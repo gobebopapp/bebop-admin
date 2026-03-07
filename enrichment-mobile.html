@@ -1,0 +1,2284 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#1A1714" />
+  <title>bebop — add location</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+```
+:root {
+  --cream: #F7F3ED;
+  --paper: #EFEAE2;
+  --ink: #1A1714;
+  --ink-soft: #6B6560;
+  --ink-muted: #A09A94;
+  --accent: #E8541A;
+  --accent-light: #FBE8DF;
+  --green: #2D6A4F;
+  --green-light: #D8EDDF;
+  --border: #DDD7CF;
+  --white: #FDFAF7;
+  --shadow: 0 1px 3px rgba(26,23,20,0.08), 0 4px 16px rgba(26,23,20,0.06);
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  padding: 0 0 80px;
+}
+
+/* ── Header ── */
+header {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--cream);
+}
+
+.logo span {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.header-tag {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--ink-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Layout ── */
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 40px 0;
+}
+
+.page-title {
+  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+  font-size: 36px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.page-sub {
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-bottom: 40px;
+}
+
+/* ── Lookup bar ── */
+.lookup-bar {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow);
+}
+
+.lookup-bar .field-wrap {
+  flex: 1;
+}
+
+.lookup-bar label {
+  display: block;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 6px;
+}
+
+.lookup-bar input {
+  width: 100%;
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 12.5px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.lookup-bar input:focus { border-color: var(--accent); }
+.lookup-bar input::placeholder { color: var(--ink-muted); }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: #E8541A;
+  color: white;
+}
+.btn-primary:hover { background: #C9430E; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  background: var(--paper);
+  color: var(--ink);
+  border: 1.5px solid var(--border);
+}
+.btn-secondary:hover { background: var(--border); }
+
+.btn-save {
+  background: #2D6A4F;
+  color: white;
+  width: 100%;
+  justify-content: center;
+  padding: 14px 20px;
+  font-size: 15px;
+}
+.btn-save:hover { background: #1E4D38; transform: translateY(-1px); }
+.btn-save:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
+
+
+/* ── Status banner ── */
+.status {
+  display: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  font-family: 'DM Mono', 'Courier New', monospace;
+}
+.status.loading { background: var(--paper); color: var(--ink-soft); border: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.status.error { background: #FEE2E2; color: #991B1B; border: 1.5px solid #FECACA; display: block; }
+.status.success { background: var(--green-light); color: var(--green); border: 1.5px solid #A7D7BB; display: block; }
+
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Form ── */
+#location-form {
+  display: none;
+  animation: fadeUp 0.3s ease forwards;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.form-section {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.section-header {
+  padding: 16px 24px;
+  background: var(--paper);
+  border-bottom: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  letter-spacing: 0.04em;
+}
+.badge-auto { background: var(--green-light); color: var(--green); }
+.badge-manual { background: var(--accent-light); color: var(--accent); }
+
+.section-body { padding: 24px; }
+
+/* ── Fields grid ── */
+.fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.fields-grid .full { grid-column: 1 / -1; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.field input,
+.field select,
+.field textarea {
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13.5px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus { border-color: var(--accent); }
+
+.field input[readonly] {
+  color: var(--ink-soft);
+  cursor: default;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6560' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+/* ── Checkboxes ── */
+.checkbox-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.check-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 13.5px;
+  transition: all 0.12s;
+  user-select: none;
+}
+.check-pill:hover { border-color: var(--accent); }
+.check-pill input[type="checkbox"] { display: none; }
+.check-pill.checked { background: #D8EDDF; border-color: #2D6A4F; color: #2D6A4F; font-weight: 500; }
+.check-pill.checked::before { content: '✓ '; }
+.check-pill.denied { background: #FEE2E2; border-color: #FECACA; color: #991B1B; font-weight: 500; }
+.check-pill.denied::before { content: '✗ '; }
+
+/* ── Age range ── */
+.age-range-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.age-range-row input { max-width: 80px; text-align: center; }
+.age-range-row span { color: var(--ink-muted); font-size: 13px; }
+
+/* ── Photo strip ── */
+.photo-strip {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.photo-thumb {
+  width: 90px;
+  height: 90px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1.5px solid var(--border);
+}
+
+/* ── Hours display ── */
+.hours-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-family: 'DM Mono', 'Courier New', monospace;
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+/* ── Coordinates ── */
+.coords-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── Config panel ── */
+.config-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--ink-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+.config-toggle svg { transition: transform 0.2s; }
+.config-toggle.open svg { transform: rotate(180deg); }
+
+.config-panel {
+  display: none;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow);
+}
+.config-panel.visible { display: block; }
+.config-panel .fields-grid { grid-template-columns: 1fr 1fr 1fr; }
+
+/* ── Bottom actions ── */
+.actions-bar {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.actions-bar .btn-save { flex: 1; }
+
+/* ── JSON output ── */
+.json-output {
+  display: none;
+  background: var(--ink);
+  color: #A8D5A2;
+  border-radius: 10px;
+  padding: 20px 24px;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-x: auto;
+  white-space: pre;
+  margin-top: 20px;
+}
+
+
+/* ── Hours builder ── */
+.hours-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.hours-row { display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: center; }
+.hours-day { font-family: 'DM Mono', 'Courier New', monospace; font-size: 12px; color: var(--ink-soft); }
+.hours-input { background: var(--paper); border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 12px; font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: var(--ink); outline: none; transition: border-color 0.15s; }
+.hours-input:focus { border-color: var(--accent); }
+/* ── AI Enrich button ── */
+.btn-enrich { background: var(--ink); color: var(--cream); font-size: 13px; padding: 8px 16px; }
+.btn-enrich:hover { background: #3a3530; }
+.btn-enrich:disabled { background: var(--ink-muted); cursor: not-allowed; }
+
+/* ── Reasoning tooltip ── */
+.info-btn { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:var(--paper); border:1.5px solid var(--border); color:var(--ink-muted); font-size:10px; font-family:'DM Mono',monospace; cursor:pointer; margin-left:6px; flex-shrink:0; transition:all 0.15s; }
+.info-btn:hover { background:var(--ink); color:var(--cream); border-color:var(--ink); }
+.field-with-info { display:flex; align-items:center; gap:0; }
+.field-with-info label { flex:1; }
+.reasoning-panel { display:none; background:var(--ink); color:#c8c0b8; border-radius:8px; padding:10px 14px; font-size:12px; line-height:1.6; margin-top:6px; font-family:'DM Mono',monospace; }
+.reasoning-panel.visible { display:block; }
+.confidence-high { color:#6ee7b7; }
+.confidence-med  { color:#fcd34d; }
+.confidence-low  { color:#fca5a5; }
+
+/* ── Category pills ── */
+.category-pills { display:flex; gap:8px; flex-wrap:wrap; }
+.cat-pill { display:inline-flex; align-items:center; gap:6px; background:var(--paper); border:1.5px solid var(--border); border-radius:8px; padding:8px 14px; cursor:pointer; font-size:13.5px; transition:all 0.12s; user-select:none; }
+.cat-pill:hover { border-color:var(--green); }
+.cat-pill.selected { background:#D8EDDF; border-color:#2D6A4F; color:#2D6A4F; font-weight:500; }
+.cat-pill.selected::before { content:'✓ '; }
+
+
+/* ── Photo upload ── */
+.photo-drop-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 28px; text-align: center; background: var(--paper); transition: border-color 0.15s; cursor: pointer; }
+.photo-drop-zone:hover { border-color: var(--accent); }
+.photo-preview-card { position:relative; width:120px; }
+.photo-preview-card img { width:120px; height:80px; object-fit:cover; border-radius:8px; border:1.5px solid var(--border); display:block; }
+.photo-preview-card .remove-photo { position:absolute; top:-6px; right:-6px; width:18px; height:18px; background:var(--accent); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; cursor:pointer; border:none; }
+.photo-preview-card .photo-label { font-family:'DM Mono',monospace; font-size:10px; color:var(--ink-muted); text-align:center; margin-top:4px; }
+.photo-preview-card .photo-status { font-size:10px; text-align:center; margin-top:2px; font-family:'DM Mono',monospace; }
+.photo-status.uploading { color:var(--ink-muted); }
+.photo-status.done { color:#2D6A4F; }
+.photo-status.error { color:#991B1B; }
+
+
+/* ── Mode toggle ── */
+.mode-toggle { display:flex; gap:0; margin-bottom:28px; margin-top:8px; border:2px solid var(--border); border-radius:12px; overflow:hidden; width:fit-content; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.mode-btn { padding:11px 24px; font-size:14px; font-family:'DM Sans',sans-serif; font-weight:500; background:white; color:var(--ink-muted); border:none; cursor:pointer; transition:all 0.18s; letter-spacing:-0.1px; }
+.mode-btn:hover:not(.active) { background:var(--surface); color:var(--ink); }
+.mode-btn.active { background:var(--accent); color:white; font-weight:600; }
+.mode-btn:first-child { border-right:2px solid var(--border); }
+
+/* ── Photo-mode search ── */
+.photo-search-bar { background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:20px 24px; margin-bottom:16px; }
+.photo-search-results { display:flex; flex-direction:column; gap:6px; margin-top:10px; max-height:240px; overflow-y:auto; }
+.photo-search-result { padding:10px 14px; border-radius:8px; border:1.5px solid var(--border); background:var(--paper); cursor:pointer; transition:border-color 0.15s; }
+.photo-search-result:hover { border-color:var(--accent); }
+.photo-search-result .res-name { font-size:13px; font-weight:600; color:var(--ink); }
+.photo-search-result .res-meta { font-size:11px; color:var(--ink-muted); margin-top:2px; font-family:'DM Mono',monospace; }
+.photo-mode-upload { background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:20px 24px; }
+.photo-mode-selected { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--paper); border:1.5px solid var(--border); border-radius:8px; margin-bottom:16px; }
+.photo-mode-selected .sel-name { font-size:14px; font-weight:600; color:var(--ink); }
+.photo-mode-selected .sel-meta { font-size:11px; color:var(--ink-muted); font-family:'DM Mono',monospace; }
+.photo-mode-selected .sel-change { margin-left:auto; font-size:12px; color:var(--accent); cursor:pointer; text-decoration:underline; }
+
+/* ── Utility ── */
+.text-muted { color: var(--ink-muted); font-size: 12px; margin-top: 4px; }
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* ══ MOBILE RESPONSIVE ══════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .container { padding: 20px 16px 0; }
+  header { padding: 0 16px; }
+  .header-tag { display: none; }
+  .page-title { font-size: 26px; }
+  .page-sub { font-size: 13px; margin-bottom: 24px; }
+
+  /* Mode toggle — full width on mobile */
+  .mode-toggle { width: 100%; }
+  .mode-btn { flex: 1; padding: 13px 12px; font-size: 13px; justify-content: center; }
+
+  /* Lookup bar — stack vertically */
+  .lookup-bar { flex-direction: column; padding: 16px; gap: 10px; }
+  .lookup-bar input { font-size: 16px; /* prevents iOS zoom */ padding: 12px 14px; }
+
+  /* Config panel grid — single column */
+  .config-panel .fields-grid { grid-template-columns: 1fr !important; }
+
+  /* Form sections */
+  .section-body { padding: 16px; }
+  .section-header { padding: 12px 16px; }
+
+  /* Fields grid — single column */
+  .fields-grid { grid-template-columns: 1fr !important; gap: 14px; }
+  .coords-row { grid-template-columns: 1fr 1fr; } /* keep coords side by side */
+
+  /* Bigger tap targets for pills */
+  .check-pill { padding: 11px 14px; font-size: 14px; }
+  .cat-pill   { padding: 11px 14px; font-size: 14px; }
+
+  /* Age range */
+  .age-range-row input { max-width: 70px; }
+
+  /* Hours */
+  .hours-row { grid-template-columns: 80px 1fr; }
+  .hours-input { font-size: 14px; padding: 10px 10px; }
+
+  /* Buttons */
+  .btn { padding: 12px 18px; font-size: 14px; }
+  .btn-save { padding: 16px 20px; font-size: 15px; }
+  .btn-enrich { padding: 12px 16px; font-size: 13px; }
+  .actions-bar { flex-direction: column; }
+
+  /* Photo cards — bigger on mobile */
+  .photo-preview-card { width: 100%; }
+  .photo-preview-card img { width: 100%; height: 140px; }
+  #photo-previews { flex-direction: column; }
+
+  /* Photo mode */
+  .photo-search-bar { padding: 16px; }
+  .photo-mode-upload { padding: 16px; }
+  .photo-drop-zone { padding: 32px 16px; }
+  #photo-mode-previews { flex-direction: column; }
+
+  /* Photo mode cards — full width on mobile */
+  .pm-card-mobile { width: 100% !important; }
+  .pm-card-mobile img { width: 100% !important; height: 160px !important; }
+
+  /* Descriptor select — bigger tap target */
+  .pm-descriptor-select { font-size: 14px !important; padding: 8px 10px !important; }
+
+  /* Upload btn */
+  #pm-upload-btn { width: 100%; justify-content: center; padding: 16px; font-size: 15px; }
+
+  /* Recent locations */
+  .recent-list { gap: 6px; }
+  .recent-item { padding: 12px 14px; }
+}
+
+/* Aspect ratio overlay on preview images */
+.photo-preview-wrap {
+  position: relative;
+  display: inline-block;
+}
+.photo-preview-wrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  height: 2px;
+  background: transparent;
+  pointer-events: none;
+}
+.ratio-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  pointer-events: none;
+}
+.ratio-overlay::before,
+.ratio-overlay::after {
+  content: '';
+  position: absolute;
+  background: rgba(255,255,255,0.35);
+  pointer-events: none;
+}
+/* Rule of thirds vertical lines */
+.ratio-overlay::before {
+  top: 0; bottom: 0;
+  left: 33.33%; width: 1px;
+  box-shadow: calc(33.33% + 1px) 0 0 0 rgba(255,255,255,0.35);
+}
+/* Rule of thirds horizontal lines */
+.ratio-overlay::after {
+  left: 0; right: 0;
+  top: 33.33%; height: 1px;
+  box-shadow: 0 calc(33.33% + 1px) 0 0 rgba(255,255,255,0.35);
+}
+
+/* Recent locations list */
+.recent-section { margin-bottom: 12px; }
+.recent-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+.recent-list { display: flex; flex-direction: column; gap: 4px; }
+.recent-item { padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--white); cursor: pointer; transition: border-color 0.15s; display: flex; justify-content: space-between; align-items: center; }
+.recent-item:hover { border-color: var(--accent); }
+.recent-item .ri-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.recent-item .ri-city { font-size: 11px; color: var(--ink-muted); font-family: 'DM Mono', monospace; }
+
+/* Upload queue / retry */
+.pm-retry-btn { font-size: 11px; padding: 3px 8px; background: var(--accent); color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 3px; display: none; }
+.photo-status.error ~ .pm-retry-btn { display: inline-block; }
+
+/* Next location banner */
+.next-location-bar { display: none; background: var(--green-light); border: 1.5px solid #A7D7BB; border-radius: 10px; padding: 14px 18px; margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.next-location-bar.hidden { display: none !important; }
+.next-location-bar p { font-size: 13px; color: var(--green); font-weight: 500; }
+.next-location-bar button { background: var(--green); color: white; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; white-space: nowrap; }
+```
+
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">be<span>bop</span></div>
+  <div class="header-tag">Location Admin</div>
+</header>
+
+<div class="container">
+
+  <!-- Config (always visible, above mode toggle) -->
+
+  <div class="config-toggle" id="config-toggle" onclick="toggleConfig()">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    API Config
+  </div>
+  <div class="config-panel" id="config-panel">
+    <div class="fields-grid">
+      <div class="field">
+        <label>Google Places API Key</label>
+        <input type="password" id="cfg-google-key" placeholder="AIza..." oninput="saveConfig()" />
+      </div>
+      <div class="field">
+        <label>Anthropic API Key (AI enrichment)</label>
+        <input type="password" id="cfg-anthropic-key" placeholder="sk-ant-..." oninput="saveConfig()" />
+      </div>
+      <div class="field">
+        <label>Supabase URL</label>
+        <input type="text" id="cfg-supabase-url" placeholder="https://xxx.supabase.co" oninput="saveConfig()" />
+      </div>
+      <div class="field">
+        <label>Supabase Anon Key</label>
+        <input type="password" id="cfg-supabase-key" placeholder="eyJ..." oninput="saveConfig()" />
+      </div>
+      <div class="field">
+        <label>Supabase Table Name</label>
+        <input type="text" id="cfg-supabase-table" placeholder="locations" oninput="saveConfig()" />
+      </div>
+    </div>
+    <p class="text-muted" style="margin-top:14px;">Keys are saved in your browser only. Never shared anywhere.</p>
+  </div>
+
+  <!-- Mode toggle -->
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="mode-add" onclick="setMode('add')">＋ Add Location</button>
+    <button class="mode-btn" id="mode-photos" onclick="setMode('photos')">📷 Add Photos</button>
+  </div>
+
+  <!-- Add Location mode -->
+
+  <div id="add-mode-ui">
+    <div class="page-title">Add a location</div>
+    <p class="page-sub">Paste a Google Maps URL or Place ID to auto-fill details, then complete the manual fields.</p>
+  </div>
+
+  <!-- Photo mode -->
+
+  <div id="photo-mode-ui" style="display:none;">
+    <div class="page-title">Add photos to a location</div>
+    <p class="page-sub">Search for an existing location in your database, then upload photos. No API calls needed.</p>
+
+```
+<div id="recent-section" class="recent-section" style="display:none;">
+  <div class="recent-label">Recent</div>
+  <div class="recent-list" id="recent-list"></div>
+</div>
+
+<div class="photo-search-bar">
+  <div class="field-wrap" style="margin-bottom:0;">
+    <label>Search locations</label>
+    <input type="text" id="photo-search-input" placeholder="Start typing a name…" oninput="searchLocations(this.value)" autocomplete="off" />
+  </div>
+  <div class="photo-search-results" id="photo-search-results"></div>
+</div>
+
+<div id="photo-mode-upload-panel" style="display:none;">
+  <div class="photo-mode-upload">
+    <div class="photo-mode-selected" id="photo-mode-selected"></div>
+    <p class="text-muted" style="margin-bottom:14px;">Resized to 1200×800 (display) + 400×267 (thumb). Pick a descriptor per photo — it becomes part of the SEO filename: <code style="font-family:'DM Mono',monospace;font-size:11px;background:var(--paper);padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.jpg</code></p>
+    <div class="photo-drop-zone" id="photo-mode-drop-zone" ondragover="event.preventDefault()" ondrop="handlePhotoModeFiles(event.dataTransfer.files)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:var(--ink-muted);margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:6px;">Drag photos here or</p>
+      <label class="btn btn-secondary" style="cursor:pointer;font-size:13px;">
+        Choose files
+        <input type="file" id="photo-mode-file-input" accept="image/*" multiple capture="environment" style="display:none;" onchange="handlePhotoModeFiles(this.files)" />
+      </label>
+    </div>
+    <div id="photo-mode-previews" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;"></div>
+    <div style="margin-top:16px;">
+      <button class="btn btn-save" id="pm-upload-btn" onclick="uploadPhotoMode()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 4l3.5-3.5L10 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Upload Photos
+      </button>
+    </div>
+    <div class="next-location-bar hidden" id="next-location-bar">
+      <p>✓ Photos uploaded! Ready for next location?</p>
+      <button onclick="startNextLocation()">Next location →</button>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- Lookup bar -->
+
+  <div class="lookup-bar">
+    <div class="field-wrap">
+      <label>Google Maps URL or Place ID</label>
+      <input type="text" id="maps-url" placeholder="https://maps.google.com/maps/place/Vondelpark/... or ChIJ..." />
+    </div>
+    <div style="padding-top:22px;">
+      <button class="btn btn-primary" onclick="lookupPlace()" id="lookup-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="white" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Lookup
+      </button>
+    </div>
+  </div>
+  </div><!-- /lookup-bar-wrap -->
+
+  <!-- Status -->
+
+  <div class="status" id="status"></div>
+
+  <!-- Form (shown after lookup) -->
+
+  <div id="location-form">
+
+```
+<!-- ── Section 1: Auto-filled from Google ── -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 4v3.5l2 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Place Details
+    </div>
+    <span class="section-badge badge-auto">Auto-filled</span>
+  </div>
+  <div class="section-body">
+    <div class="fields-grid">
+      <div class="field full">
+        <label>Name</label>
+        <input type="text" id="f-name" />
+      </div>
+      <div class="field full">
+        <label>Address</label>
+        <input type="text" id="f-address" readonly />
+      </div>
+      <div class="field">
+        <label>City</label>
+        <input type="text" id="f-city" />
+      </div>
+      <div class="field">
+        <label>Province</label>
+        <input type="text" id="f-province" />
+      </div>
+      <div class="field">
+        <label>Latitude</label>
+        <input type="text" id="f-lat" readonly />
+      </div>
+      <div class="field">
+        <label>Longitude</label>
+        <input type="text" id="f-lon" readonly />
+      </div>
+      <div class="field full">
+        <label>Google Place ID</label>
+        <input type="text" id="f-place-id" readonly />
+      </div>
+      <div class="field full">
+        <label>Google Maps URL</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="f-maps-url" readonly style="flex:1;" />
+          <a id="maps-url-link" href="#" target="_blank" class="btn btn-secondary" style="white-space:nowrap;text-decoration:none;padding:8px 14px;font-size:12.5px;">Open ↗</a>
+        </div>
+      </div>
+      <div class="field full">
+        <label>Website</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="f-website" placeholder="https://..." style="flex:1;" oninput="updateWebsiteLink(this.value)" />
+          <a id="website-link" href="#" target="_blank" class="btn btn-secondary" style="white-space:nowrap;text-decoration:none;padding:8px 14px;font-size:12.5px;display:none;">Open ↗</a>
+        </div>
+      </div>
+      <div class="field">
+        <label>Opening Status</label>
+        <select id="f-opening-status">
+          <option value="">— Unknown —</option>
+          <option value="OPERATIONAL">Operational</option>
+          <option value="CLOSED_TEMPORARILY">Closed Temporarily</option>
+          <option value="CLOSED_PERMANENTLY">Closed Permanently</option>
+        </select>
+      </div>
+      <div class="field full" style="grid-column:1/-1;">
+        <label>Opening Hours</label>
+        <div id="f-hours-builder">
+          <div class="hours-grid" id="hours-rows"></div>
+        </div>
+        <p class="text-muted" style="margin-top:6px;">Enter hours or "Closed" for each day. Leave all blank if unknown.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Section 2: Manual — Classification ── -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="1.5" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M4 5h5M4 7.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Classification
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-enrich" id="enrich-btn" onclick="enrichWithAI()">✦ AI Enrich</button>
+      <button class="btn btn-enrich" id="describe-btn" onclick="describeWithAI()" style="background:#4a5568;">✦ Write Description</button>
+      <span class="section-badge badge-auto" id="enrich-badge" style="display:none;">AI filled</span>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="fields-grid">
+
+      <div class="field full">
+        <label>Categories <span style="color:var(--ink-muted);font-weight:400;">(select all that apply)</span></label>
+        <div class="category-pills">
+          <div class="cat-pill" onclick="toggleCatPill(this)">Active Play</div>
+          <div class="cat-pill" onclick="toggleCatPill(this)">Animals &amp; Nature</div>
+          <div class="cat-pill" onclick="toggleCatPill(this)">Amusements &amp; Attractions</div>
+          <div class="cat-pill" onclick="toggleCatPill(this)">Classes, Workshops, Camps</div>
+          <div class="cat-pill" onclick="toggleCatPill(this)">Culture &amp; Learning</div>
+          <div class="cat-pill" onclick="toggleCatPill(this)">Restaurants &amp; Cafes</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Secondary Category <span style="color:var(--accent);font-weight:500;">*</span></label>
+        <input type="text" id="f-secondary-category" placeholder="e.g. Trampolining" />
+      </div>
+
+      <div class="field">
+        <label>Indoor / Outdoor</label>
+        <select id="f-indoor-outdoor">
+          <option value="">— Select —</option>
+          <option>Indoor</option>
+          <option>Outdoor</option>
+          <option>Mixed</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Cost</label>
+        <input type="text" id="f-cost" placeholder='e.g. "Free" or "€12.50 adults, Free under 3"' />
+        <p class="text-muted" style="margin-top:4px;">Write "Free" if no entry fee.</p>
+      </div>
+
+
+      <div class="field full">
+        <div class="field-with-info">
+          <label>Ideal Age Range</label>
+          <span class="info-btn" onclick="toggleReasoning('reasoning-ages')" title="AI reasoning">?</span>
+        </div>
+        <div class="reasoning-panel" id="reasoning-ages"></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <input type="number" id="f-age-min" min="0" max="18" placeholder="0" style="width:70px;text-align:center;background:var(--paper);border:1.5px solid var(--border);border-radius:8px;padding:8px;font-size:13.5px;outline:none;" />
+          <span style="color:var(--ink-muted);font-size:13px;">to</span>
+          <input type="number" id="f-age-max" min="0" max="18" placeholder="12" style="width:70px;text-align:center;background:var(--paper);border:1.5px solid var(--border);border-radius:8px;padding:8px;font-size:13.5px;outline:none;" />
+          <span style="color:var(--ink-muted);font-size:13px;">years</span>
+          <div class="check-pill" id="pill-all-ages" onclick="toggleAllAges(this)" style="margin-left:8px;">All Ages</div>
+          <div class="check-pill" id="pill-no-max" onclick="toggleNoMax(this)" style="margin-left:4px;">No max (e.g. 4+)</div>
+        </div>
+        <p class="text-muted" style="margin-bottom:8px;">Age group filters (for map filtering):</p>
+        <div class="checkbox-row">
+          <div class="check-pill" id="pill-baby" onclick="toggleBoolPill(this, 'baby')">👶 Baby (0–2)</div>
+          <div class="check-pill" id="pill-preschooler" onclick="toggleBoolPill(this, 'preschooler')">🧒 Preschooler (3–6)</div>
+          <div class="check-pill" id="pill-bigkid" onclick="toggleBoolPill(this, 'bigkid')">🧑 Big Kid (7–12)</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── Section 4: Manual — Facilities ── -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1.5v11M1.5 6.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Facilities
+    </div>
+    <span class="section-badge badge-manual">Fill manually</span>
+  </div>
+  <div class="section-body">
+    <div class="field-with-info" style="margin-bottom:10px;">
+      <p class="text-muted">Click once = ✓ Yes &nbsp;·&nbsp; Click twice = ✗ No &nbsp;·&nbsp; Click again to reset</p>
+      <span class="info-btn" onclick="toggleReasoning('reasoning-facilities')" title="AI reasoning">?</span>
+    </div>
+    <div class="reasoning-panel" id="reasoning-facilities" style="margin-bottom:10px;"></div>
+    <div class="checkbox-row">
+      <div class="check-pill" id="pill-toilet" onclick="toggleTriPill(this, 'toilet')">🚻 Toilet</div>
+      <div class="check-pill" id="pill-changing-table" onclick="toggleTriPill(this, 'changing_table')">🍼 Changing table</div>
+      <div class="check-pill" id="pill-lockers" onclick="toggleTriPill(this, 'lockers')">🔒 Lockers</div>
+      <div class="check-pill" id="pill-pram-parking" onclick="toggleTriPill(this, 'pram_parking')">🛺 Pram parking</div>
+      <div class="check-pill" id="pill-food-drink" onclick="toggleTriPill(this, 'food_drink')">🍽 Food/drink</div>
+      <div class="check-pill" id="pill-highchairs" onclick="toggleTriPill(this, 'highchairs')">🪑 Highchairs</div>
+      <div class="check-pill" id="pill-accessible" onclick="toggleTriPill(this, 'accessible')">♿ Accessible entrance</div>
+      <div class="check-pill" id="pill-party-venue" onclick="toggleTriPill(this, 'party_venue')">🎂 Party venue</div>
+      <div class="check-pill" id="pill-events" onclick="toggleTriPill(this, 'events')">🗓 Events</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Section 5: Description & Tips ── -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 3h9M2 6h9M2 9h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Description &amp; Tips
+    </div>
+    <span class="section-badge badge-manual">Fill manually</span>
+  </div>
+  <div class="section-body">
+    <div class="fields-grid">
+      <div class="field full">
+        <div class="field-with-info">
+          <label>Description</label>
+          <span class="info-btn" onclick="toggleReasoning('reasoning-description')" title="AI reasoning">?</span>
+        </div>
+        <textarea id="f-description" placeholder="A family-friendly description of this place..."></textarea>
+        <div class="reasoning-panel" id="reasoning-description"></div>
+      </div>
+      <div class="field full">
+        <div class="field-with-info">
+          <label>Tips <span style="color:var(--ink-muted);font-weight:400;">(optional — practical advice worth highlighting)</span></label>
+          <span class="info-btn" onclick="toggleReasoning('reasoning-tips')" title="AI reasoning">?</span>
+        </div>
+        <textarea id="f-tips" placeholder="e.g. Book tickets in advance — they sell out fast." style="min-height:70px;"></textarea>
+        <div class="reasoning-panel" id="reasoning-tips"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Photos ── -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="2.5" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="6.5" cy="6.5" r="1.8" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 2.5l.8-1h2.4l.8 1" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      Photos
+    </div>
+    <span class="section-badge badge-manual">Upload</span>
+  </div>
+  <div class="section-body">
+    <p class="text-muted" style="margin-bottom:14px;">Upload up to 3 photos. Resized to 1200×800 (display) + 400×267 (thumb). Pick a descriptor per photo — it becomes part of the filename for SEO: <code style="font-family:'DM Mono',monospace;font-size:11px;background:var(--paper);padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.jpg</code></p>
+    <div id="photo-upload-area" style="display:none;">
+      <div class="photo-drop-zone" id="photo-drop-zone" ondragover="event.preventDefault()" ondrop="handlePhotoDrop(event)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:var(--ink-muted);margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:6px;">Drag photos here or</p>
+        <label class="btn btn-secondary" style="cursor:pointer;font-size:13px;">
+          Choose files
+          <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoFiles(this.files)" />
+        </label>
+      </div>
+      <div id="photo-previews" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;"></div>
+    </div>
+    <p id="photo-no-place" style="font-size:13px;color:var(--ink-muted);">Look up a place first — photos are stored by Place ID.</p>
+  </div>
+</div>
+
+<!-- ── Record Status ── -->
+<div class="form-section">
+  <div class="section-body" style="padding:16px 24px;">
+    <div class="field" style="max-width:200px;">
+      <label>Record Status</label>
+      <select id="f-status">
+        <option value="draft">Draft</option>
+        <option value="ready">Ready</option>
+        <option value="published">Published</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Save / export -->
+<div class="actions-bar">
+  <button class="btn btn-secondary" onclick="uploadPhotos()" id="upload-photos-btn">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 4l3.5-3.5L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Upload Photos
+  </button>
+  <button class="btn btn-secondary" onclick="exportJSON()">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3 6l3.5 3.5L10 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Export JSON
+  </button>
+  <button class="btn btn-save" onclick="saveToSupabase()" id="save-btn">
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5l3.5 3.5 6.5-6.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Save to Supabase
+  </button>
+</div>
+
+<pre class="json-output" id="json-output"></pre>
+```
+
+  </div><!-- /location-form -->
+
+</div><!-- /container -->
+
+<script>
+// ─── Config (saved to localStorage) ────────────────────────────────────────
+
+function saveConfig() {
+  localStorage.setItem('bebop_google_key', document.getElementById('cfg-google-key').value);
+  localStorage.setItem('bebop_anthropic_key', document.getElementById('cfg-anthropic-key').value);
+  localStorage.setItem('bebop_supabase_url', document.getElementById('cfg-supabase-url').value);
+  localStorage.setItem('bebop_supabase_key', document.getElementById('cfg-supabase-key').value);
+  localStorage.setItem('bebop_supabase_table', document.getElementById('cfg-supabase-table').value);
+}
+
+function loadConfig() {
+  document.getElementById('cfg-google-key').value = localStorage.getItem('bebop_google_key') || '';
+  document.getElementById('cfg-anthropic-key').value = localStorage.getItem('bebop_anthropic_key') || '';
+  document.getElementById('cfg-supabase-url').value = localStorage.getItem('bebop_supabase_url') || '';
+  document.getElementById('cfg-supabase-key').value = localStorage.getItem('bebop_supabase_key') || '';
+  document.getElementById('cfg-supabase-table').value = localStorage.getItem('bebop_supabase_table') || 'locations';
+}
+
+function getConfig() {
+  return {
+    googleKey: localStorage.getItem('bebop_google_key') || '',
+    anthropicKey: localStorage.getItem('bebop_anthropic_key') || '',
+    supabaseUrl: localStorage.getItem('bebop_supabase_url') || '',
+    supabaseKey: localStorage.getItem('bebop_supabase_key') || '',
+    supabaseTable: localStorage.getItem('bebop_supabase_table') || 'locations',
+  };
+}
+
+function toggleConfig() {
+  const panel = document.getElementById('config-panel');
+  const toggle = document.getElementById('config-toggle');
+  panel.classList.toggle('visible');
+  toggle.classList.toggle('open');
+}
+
+// ─── Status helpers ─────────────────────────────────────────────────────────
+
+function setStatus(type, message) {
+  const el = document.getElementById('status');
+  el.className = 'status ' + type;
+  if (type === 'loading') {
+    el.innerHTML = `<div class="spinner"></div><span>${message}</span>`;
+  } else {
+    el.textContent = message;
+  }
+  el.style.display = 'flex';
+  if (type !== 'loading') el.style.display = 'block';
+}
+
+function clearStatus() {
+  const el = document.getElementById('status');
+  el.className = 'status';
+  el.style.display = 'none';
+}
+
+// ─── Place lookup ────────────────────────────────────────────────────────────
+
+let currentPlaceData = null;
+
+async function lookupPlace() {
+  const input = document.getElementById('maps-url').value.trim();
+  if (!input) return alert('Please paste a Google Maps URL or Place ID first.');
+
+  const { googleKey } = getConfig();
+  if (!googleKey) {
+    // Show config panel
+    document.getElementById('config-panel').classList.add('visible');
+    document.getElementById('config-toggle').classList.add('open');
+    return alert('Please enter your Google Places API key in the config panel above.');
+  }
+
+  document.getElementById('lookup-btn').disabled = true;
+  setStatus('loading', 'Resolving place…');
+
+  try {
+    const placeId = await extractPlaceId(input, googleKey);
+    setStatus('loading', `Found Place ID: ${placeId} — fetching details…`);
+    const details = await fetchPlaceDetails(placeId, googleKey);
+    currentPlaceData = details;
+    populateForm(details);
+    clearStatus();
+    document.getElementById('location-form').style.display = 'block';
+    showPhotoUpload();
+    document.getElementById('location-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (err) {
+    setStatus('error', '❌ ' + err.message);
+  } finally {
+    document.getElementById('lookup-btn').disabled = false;
+  }
+}
+
+async function extractPlaceId(input, apiKey) {
+  // Direct Place ID
+  if (!input.includes('http') && !input.includes(' ') && input.length > 10) {
+    return input;
+  }
+
+  // URL contains place_id param
+  try {
+    const url = new URL(input);
+    const pid = url.searchParams.get('place_id');
+    if (pid) return pid;
+  } catch (_) {}
+
+  // Try to extract name from /maps/place/NAME/ pattern
+  const placeMatch = input.match(/\/maps\/place\/([^/@?]+)/);
+  if (placeMatch) {
+    const nameGuess = decodeURIComponent(placeMatch[1]).replace(/\+/g, ' ');
+    return await findPlaceByText(nameGuess + ' Amsterdam', apiKey);
+  }
+
+  // CID format: ?cid=xxxx
+  const cidMatch = input.match(/[?&]cid=(\d+)/);
+  if (cidMatch) {
+    // CID can't be directly converted — search by coordinates from URL if present
+    const coordMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (coordMatch) {
+      throw new Error('CID-based URLs are tricky. Try copying the place name from Maps and searching that instead, or use a URL from the address bar after clicking a place.');
+    }
+  }
+
+  throw new Error('Could not extract a place from this URL. Try copying the full URL from the browser address bar after clicking on the place in Google Maps.');
+}
+
+async function findPlaceByText(query, apiKey) {
+  // Places API (New) — Text Search endpoint
+  // Uses allorigins CORS proxy since browser can't call Google APIs directly
+  const placesUrl = 'https://places.googleapis.com/v1/places:searchText';
+  const body = JSON.stringify({
+    textQuery: query,
+    locationBias: {
+      circle: { center: { latitude: 52.3676, longitude: 4.9041 }, radius: 20000 }
+    },
+    maxResultCount: 1,
+  });
+
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(placesUrl)}`;
+
+  // allorigins only supports GET, so we encode the POST body as a header trick won't work.
+  // Instead use a different proxy that supports POST: corsproxy.io
+  const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(placesUrl)}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask': 'places.id,places.displayName',
+    },
+    body,
+  });
+
+  const data = await res.json();
+
+  if (!data.places?.length) {
+    throw new Error(`No places found for "${query}". Check your API key, or try a different URL format.`);
+  }
+
+  return data.places[0].id;
+}
+
+async function fetchPlaceDetails(placeId, apiKey) {
+  // Places API (New) — Place Details endpoint
+  // Essentials SKU (free): id, formattedAddress, location, types
+  // Pro SKU (cheap ~$0.002/req): displayName, addressComponents, googleMapsUri, businessStatus
+  const placesUrl = `https://places.googleapis.com/v1/places/${placeId}`;
+
+  const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(placesUrl)}`, {
+    method: 'GET',
+    headers: {
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask': 'id,displayName,formattedAddress,location,types,addressComponents,googleMapsUri,businessStatus,websiteUri,regularOpeningHours',
+    },
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    throw new Error(`Place Details API error: ${data.error.status} — ${data.error.message}`);
+  }
+
+  return data;
+}
+
+
+// ─── Clear manual/AI fields for fresh lookup ─────────────────────────────────
+
+function clearManualFields() {
+  // Category pills
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('selected'));
+  // Check/tri pills
+  Object.keys(pillState).forEach(k => { pillState[k] = null; });
+  document.querySelectorAll('.check-pill').forEach(p => p.classList.remove('checked', 'denied'));
+  // Text fields
+  ['f-secondary-category','f-indoor-outdoor','f-cost','f-description','f-tips',
+   'f-icon-url','f-website'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; }
+  });
+  // Website link
+  const wl = document.getElementById('website-link');
+  if (wl) wl.style.display = 'none';
+  // Age range
+  ['f-age-min','f-age-max'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.disabled = false; el.placeholder = id === 'f-age-max' ? '12' : '0'; }
+  });
+  // Reasoning panels
+  document.querySelectorAll('.reasoning-panel').forEach(p => {
+    p.innerHTML = ''; p.classList.remove('visible');
+  });
+  // AI filled badge
+  const badge = document.getElementById('enrich-badge');
+  if (badge) badge.style.display = 'none';
+  // Status dropdown
+  document.getElementById('f-status').value = 'draft';
+  // Opening status
+  document.getElementById('f-opening-status').value = '';
+  // Photos
+  photoQueue.length = 0;
+  const previews = document.getElementById('photo-previews');
+  if (previews) previews.innerHTML = '';
+  document.getElementById('photo-upload-area').style.display = 'none';
+  document.getElementById('photo-no-place').style.display = 'block';
+}
+
+// ─── Form population ─────────────────────────────────────────────────────────
+
+function populateForm(place) {
+  clearManualFields();
+  // Places API (New) field names
+  document.getElementById('f-name').value = place.displayName?.text || '';
+  document.getElementById('f-address').value = place.formattedAddress || '';
+  const r6 = v => v != null ? parseFloat(v.toFixed(6)) : '';
+  document.getElementById('f-lat').value = r6(place.location?.latitude);
+  document.getElementById('f-lon').value = r6(place.location?.longitude);
+  document.getElementById('f-place-id').value = place.id || '';
+  const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${place.id}`;
+  document.getElementById('f-maps-url').value = mapsUrl;
+  document.getElementById('maps-url-link').href = mapsUrl;
+
+  // Extract city and province from addressComponents
+  // administrative_area_level_2 = city/municipality in NL
+  // administrative_area_level_1 = province in NL
+  const components = place.addressComponents || [];
+  const city = components.find(c => c.types?.includes('locality'))?.longText
+            || components.find(c => c.types?.includes('administrative_area_level_2'))?.longText
+            || '';
+  const province = components.find(c => c.types?.includes('administrative_area_level_1'))?.longText || '';
+  document.getElementById('f-city').value = city;
+  document.getElementById('f-province').value = province;
+
+  // Pre-fill opening status if available
+  if (place.businessStatus) {
+    document.getElementById('f-opening-status').value = place.businessStatus;
+  }
+
+  // Auto-fill website from Google if available
+  if (place.websiteUri) {
+    document.getElementById('f-website').value = place.websiteUri;
+    updateWebsiteLink(place.websiteUri);
+  }
+
+  // Auto-fill opening hours from Google if available, otherwise build empty rows
+  if (place.regularOpeningHours?.weekdayDescriptions?.length) {
+    buildHoursRows(place.regularOpeningHours.weekdayDescriptions);
+  } else {
+    buildHoursRows();
+  }
+}
+
+function buildHoursRows(weekdayDescriptions) {
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const container = document.getElementById('hours-rows');
+  container.innerHTML = '';
+  days.forEach((day, i) => {
+    // Google returns "Monday: 9:00 AM - 5:00 PM" — strip the day prefix
+    let prefilled = '';
+    if (weekdayDescriptions?.[i]) {
+      prefilled = weekdayDescriptions[i].replace(/^[^:]+:\s*/, '');
+    }
+    const row = document.createElement('div');
+    row.className = 'hours-row';
+    row.innerHTML = `
+      <span class="hours-day">${day}</span>
+      <input class="hours-input" type="text" value="${prefilled}" placeholder="e.g. 9:00 AM – 5:00 PM or Closed" data-day="${day}" />
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ─── Toggle pills ────────────────────────────────────────────────────────────
+
+const pillState = {};
+
+// Website link helper
+function updateWebsiteLink(val) {
+  const link = document.getElementById('website-link');
+  if (!link) return;
+  const url = val.trim();
+  if (url.startsWith('http')) {
+    link.href = url;
+    link.style.display = 'inline-flex';
+  } else {
+    link.style.display = 'none';
+  }
+}
+
+// No max age toggle — for "ages X+" cases
+function toggleNoMax(el) {
+  pillState['no_max'] = !pillState['no_max'];
+  el.classList.toggle('checked', pillState['no_max']);
+  const maxEl = document.getElementById('f-age-max');
+  if (pillState['no_max']) {
+    maxEl.value = '';
+    maxEl.disabled = true;
+    maxEl.placeholder = 'no max';
+    // Uncheck all_ages if active
+    if (pillState['all_ages']) {
+      pillState['all_ages'] = false;
+      document.getElementById('pill-all-ages').classList.remove('checked');
+      document.getElementById('f-age-min').disabled = false;
+    }
+  } else {
+    maxEl.disabled = false;
+    maxEl.placeholder = '12';
+  }
+}
+
+// All Ages toggle — sets min=0, max=18, clears numeric inputs
+function toggleAllAges(el) {
+  pillState['all_ages'] = !pillState['all_ages'];
+  el.classList.toggle('checked', pillState['all_ages']);
+  if (pillState['all_ages']) {
+    document.getElementById('f-age-min').value = '';
+    document.getElementById('f-age-max').value = '';
+    document.getElementById('f-age-min').disabled = true;
+    document.getElementById('f-age-max').disabled = true;
+    // uncheck no_max if active
+    if (pillState['no_max']) {
+      pillState['no_max'] = false;
+      document.getElementById('pill-no-max').classList.remove('checked');
+    }
+  } else {
+    document.getElementById('f-age-min').disabled = false;
+    if (!pillState['no_max']) document.getElementById('f-age-max').disabled = false;
+  }
+}
+
+// 2-state toggle for age pills (false / true)
+function toggleBoolPill(el, key, states) {
+  const current = pillState[key] ?? false;
+  pillState[key] = !current;
+  el.classList.toggle('checked', pillState[key]);
+}
+
+// 3-state toggle for facility pills (null → true → false → null)
+function toggleTriPill(el, key) {
+  const current = pillState[key]; // undefined/null = untouched, true = yes, false = no
+  if (current === undefined || current === null) {
+    pillState[key] = true;
+    el.classList.remove('denied');
+    el.classList.add('checked');
+  } else if (current === true) {
+    pillState[key] = false;
+    el.classList.remove('checked');
+    el.classList.add('denied');
+  } else {
+    pillState[key] = null;
+    el.classList.remove('checked', 'denied');
+  }
+}
+
+
+
+// ─── Category pills ─────────────────────────────────────────────────────────
+function toggleCatPill(el) {
+  el.classList.toggle('selected');
+}
+
+function getSelectedCategories() {
+  return Array.from(document.querySelectorAll('.cat-pill.selected')).map(el => {
+    // Strip the ✓ prefix added by CSS ::before by reading dataset or textContent carefully
+    return el.textContent.replace(/^✓\s*/, '').trim();
+  });
+}
+
+// ─── Reasoning toggle ────────────────────────────────────────────────────────
+function toggleReasoning(id) {
+  document.getElementById(id)?.classList.toggle('visible');
+}
+
+function setReasoning(id, html) {
+  const el = document.getElementById(id);
+  if (el) { el.innerHTML = html; el.classList.add('visible'); }
+}
+
+// ─── Collect form data ────────────────────────────────────────────────────────
+
+function collectFormData() {
+  const roundCoord = v => { const n = parseFloat(v); return isNaN(n) ? null : parseFloat(n.toFixed(6)); };
+  const lat = roundCoord(document.getElementById('f-lat').value);
+  const lon = roundCoord(document.getElementById('f-lon').value);
+
+  // Collect opening hours — store null if all blank, otherwise store filled days
+  const hoursInputs = document.querySelectorAll('#hours-rows .hours-input');
+  const hoursArr = Array.from(hoursInputs).map(input => ({
+    day: input.dataset.day,
+    hours: input.value.trim()
+  }));
+  const opening_hours_val = hoursArr.some(h => h.hours)
+    ? hoursArr.map(h => ({ day: h.day, hours: h.hours || 'Closed' }))
+    : null;
+
+  return {
+    // Auto-filled
+    name:              document.getElementById('f-name').value || null,
+    google_place_id:   document.getElementById('f-place-id').value || null,
+    google_maps_url:   document.getElementById('f-maps-url').value || null,
+    address:           document.getElementById('f-address').value || null,
+    city:              document.getElementById('f-city').value || null,
+    province:          document.getElementById('f-province').value || null,
+    lat,
+    lon,
+    // Manual — contact & status
+    website:           document.getElementById('f-website').value || null,
+    opening_hours:     opening_hours_val,
+    opening_status:    document.getElementById('f-opening-status').value || null,
+    status:            document.getElementById('f-status').value || 'draft',
+    // Manual — classification
+    primary_category:  getSelectedCategories().length ? getSelectedCategories() : null,
+    secondary_category:document.getElementById('f-secondary-category').value || null,
+    indoor_outdoor:    document.getElementById('f-indoor-outdoor').value || null,
+    // Ideal age range
+    ideal_age_min:     parseInt(document.getElementById('f-age-min').value) || null,
+    ideal_age_max:     pillState['no_max'] ? null : (parseInt(document.getElementById('f-age-max').value) || null),
+    all_ages:          pillState['all_ages'] ?? false,
+    // Age group filters (separate boolean columns)
+    age_baby:          pillState['baby'] ?? false,
+    age_preschooler:   pillState['preschooler'] ?? false,
+    age_bigkid:        pillState['bigkid'] ?? false,
+    // Cost
+    cost:              document.getElementById('f-cost').value || null,
+    // Facilities (null = unknown, true/false only if pill was toggled)
+    toilet:            pillState['toilet'] ?? null,
+    changing_table:    pillState['changing_table'] ?? null,
+    lockers:           pillState['lockers'] ?? null,
+    pram_parking:      pillState['pram_parking'] ?? null,
+    food_drink:        pillState['food_drink'] ?? null,
+    highchairs:        pillState['highchairs'] ?? null,
+    accessible:        pillState['accessible'] ?? null,
+    party_venue:       pillState['party_venue'] ?? null,
+    events:            pillState['events'] ?? null,
+    // Description & tips
+    description:       document.getElementById('f-description').value || null,
+    tips:              document.getElementById('f-tips').value || null,
+  };
+}
+
+// ─── AI Enrichment ───────────────────────────────────────────────────────────
+
+async function enrichWithAI() {
+  if (!currentPlaceData) return alert('Look up a place first.');
+  const { anthropicKey } = getConfig();
+  if (!anthropicKey) {
+    document.getElementById('config-panel').classList.add('visible');
+    document.getElementById('config-toggle').classList.add('open');
+    return alert('Please enter your Anthropic API key in the config panel.');
+  }
+
+  const btn = document.getElementById('enrich-btn');
+  btn.disabled = true;
+  btn.textContent = '✦ Enriching…';
+
+  const name = document.getElementById('f-name').value;
+  const address = document.getElementById('f-address').value;
+  const mapsUrl = document.getElementById('f-maps-url').value;
+  const website = document.getElementById('f-website').value;
+
+  const prompt = `You are a research assistant helping curate a family-friendly places guide for the Netherlands.
+
+Research this location thoroughly using web search, then return a JSON object with your best assessment. For anything you are not confident about, return null — never guess.
+
+Location:
+- Name: ${name}
+- Address: ${address}
+- Google Maps: ${mapsUrl}
+${website ? `- Website: ${website}` : ''}
+
+Return ONLY a valid JSON object with these exact keys:
+{
+  "categories": [],         // array, pick 1-2 from: ["Active Play","Animals & Nature","Amusements & Attractions","Classes, Workshops, Camps","Culture & Learning","Restaurants & Cafes"]
+  "secondary_category": null, // pick exactly 1 from: ["Activity Center", "Adventure Park", "Amusement Park", "Aquarium", "Art Classes", "Aviation Museum", "Baby Spa", "Bakery Museum", "Barefoot Path", "Boat Rental", "Bookstore", "Botanical Garden", "Butterfly Garden", "Cafe", "Castle", "Children's Farm", "Cinema", "Coffee Shop", "Concert Hall", "Construction Playground", "Cooking Classes", "Cooking Workshop", "Culture Museum", "Dance Classes", "Drama Classes", "Film Museum", "Fitness Classes", "Gnome Trail", "Gymnastics Classes", "Horse Riding Classes", "Immersive Experience", "Immersive Play", "Indoor Playground", "Interactive Toy Shop", "Kid Cafe", "Library", "Maritime Museum", "Minigolf", "Music Classes", "Music Museum", "Natural History Museum", "Nature Camp", "Nature Playground", "Open Air Museum", "Paddling Pool", "Pancake House", "Pick-Your-Own Farm", "Plane Spotting", "Playgroup", "Playground", "Playroom", "Pool", "Railway Museum", "Restaurant", "Science Camp", "Science Museum", "Sensory Classes", "Space Museum", "Swim Classes", "Theater", "Theme Park", "Traffic Garden", "Train Ride", "Trampoline Park", "Yoga Classes", "Zoo"]
+  "indoor_outdoor": "",     // "Indoor", "Outdoor", or "Mixed" — null if unsure
+  "ideal_age_min": null,    // youngest suitable age in years (integer), null if truly all ages
+  "ideal_age_max": null,    // oldest suitable age in years (integer), null if truly all ages
+  "all_ages": false,        // true ONLY if genuinely suitable for all ages with no upper limit
+  "age_baby": null,         // true/false — suitable for 0-2 year olds
+  "age_preschooler": null,  // true/false — suitable for 3-6 year olds
+  "age_bigkid": null,       // true/false — suitable for 7-12 year olds
+  "cost": null,             // "Free" if no entry fee, or e.g. "€12.50 adults, Free under 3" if paid. null only if genuinely unknown.
+  "toilet": null,           // true/false/null — explicit evidence only
+  "changing_table": null,   // true/false/null — explicit evidence only
+  "lockers": null,          // true/false/null — explicit evidence only
+  "pram_parking": null,     // true/false/null — explicit evidence only
+  "food_drink": null,       // true/false/null — cafe, restaurant or food for purchase on site
+  "highchairs": null,       // true/false/null — explicit evidence only
+  "accessible": null,       // true/false/null — wheelchair/pram accessible entrance
+  "party_venue": null,      // true if they host children's birthday parties, false/null otherwise
+  "events": null,           // true if the place regularly offers children's events/programs/workshops/concerts. null if unknown.
+  "description": "",        // 2-3 punchy fragments. NO age range text — that goes elsewhere. Format: "[What makes it special]. [Specific vivid details]. [One more detail if needed]." Do not start with the place name.
+  "tips": null,             // ONE practical tip (booking, parking, seasonality, distance from Amsterdam). null if nothing notable.
+  "reasoning": {
+    "ages": { "text": "", "confidence": "high|medium|low" },
+    "facilities": { "text": "", "confidence": "high|medium|low" },
+    "description": { "text": "", "confidence": "high|medium|low" },
+    "tips": { "text": "", "confidence": "high|medium|low" }
+  }
+}
+
+Rules:
+- For facilities, ONLY return true/false if you found EXPLICIT evidence (official website, confirmed reviews). Otherwise null. Do not infer.
+- For cost: return "Free" if entry is free, the actual price string if paid. null only if genuinely unknown.
+- Description must NOT include age range text — that is displayed separately from a dedicated field.
+- Description must be plain text only. No HTML, no markdown, no citation tags, no <cite> or any other markup whatsoever.
+- Tips should be genuinely useful and non-obvious. null if nothing stands out.
+- Return JSON only, no markdown, no explanation, no preamble. Do not write "Let me search" or any other narration. Your entire response must start with { and end with }.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1200,
+        tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Anthropic API error');
+
+    // Extract text from response (may include tool_use blocks)
+    const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    const first = text.indexOf('{');
+    const last  = text.lastIndexOf('}');
+    if (first === -1 || last === -1) throw new Error('No JSON found in response. Try again.');
+    const enriched = JSON.parse(text.slice(first, last + 1));
+
+    // Populate form fields
+    if (enriched.categories?.length) {
+      document.querySelectorAll('.cat-pill').forEach(pill => {
+        const label = pill.textContent.replace(/^✓\s*/, '').trim();
+        if (enriched.categories.includes(label)) pill.classList.add('selected');
+      });
+    }
+    if (enriched.secondary_category) document.getElementById('f-secondary-category').value = enriched.secondary_category;
+    if (enriched.indoor_outdoor) document.getElementById('f-indoor-outdoor').value = enriched.indoor_outdoor;
+    if (enriched.description) document.getElementById('f-description').value = enriched.description;
+    if (enriched.tips) document.getElementById('f-tips').value = enriched.tips;
+
+    // Age pills
+    ['baby','preschooler','bigkid'].forEach(key => {
+      const apiKey2 = key === 'baby' ? 'age_baby' : key === 'preschooler' ? 'age_preschooler' : 'age_bigkid';
+      if (enriched[apiKey2] !== null && enriched[apiKey2] !== undefined) {
+        pillState[key] = enriched[apiKey2];
+        const el = document.getElementById('pill-' + key);
+        if (el) el.classList.toggle('checked', enriched[apiKey2]);
+      }
+    });
+
+    // Ideal age range
+    if (enriched.all_ages) {
+      pillState['all_ages'] = true;
+      const allEl = document.getElementById('pill-all-ages');
+      if (allEl) { allEl.classList.add('checked'); }
+      document.getElementById('f-age-min').disabled = true;
+      document.getElementById('f-age-max').disabled = true;
+    } else {
+      if (enriched.ideal_age_min != null) document.getElementById('f-age-min').value = enriched.ideal_age_min;
+      if (enriched.ideal_age_max != null) document.getElementById('f-age-max').value = enriched.ideal_age_max;
+    }
+    // Cost
+    if (enriched.cost != null) document.getElementById('f-cost').value = enriched.cost;
+
+    // Facility pills
+    ['toilet','changing_table','lockers','pram_parking','food_drink','highchairs','accessible','party_venue','events'].forEach(key => {
+      if (enriched[key] !== null && enriched[key] !== undefined) {
+        pillState[key] = enriched[key];
+        const pillId = 'pill-' + key.replace(/_/g, '-');
+        const el = document.getElementById(pillId);
+        if (el) {
+          el.classList.remove('checked','denied');
+          el.classList.add(enriched[key] ? 'checked' : 'denied');
+        }
+      }
+    });
+
+    // Show reasoning panels
+    const r = enriched.reasoning || {};
+    const confClass = c => c === 'high' ? 'confidence-high' : c === 'medium' ? 'confidence-med' : 'confidence-low';
+    if (r.ages) setReasoning('reasoning-ages', `<span class="${confClass(r.ages.confidence)}">[${r.ages.confidence} confidence]</span> ${r.ages.text}`);
+    if (r.facilities) setReasoning('reasoning-facilities', `<span class="${confClass(r.facilities.confidence)}">[${r.facilities.confidence} confidence]</span> ${r.facilities.text}`);
+    if (r.description) setReasoning('reasoning-description', `<span class="${confClass(r.description.confidence)}">[${r.description.confidence} confidence]</span> ${r.description.text}`);
+    if (r.tips) setReasoning('reasoning-tips', `<span class="${confClass(r.tips.confidence)}">[${r.tips.confidence} confidence]</span> ${r.tips.text}`);
+
+    document.getElementById('enrich-badge').style.display = 'inline-flex';
+
+  } catch (err) {
+    alert('AI enrichment failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ AI Enrich';
+  }
+}
+
+
+// ─── Description-only AI (cheaper — 1 search max) ────────────────────────────
+
+async function describeWithAI() {
+  if (!currentPlaceData) return alert('Look up a place first.');
+  const { anthropicKey } = getConfig();
+  if (!anthropicKey) {
+    document.getElementById('config-panel').classList.add('visible');
+    document.getElementById('config-toggle').classList.add('open');
+    return alert('Please enter your Anthropic API key in the config panel.');
+  }
+
+  const btn = document.getElementById('describe-btn');
+  btn.disabled = true;
+  btn.textContent = '✦ Writing…';
+
+  const name       = document.getElementById('f-name').value;
+  const address    = document.getElementById('f-address').value;
+  const website    = document.getElementById('f-website').value;
+  const mapsUrl    = document.getElementById('f-maps-url').value;
+  const secCat     = document.getElementById('f-secondary-category').value;
+  const ageMin     = document.getElementById('f-age-min').value;
+  const ageMax     = document.getElementById('f-age-max').value;
+
+  const prompt = `You are a copywriter for gobebop.app, a family-friendly places guide for the Netherlands.
+
+Do ONE web search to learn about this place, then write a description and tip.
+
+Location:
+- Name: ${name}
+- Type: ${secCat || 'unknown'}
+- Address: ${address}
+${website ? `- Website: ${website}` : ''}
+${ageMin ? `- Ideal ages: ${ageMin}${ageMax ? '-' + ageMax : '+'}` : ''}
+
+Return ONLY a valid JSON object — no preamble, no narration, start with { end with }:
+{
+  "description": "",  // 2-3 punchy fragments. What makes it special + vivid details. Plain text only, no markup, no age range text. Do not start with the place name.
+  "tips": null,       // ONE practical tip (booking, parking, seasonality). null if nothing notable.
+  "reasoning": {
+    "description": { "text": "", "confidence": "high|medium|low" },
+    "tips": { "text": "", "confidence": "high|medium|low" }
+  }
+}
+
+Style: punchy, specific, warm. Example: "Step into Miffy's world across 12 hands-on rooms. Kids role-play at their own pace in a farm, town, and garden. Calm, unhurried — a rare thing."
+Plain text only. No HTML, no markdown, no citation tags.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 600,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        tool_choice: { type: 'auto', disable_parallel_tool_use: true },
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Anthropic API error');
+
+    const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    const first = text.indexOf('{');
+    const last  = text.lastIndexOf('}');
+    if (first === -1 || last === -1) throw new Error('No JSON in response. Try again.');
+    const result = JSON.parse(text.slice(first, last + 1));
+
+    if (result.description) document.getElementById('f-description').value = result.description;
+    if (result.tips)        document.getElementById('f-tips').value = result.tips;
+
+    const r = result.reasoning || {};
+    const confClass = c => c === 'high' ? 'confidence-high' : c === 'medium' ? 'confidence-med' : 'confidence-low';
+    if (r.description) setReasoning('reasoning-description', `<span class="${confClass(r.description.confidence)}">[${r.description.confidence} confidence]</span> ${r.description.text}`);
+    if (r.tips)        setReasoning('reasoning-tips',        `<span class="${confClass(r.tips.confidence)}">[${r.tips.confidence} confidence]</span> ${r.tips.text}`);
+
+    document.getElementById('enrich-badge').style.display = 'inline-flex';
+
+  } catch (err) {
+    alert('Description failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ Write Description';
+  }
+}
+
+
+// ─── Photos ──────────────────────────────────────────────────
+
+const photoQueue = []; // [{file, descriptor, status}]
+const MAX_PHOTOS = 3;
+const DISPLAY_W = 1200, DISPLAY_H = 800;
+const THUMB_W = 400,    THUMB_H = 267;
+
+const PHOTO_DESCRIPTORS = [
+  'interior', 'exterior', 'play-area', 'kids-cafe',
+  'entrance', 'playground', 'activity', 'overview'
+];
+
+function slugify(str) {
+  return str.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function buildPhotoFilename(placeId, city, descriptor, num) {
+  // SEO pattern: {place-slug}-{city}-{descriptor}-{n}.jpg
+  // e.g. nijntje-museum-utrecht-play-area-1.jpg
+  const name = document.getElementById('f-name').value;
+  const placePart = slugify(name || placeId.slice(0, 12));
+  const cityPart  = slugify(city || 'amsterdam');
+  return `${placePart}-${cityPart}-${descriptor}-${num}.jpg`;
+}
+
+function showPhotoUpload() {
+  const placeId = document.getElementById('f-place-id').value;
+  if (placeId) {
+    document.getElementById('photo-upload-area').style.display = 'block';
+    document.getElementById('photo-no-place').style.display = 'none';
+  }
+}
+
+function handlePhotoDrop(e) {
+  e.preventDefault();
+  handlePhotoFiles(e.dataTransfer.files);
+}
+
+function handlePhotoFiles(files) {
+  const remaining = MAX_PHOTOS - photoQueue.length;
+  const toAdd = Array.from(files).slice(0, remaining);
+  toAdd.forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const entry = { file, descriptor: PHOTO_DESCRIPTORS[0], status: 'ready' };
+    photoQueue.push(entry);
+    renderPhotoPreviews();
+  });
+}
+
+function renderPhotoPreviews() {
+  const container = document.getElementById('photo-previews');
+  container.innerHTML = '';
+  const city = document.getElementById('f-city').value;
+  const placeId = document.getElementById('f-place-id').value;
+
+  photoQueue.forEach((entry, idx) => {
+    const card = document.createElement('div');
+    card.className = 'photo-preview-card';
+    card.id = 'photo-card-' + idx;
+
+    const descriptorOpts = PHOTO_DESCRIPTORS.map(d =>
+      `<option value="${d}" ${d === entry.descriptor ? 'selected' : ''}>${d}</option>`
+    ).join('');
+
+    const filename = buildPhotoFilename(placeId, city, entry.descriptor, idx + 1);
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      card.innerHTML = `
+        <img src="${ev.target.result}" alt="preview" />
+        <button class="remove-photo" onclick="removePhoto(${idx})">✕</button>
+        <div class="photo-label" style="margin-top:6px;">
+          <select onchange="updateDescriptor(${idx}, this.value)" style="width:100%;font-size:11px;padding:3px 6px;background:var(--paper);border:1.5px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;">
+            ${descriptorOpts}
+          </select>
+        </div>
+        <div class="photo-label" id="photo-filename-${idx}" style="font-size:9px;color:var(--ink-muted);word-break:break-all;margin-top:3px;">${filename}</div>
+        <div class="photo-status" id="photo-status-${idx}">Ready</div>
+      `;
+    };
+    reader.readAsDataURL(entry.file);
+    container.appendChild(card);
+  });
+}
+
+function updateDescriptor(idx, val) {
+  if (photoQueue[idx]) {
+    photoQueue[idx].descriptor = val;
+    // Update filename preview
+    const city = document.getElementById('f-city').value;
+    const placeId = document.getElementById('f-place-id').value;
+    const el = document.getElementById('photo-filename-' + idx);
+    if (el) el.textContent = buildPhotoFilename(placeId, city, val, idx + 1);
+  }
+}
+
+function removePhoto(idx) {
+  photoQueue.splice(idx, 1);
+  renderPhotoPreviews();
+}
+
+async function resizeImage(file, width, height) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      const srcRatio = img.width / img.height;
+      const dstRatio = width / height;
+      let sx, sy, sw, sh;
+      if (srcRatio > dstRatio) {
+        sh = img.height; sw = sh * dstRatio;
+        sy = 0; sx = (img.width - sw) / 2;
+      } else {
+        sw = img.width; sh = sw / dstRatio;
+        sx = 0; sy = (img.height - sh) / 2;
+      }
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(resolve, 'image/jpeg', 0.88);
+    };
+    img.src = url;
+  });
+}
+
+async function uploadPhotos() {
+  const { supabaseUrl, supabaseKey } = getConfig();
+  const placeId = document.getElementById('f-place-id').value;
+  const city    = document.getElementById('f-city').value;
+  if (!placeId) return alert('Save the location first to get a Place ID.');
+  if (!photoQueue.length) return alert('Add at least one photo first.');
+
+  for (let idx = 0; idx < photoQueue.length; idx++) {
+    const entry = photoQueue[idx];
+    const statusEl = document.getElementById('photo-status-' + idx);
+    if (statusEl) { statusEl.textContent = 'Resizing…'; statusEl.className = 'photo-status uploading'; }
+
+    try {
+      const [displayBlob, thumbBlob] = await Promise.all([
+        resizeImage(entry.file, DISPLAY_W, DISPLAY_H),
+        resizeImage(entry.file, THUMB_W, THUMB_H),
+      ]);
+
+      if (statusEl) statusEl.textContent = 'Uploading…';
+
+      const filename      = buildPhotoFilename(placeId, city, entry.descriptor, idx + 1);
+      const thumbFilename = buildPhotoFilename(placeId, city, entry.descriptor + '-thumb', idx + 1);
+      const displayPath   = `photos/${placeId}/${filename}`;
+      const thumbPath     = `photos/${placeId}/${thumbFilename}`;
+
+      await Promise.all([
+        supabaseUpload(supabaseUrl, supabaseKey, displayPath, displayBlob),
+        supabaseUpload(supabaseUrl, supabaseKey, thumbPath,   thumbBlob),
+      ]);
+
+      if (statusEl) { statusEl.textContent = '✓ ' + filename; statusEl.className = 'photo-status done'; }
+
+    } catch (err) {
+      if (statusEl) { statusEl.textContent = '✗ ' + err.message; statusEl.className = 'photo-status error'; }
+    }
+  }
+}
+
+async function supabaseUpload(url, key, path, blob) {
+  const res = await fetch(`${url}/storage/v1/object/photos/${path}`, {
+    method: 'POST',
+    headers: {
+      'apikey': key,
+      'Authorization': `Bearer ${key}`,
+      'Content-Type': 'image/jpeg',
+      'x-upsert': 'true',
+    },
+    body: blob,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Upload failed');
+  }
+  return res.json();
+}
+
+
+// ─── Mode toggle ─────────────────────────────────────────────────────────────
+
+function setMode(mode) {
+  const isAdd = mode === 'add';
+  document.getElementById('mode-add').classList.toggle('active', isAdd);
+  document.getElementById('mode-photos').classList.toggle('active', !isAdd);
+  document.getElementById('add-mode-ui').style.display    = isAdd ? '' : 'none';
+  document.getElementById('photo-mode-ui').style.display  = isAdd ? 'none' : '';
+  document.getElementById('lookup-bar-wrap').style.display = isAdd ? '' : 'none';
+  document.getElementById('status').textContent = '';
+  if (!isAdd) {
+    // reset photo mode state
+    photoModeQueue.length = 0;
+    photoModeRecord = null;
+    document.getElementById('photo-search-input').value = '';
+    document.getElementById('photo-search-results').innerHTML = '';
+    document.getElementById('photo-mode-upload-panel').style.display = 'none';
+    document.getElementById('photo-mode-previews').innerHTML = '';
+  }
+}
+
+// ─── Photo mode state ─────────────────────────────────────────────────────────
+
+const photoModeQueue = [];
+let photoModeRecord = null; // {id, name, city, google_place_id}
+
+// Recent locations — stored in memory (persists in session)
+const recentLocations = [];
+const MAX_RECENT = 5;
+
+function addToRecent(record) {
+  const exists = recentLocations.findIndex(r => r.id === record.id);
+  if (exists > -1) recentLocations.splice(exists, 1);
+  recentLocations.unshift(record);
+  if (recentLocations.length > MAX_RECENT) recentLocations.pop();
+  renderRecentList();
+}
+
+function renderRecentList() {
+  const section = document.getElementById('recent-section');
+  const list    = document.getElementById('recent-list');
+  if (!recentLocations.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = recentLocations.map(r => `
+    <div class="recent-item" onclick="selectPhotoModeRecord(${JSON.stringify(r).replace(/"/g, '&quot;')})">
+      <div>
+        <div class="ri-name">${r.name}</div>
+        <div class="ri-city">${r.city || '—'}</div>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  `).join('');
+}
+
+function startNextLocation() {
+  // Reset for a new location but keep recent list intact
+  photoModeQueue.length = 0;
+  photoModeRecord = null;
+  document.getElementById('photo-mode-upload-panel').style.display = 'none';
+  document.getElementById('photo-mode-previews').innerHTML = '';
+  document.getElementById('next-location-bar').classList.add('hidden');
+  document.getElementById('photo-search-input').value = '';
+  document.getElementById('photo-search-results').innerHTML = '';
+  // Focus search on mobile
+  setTimeout(() => document.getElementById('photo-search-input').focus(), 100);
+}
+
+async function searchLocations(query) {
+  const resultsEl = document.getElementById('photo-search-results');
+  if (query.length < 2) { resultsEl.innerHTML = ''; return; }
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  if (!supabaseUrl || !supabaseKey) {
+    resultsEl.innerHTML = '<p style="font-size:12px;color:var(--ink-muted);padding:8px;">Enter Supabase config above first.</p>';
+    return;
+  }
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?name=ilike.*${encodeURIComponent(query)}*&select=id,name,city,google_place_id&limit=8`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    if (!rows.length) {
+      resultsEl.innerHTML = '<p style="font-size:12px;color:var(--ink-muted);padding:8px;">No matches found.</p>';
+      return;
+    }
+    resultsEl.innerHTML = rows.map(r => `
+      <div class="photo-search-result" onclick="selectPhotoModeRecord(${JSON.stringify(r).replace(/"/g, '&quot;')})">
+        <div class="res-name">${r.name}</div>
+        <div class="res-meta">${r.city || '—'} · ${r.google_place_id || r.id}</div>
+      </div>
+    `).join('');
+  } catch(e) {
+    resultsEl.innerHTML = `<p style="font-size:12px;color:#991B1B;padding:8px;">Error: ${e.message}</p>`;
+  }
+}
+
+function selectPhotoModeRecord(record) {
+  photoModeRecord = record;
+  photoModeQueue.length = 0;
+  document.getElementById('photo-search-results').innerHTML = '';
+  document.getElementById('photo-search-input').value = '';
+  document.getElementById('photo-mode-previews').innerHTML = '';
+  document.getElementById('next-location-bar').classList.add('hidden');
+
+  document.getElementById('photo-mode-selected').innerHTML = `
+    <div>
+      <div class="sel-name">${record.name}</div>
+      <div class="sel-meta">${record.city || '—'} · ${record.google_place_id || record.id}</div>
+    </div>
+    <span class="sel-change" onclick="resetPhotoModeSelection()">Change</span>
+  `;
+  document.getElementById('photo-mode-upload-panel').style.display = 'block';
+  addToRecent(record);
+}
+
+function resetPhotoModeSelection() {
+  photoModeRecord = null;
+  photoModeQueue.length = 0;
+  document.getElementById('photo-mode-upload-panel').style.display = 'none';
+  document.getElementById('photo-mode-previews').innerHTML = '';
+}
+
+// Auto-descriptor defaults by slot position
+const AUTO_DESCRIPTORS = ['exterior', 'interior', 'play-area'];
+
+function handlePhotoModeFiles(files) {
+  const remaining = MAX_PHOTOS - photoModeQueue.length;
+  Array.from(files).slice(0, remaining).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const slotIdx = photoModeQueue.length; // before push
+    const autoDesc = AUTO_DESCRIPTORS[slotIdx] || PHOTO_DESCRIPTORS[0];
+    photoModeQueue.push({ file, descriptor: autoDesc, uploadStatus: 'pending' });
+  });
+  renderPhotoModePreviews();
+}
+
+function renderPhotoModePreviews() {
+  const container = document.getElementById('photo-mode-previews');
+  container.innerHTML = '';
+  const placeId = photoModeRecord?.google_place_id || photoModeRecord?.id || '';
+  const city    = photoModeRecord?.city || '';
+
+  photoModeQueue.forEach((entry, idx) => {
+    const card = document.createElement('div');
+    card.className = 'photo-preview-card';
+    const descriptorOpts = PHOTO_DESCRIPTORS.map(d =>
+      `<option value="${d}" ${d === entry.descriptor ? 'selected' : ''}>${d}</option>`
+    ).join('');
+    const filename = buildPhotoFilename(placeId, city, entry.descriptor, idx + 1);
+
+    card.className = 'photo-preview-card pm-card-mobile';
+    const reader = new FileReader();
+    reader.onload = ev => {
+      card.innerHTML = `
+        <div class="photo-preview-wrap" style="display:block;position:relative;">
+          <img src="${ev.target.result}" alt="preview" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);display:block;" />
+          <div class="ratio-overlay"></div>
+          <button class="remove-photo" onclick="removePhotoMode(${idx})" style="position:absolute;top:-6px;right:-6px;">✕</button>
+        </div>
+        <div class="photo-label" style="margin-top:8px;">
+          <select onchange="updatePhotoModeDescriptor(${idx}, this.value)" class="pm-descriptor-select" style="width:100%;font-size:13px;padding:8px 10px;background:var(--paper);border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;">
+            ${descriptorOpts}
+          </select>
+        </div>
+        <div class="photo-label" id="pm-filename-${idx}" style="font-size:10px;color:var(--ink-muted);word-break:break-all;margin-top:4px;">${filename}</div>
+        <div class="photo-status" id="pm-status-${idx}">Ready</div>
+        <button class="pm-retry-btn" id="pm-retry-${idx}" onclick="retryUpload(${idx})">↺ Retry</button>
+      `;
+    };
+    reader.readAsDataURL(entry.file);
+    container.appendChild(card);
+  });
+}
+
+function updatePhotoModeDescriptor(idx, val) {
+  if (photoModeQueue[idx]) {
+    photoModeQueue[idx].descriptor = val;
+    const placeId = photoModeRecord?.google_place_id || photoModeRecord?.id || '';
+    const city    = photoModeRecord?.city || '';
+    const el = document.getElementById('pm-filename-' + idx);
+    if (el) el.textContent = buildPhotoFilename(placeId, city, val, idx + 1);
+  }
+}
+
+function removePhotoMode(idx) {
+  photoModeQueue.splice(idx, 1);
+  renderPhotoModePreviews();
+}
+
+async function uploadSinglePhoto(idx) {
+  const entry = photoModeQueue[idx];
+  if (!entry) return;
+  const { supabaseUrl, supabaseKey } = getConfig();
+  const placeId   = photoModeRecord.google_place_id || photoModeRecord.id;
+  const city      = photoModeRecord.city || '';
+  const statusEl  = document.getElementById('pm-status-' + idx);
+  const retryBtn  = document.getElementById('pm-retry-' + idx);
+
+  if (statusEl) { statusEl.textContent = 'Resizing…'; statusEl.className = 'photo-status uploading'; }
+  if (retryBtn) retryBtn.style.display = 'none';
+
+  const [displayBlob, thumbBlob] = await Promise.all([
+    resizeImage(entry.file, DISPLAY_W, DISPLAY_H),
+    resizeImage(entry.file, THUMB_W,   THUMB_H),
+  ]);
+  if (statusEl) statusEl.textContent = 'Uploading…';
+  const filename      = buildPhotoFilename(placeId, city, entry.descriptor, idx + 1);
+  const thumbFilename = buildPhotoFilename(placeId, city, entry.descriptor + '-thumb', idx + 1);
+  await Promise.all([
+    supabaseUpload(supabaseUrl, supabaseKey, `photos/${placeId}/${filename}`,     displayBlob),
+    supabaseUpload(supabaseUrl, supabaseKey, `photos/${placeId}/${thumbFilename}`, thumbBlob),
+  ]);
+  if (statusEl) { statusEl.textContent = '✓ ' + filename; statusEl.className = 'photo-status done'; }
+  entry.uploadStatus = 'done';
+}
+
+async function retryUpload(idx) {
+  try { await uploadSinglePhoto(idx); } catch(err) {
+    const statusEl = document.getElementById('pm-status-' + idx);
+    const retryBtn = document.getElementById('pm-retry-' + idx);
+    if (statusEl) { statusEl.textContent = '✗ ' + err.message; statusEl.className = 'photo-status error'; }
+    if (retryBtn) retryBtn.style.display = 'inline-block';
+  }
+}
+
+async function uploadPhotoMode() {
+  if (!photoModeRecord) return alert('Select a location first.');
+  if (!photoModeQueue.length) return alert('Add at least one photo first.');
+  const btn = document.getElementById('pm-upload-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+
+  let anyFailed = false;
+  for (let idx = 0; idx < photoModeQueue.length; idx++) {
+    try {
+      await uploadSinglePhoto(idx);
+    } catch(err) {
+      anyFailed = true;
+      const statusEl = document.getElementById('pm-status-' + idx);
+      const retryBtn = document.getElementById('pm-retry-' + idx);
+      if (statusEl) { statusEl.textContent = '✗ ' + err.message; statusEl.className = 'photo-status error'; }
+      if (retryBtn) retryBtn.style.display = 'inline-block';
+    }
+  }
+
+  if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 4l3.5-3.5L10 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg> Upload Photos'; }
+
+  if (!anyFailed) {
+    // Show next location prompt
+    document.getElementById('next-location-bar').classList.remove('hidden');
+  }
+}
+
+// ─── Export JSON ──────────────────────────────────────────────────────────────
+
+function exportJSON() {
+  const data = collectFormData();
+  const out = document.getElementById('json-output');
+  out.textContent = JSON.stringify(data, null, 2);
+  out.style.display = 'block';
+  out.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─── Save to Supabase ─────────────────────────────────────────────────────────
+
+async function saveToSupabase() {
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+
+  if (!supabaseUrl || !supabaseKey) {
+    document.getElementById('config-panel').classList.add('visible');
+    document.getElementById('config-toggle').classList.add('open');
+    return alert('Please enter your Supabase URL and key in the config panel.');
+  }
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="border-top-color:white;width:14px;height:14px;"></div> Saving…';
+
+  const data = collectFormData();
+  if (!data.secondary_category) {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5l3.5 3.5 6.5-6.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Save to Supabase';
+    return setStatus('error', '❌ Secondary Category is required before saving.');
+  }
+
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Prefer': 'return=representation',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || err.details || 'Supabase error');
+    }
+
+    setStatus('success', `✅ "${data.name}" saved to Supabase successfully!`);
+    document.getElementById('status').scrollIntoView({ behavior: 'smooth' });
+
+    // Reset for next entry
+    setTimeout(() => {
+      document.getElementById('maps-url').value = '';
+      document.getElementById('location-form').style.display = 'none';
+      document.getElementById('json-output').style.display = 'none';
+      currentPlaceData = null;
+      Object.keys(pillState).forEach(k => {
+        pillState[k] = false;
+        const pill = document.getElementById(`pill-${k}`);
+        if (pill) pill.classList.remove('checked');
+      });
+      clearStatus();
+    }, 3000);
+
+  } catch (err) {
+    setStatus('error', '❌ Save failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5l3.5 3.5 6.5-6.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Save to Supabase';
+  }
+}
+
+// ─── Enter key on lookup ──────────────────────────────────────────────────────
+
+document.getElementById('maps-url').addEventListener('keydown', e => {
+  if (e.key === 'Enter') lookupPlace();
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+loadConfig();
+
+// Open config on first load if no API key set
+if (!localStorage.getItem('bebop_google_key')) {
+  document.getElementById('config-panel').classList.add('visible');
+  document.getElementById('config-toggle').classList.add('open');
+}
+</script>
+
+</body>
+</html>
