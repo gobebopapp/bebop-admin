@@ -1205,30 +1205,17 @@ async function findPlaceByText(query, apiKey) {
     maxResultCount: 1,
   });
 
-  // Use a CORS proxy that supports POST requests
-  // Try multiple proxies in sequence in case one is down
-  const postProxies = [
-    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  ];
-
-  let res, lastError;
-  for (const makeProxy of postProxies) {
-    try {
-      res = await fetch(makeProxy(placesUrl), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask': 'places.id,places.displayName',
-        },
-        body,
-      });
-      if (res.ok) break;
-      lastError = `HTTP ${res.status}`;
-    } catch(e) { lastError = e.message; res = null; }
-  }
-  if (!res?.ok) throw new Error(`All CORS proxies failed for text search: ${lastError}`);
+  // Places API (New) supports CORS from https:// origins — call directly, no proxy needed.
+  const res = await fetch(placesUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask': 'places.id,places.displayName',
+    },
+    body,
+  });
+  if (!res.ok) throw new Error(`Text Search API error: HTTP ${res.status}`);
 
   const data = await res.json();
 
@@ -1245,26 +1232,16 @@ async function fetchPlaceDetails(placeId, apiKey) {
   // Pro SKU (cheap ~$0.002/req): displayName, addressComponents, googleMapsUri, businessStatus
   const placesUrl = `https://places.googleapis.com/v1/places/${placeId}`;
 
-  // Places API (New) normally requires X-Goog-Api-Key and X-Goog-FieldMask headers,
-  // but custom headers trigger CORS preflight which fails from file:// origin.
-  // Solution: pass key and fields as query params — Google accepts both forms.
+  // Places API (New) supports CORS from https:// origins — call directly with headers, no proxy needed.
   const fieldMask = 'id,displayName,formattedAddress,location,types,addressComponents,googleMapsUri,businessStatus,websiteUri,regularOpeningHours';
-  const fullUrl = `${placesUrl}?key=${apiKey}&fields=${encodeURIComponent(fieldMask)}`;
 
-  const proxyUrls = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(fullUrl)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(fullUrl)}`,
-  ];
-
-  let res, lastErr;
-  for (const proxyUrl of proxyUrls) {
-    try {
-      res = await fetch(proxyUrl);
-      if (res.ok) break;
-      lastErr = `HTTP ${res.status}`;
-    } catch(e) { lastErr = e.message; res = null; }
-  }
-  if (!res?.ok) throw new Error(`All CORS proxies failed for place details: ${lastErr}`);
+  const res = await fetch(placesUrl, {
+    headers: {
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask': fieldMask,
+    }
+  });
+  if (!res.ok) throw new Error(`Place Details API error: HTTP ${res.status}`);
 
   const data = await res.json();
 
