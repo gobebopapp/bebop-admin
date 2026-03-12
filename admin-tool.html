@@ -749,7 +749,7 @@ header {
       <p style="font-size:13px;color:var(--ink-muted);margin-bottom:6px;">Drag photos here or</p>
       <label class="btn btn-secondary" style="cursor:pointer;font-size:13px;">
         Choose files
-        <input type="file" id="photo-mode-file-input" accept="image/*" multiple capture="environment" style="display:none;" onchange="handlePhotoModeFiles(this.files)" />
+        <input type="file" id="photo-mode-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoModeFiles(this.files)" />
       </label>
     </div>
     <div id="photo-mode-previews" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;"></div>
@@ -771,6 +771,7 @@ header {
 
   <!-- Lookup bar -->
 
+  <div id="lookup-bar-wrap">
   <div class="lookup-bar">
     <div class="field-wrap">
       <label>Google Maps URL or Place ID</label>
