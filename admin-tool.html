@@ -15,8 +15,8 @@
 
 ```
 :root {
-  --cream: #F7F3ED;
-  --paper: #EFEAE2;
+  --cream: #EDE8DF;
+  --paper: #E4DDD3;
   --ink: #1A1714;
   --ink-soft: #6B6560;
   --ink-muted: #A09A94;
@@ -24,10 +24,10 @@
   --accent-light: #FBE8DF;
   --green: #2D6A4F;
   --green-light: #D8EDDF;
-  --border: #DDD7CF;
-  --white: #FDFAF7;
-  --shadow: 0 1px 3px rgba(26,23,20,0.08), 0 4px 16px rgba(26,23,20,0.06);
-  --surface: #FDFAF7;
+  --border: #D4CEC6;
+  --white: #FFFFFF;
+  --shadow: 0 1px 3px rgba(26,23,20,0.10), 0 4px 16px rgba(26,23,20,0.08);
+  --surface: #FFFFFF;
 }
 
 body {
@@ -736,7 +736,7 @@ header {
 <div class="photo-search-bar">
   <div class="field-wrap" style="margin-bottom:0;">
     <label>Search locations</label>
-    <input type="text" id="photo-search-input" placeholder="Start typing a name…" oninput="searchLocations(this.value)" autocomplete="off" />
+    <input type="text" id="photo-search-input" placeholder="Start typing a name…" oninput="searchLocations(this.value)" autocomplete="off" style="font-size:16px;" />
   </div>
   <div class="photo-search-results" id="photo-search-results"></div>
 </div>
@@ -1999,6 +1999,8 @@ function setMode(mode) {
   document.getElementById('add-mode-ui').style.display    = isAdd ? '' : 'none';
   document.getElementById('photo-mode-ui').style.display  = isAdd ? 'none' : '';
   document.getElementById('lookup-bar-wrap').style.display = isAdd ? '' : 'none';
+  document.getElementById('location-form').style.display  = isAdd ? '' : 'none';
+  document.getElementById('status').style.display = 'none';
   document.getElementById('status').textContent = '';
   if (!isAdd) {
     // reset photo mode state
