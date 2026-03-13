@@ -31,8 +31,8 @@ html {
 }
 
 body {
-  background: var(--cream);
-  color: var(--ink);
+  background: #EDE8DF;
+  color: #1A1714;
   font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
   font-size: 14px;
   min-height: 100vh;
@@ -41,8 +41,8 @@ body {
 
 /* ── Header ── */
 header {
-  background: var(--ink);
-  color: var(--cream);
+  background: #1A1714;
+  color: #EDE8DF;
   padding: 0 40px;
   display: flex;
   align-items: center;
@@ -58,18 +58,18 @@ header {
   font-size: 22px;
   font-weight: 300;
   letter-spacing: -0.02em;
-  color: var(--cream);
+  color: #EDE8DF;
 }
 
 .logo span {
-  color: var(--accent);
+  color: #E8541A;
   font-style: italic;
 }
 
 .header-tag {
   font-family: 'DM Mono', 'Courier New', monospace;
   font-size: 11px;
-  color: var(--ink-muted);
+  color: #A09A94;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -91,22 +91,22 @@ header {
 }
 
 .page-sub {
-  color: var(--ink-soft);
+  color: #6B6560;
   font-size: 14px;
   margin-bottom: 40px;
 }
 
 /* ── Lookup bar ── */
 .lookup-bar {
-  background: var(--white);
-  border: 1.5px solid var(--border);
+  background: #FFFFFF;
+  border: 1.5px solid #D4CEC6;
   border-radius: 12px;
   padding: 20px 24px;
   display: flex;
   gap: 12px;
   align-items: flex-start;
   margin-bottom: 32px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 1px 3px rgba(26,23,20,0.10), 0 4px 16px rgba(26,23,20,0.08);
 }
 
 .lookup-bar .field-wrap {
@@ -119,25 +119,25 @@ header {
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-muted);
+  color: #A09A94;
   margin-bottom: 6px;
 }
 
 .lookup-bar input {
   width: 100%;
-  background: var(--paper);
-  border: 1.5px solid var(--border);
+  background: #E4DDD3;
+  border: 1.5px solid #D4CEC6;
   border-radius: 8px;
   padding: 10px 14px;
   font-family: 'DM Mono', 'Courier New', monospace;
   font-size: 12.5px;
-  color: var(--ink);
+  color: #1A1714;
   outline: none;
   transition: border-color 0.15s;
 }
 
-.lookup-bar input:focus { border-color: var(--accent); }
-.lookup-bar input::placeholder { color: var(--ink-muted); }
+.lookup-bar input:focus { border-color: #E8541A; }
+.lookup-bar input::placeholder { color: #A09A94; }
 
 /* ── Buttons ── */
 .btn {
@@ -161,14 +161,14 @@ header {
 }
 .btn-primary:hover { background: #C9430E; transform: translateY(-1px); }
 .btn-primary:active { transform: translateY(0); }
-.btn-primary:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
+.btn-primary:disabled { background: #A09A94; cursor: not-allowed; transform: none; }
 
 .btn-secondary {
-  background: var(--paper);
-  color: var(--ink);
-  border: 1.5px solid var(--border);
+  background: #E4DDD3;
+  color: #1A1714;
+  border: 1.5px solid #D4CEC6;
 }
-.btn-secondary:hover { background: var(--border); }
+.btn-secondary:hover { background: #D4CEC6; }
 
 .btn-save {
   background: #2D6A4F;
@@ -179,7 +179,7 @@ header {
   font-size: 15px;
 }
 .btn-save:hover { background: #1E4D38; transform: translateY(-1px); }
-.btn-save:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
+.btn-save:disabled { background: #A09A94; cursor: not-allowed; transform: none; }
 
 
 /* ── Status banner ── */
@@ -191,14 +191,14 @@ header {
   margin-bottom: 20px;
   font-family: 'DM Mono', 'Courier New', monospace;
 }
-.status.loading { background: var(--paper); color: var(--ink-soft); border: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.status.loading { background: #E4DDD3; color: #6B6560; border: 1.5px solid #D4CEC6; display: flex; align-items: center; gap: 10px; }
 .status.error { background: #FEE2E2; color: #991B1B; border: 1.5px solid #FECACA; display: block; }
-.status.success { background: var(--green-light); color: var(--green); border: 1.5px solid #A7D7BB; display: block; }
+.status.success { background: #D8EDDF; color: #2D6A4F; border: 1.5px solid #A7D7BB; display: block; }
 
 .spinner {
   width: 16px; height: 16px;
-  border: 2px solid var(--border);
-  border-top-color: var(--accent);
+  border: 2px solid #D4CEC6;
+  border-top-color: #E8541A;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   flex-shrink: 0;
@@ -216,18 +216,18 @@ header {
 }
 
 .form-section {
-  background: var(--white);
-  border: 1.5px solid var(--border);
+  background: #FFFFFF;
+  border: 1.5px solid #D4CEC6;
   border-radius: 12px;
   margin-bottom: 20px;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: 0 1px 3px rgba(26,23,20,0.10), 0 4px 16px rgba(26,23,20,0.08);
 }
 
 .section-header {
   padding: 16px 24px;
-  background: var(--paper);
-  border-bottom: 1.5px solid var(--border);
+  background: #E4DDD3;
+  border-bottom: 1.5px solid #D4CEC6;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -238,7 +238,7 @@ header {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: #6B6560;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -251,8 +251,8 @@ header {
   font-family: 'DM Mono', 'Courier New', monospace;
   letter-spacing: 0.04em;
 }
-.badge-auto { background: var(--green-light); color: var(--green); }
-.badge-manual { background: var(--accent-light); color: var(--accent); }
+.badge-auto { background: #D8EDDF; color: #2D6A4F; }
+.badge-manual { background: #FBE8DF; color: #E8541A; }
 
 .section-body { padding: 24px; }
 
@@ -275,19 +275,19 @@ header {
   font-size: 10px;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: #6B6560;
 }
 
 .field input,
 .field select,
 .field textarea {
-  background: var(--paper);
-  border: 1.5px solid var(--border);
+  background: #E4DDD3;
+  border: 1.5px solid #D4CEC6;
   border-radius: 8px;
   padding: 9px 13px;
   font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
   font-size: 13.5px;
-  color: var(--ink);
+  color: #1A1714;
   outline: none;
   transition: border-color 0.15s;
   width: 100%;
@@ -295,10 +295,10 @@ header {
 
 .field input:focus,
 .field select:focus,
-.field textarea:focus { border-color: var(--accent); }
+.field textarea:focus { border-color: #E8541A; }
 
 .field input[readonly] {
-  color: var(--ink-soft);
+  color: #6B6560;
   cursor: default;
 }
 
@@ -321,8 +321,8 @@ header {
   display: flex;
   align-items: center;
   gap: 7px;
-  background: var(--paper);
-  border: 1.5px solid var(--border);
+  background: #E4DDD3;
+  border: 1.5px solid #D4CEC6;
   border-radius: 8px;
   padding: 8px 14px;
   cursor: pointer;
@@ -330,7 +330,7 @@ header {
   transition: all 0.12s;
   user-select: none;
 }
-.check-pill:hover { border-color: var(--accent); }
+.check-pill:hover { border-color: #E8541A; }
 .check-pill input[type="checkbox"] { display: none; }
 .check-pill.checked { background: #D8EDDF; border-color: #2D6A4F; color: #2D6A4F; font-weight: 500; }
 .check-pill.checked::before { content: '✓ '; }
@@ -344,7 +344,7 @@ header {
   gap: 12px;
 }
 .age-range-row input { max-width: 80px; text-align: center; }
-.age-range-row span { color: var(--ink-muted); font-size: 13px; }
+.age-range-row span { color: #A09A94; font-size: 13px; }
 
 /* ── Photo strip ── */
 .photo-strip {
@@ -358,7 +358,7 @@ header {
   height: 90px;
   border-radius: 8px;
   object-fit: cover;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid #D4CEC6;
 }
 
 /* ── Hours display ── */
@@ -367,10 +367,10 @@ header {
   flex-direction: column;
   gap: 3px;
   font-size: 13px;
-  color: var(--ink-soft);
+  color: #6B6560;
   font-family: 'DM Mono', 'Courier New', monospace;
-  background: var(--paper);
-  border: 1.5px solid var(--border);
+  background: #E4DDD3;
+  border: 1.5px solid #D4CEC6;
   border-radius: 8px;
   padding: 10px 14px;
 }
@@ -389,7 +389,7 @@ header {
   gap: 8px;
   font-family: 'DM Mono', 'Courier New', monospace;
   font-size: 11px;
-  color: var(--ink-muted);
+  color: #A09A94;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
@@ -401,12 +401,12 @@ header {
 
 .config-panel {
   display: none;
-  background: var(--white);
-  border: 1.5px solid var(--border);
+  background: #FFFFFF;
+  border: 1.5px solid #D4CEC6;
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 32px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 1px 3px rgba(26,23,20,0.10), 0 4px 16px rgba(26,23,20,0.08);
 }
 .config-panel.visible { display: block; }
 .config-panel .fields-grid { grid-template-columns: 1fr 1fr 1fr; }
@@ -422,7 +422,7 @@ header {
 /* ── JSON output ── */
 .json-output {
   display: none;
-  background: var(--ink);
+  background: #1A1714;
   color: #A8D5A2;
   border-radius: 10px;
   padding: 20px 24px;
@@ -438,20 +438,20 @@ header {
 /* ── Hours builder ── */
 .hours-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 .hours-row { display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: center; }
-.hours-day { font-family: 'DM Mono', 'Courier New', monospace; font-size: 12px; color: var(--ink-soft); }
-.hours-input { background: var(--paper); border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 12px; font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: var(--ink); outline: none; transition: border-color 0.15s; }
-.hours-input:focus { border-color: var(--accent); }
+.hours-day { font-family: 'DM Mono', 'Courier New', monospace; font-size: 12px; color: #6B6560; }
+.hours-input { background: #E4DDD3; border: 1.5px solid #D4CEC6; border-radius: 8px; padding: 7px 12px; font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #1A1714; outline: none; transition: border-color 0.15s; }
+.hours-input:focus { border-color: #E8541A; }
 /* ── AI Enrich button ── */
-.btn-enrich { background: var(--ink); color: var(--cream); font-size: 13px; padding: 8px 16px; }
+.btn-enrich { background: #1A1714; color: #EDE8DF; font-size: 13px; padding: 8px 16px; }
 .btn-enrich:hover { background: #3a3530; }
-.btn-enrich:disabled { background: var(--ink-muted); cursor: not-allowed; }
+.btn-enrich:disabled { background: #A09A94; cursor: not-allowed; }
 
 /* ── Reasoning tooltip ── */
-.info-btn { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:var(--paper); border:1.5px solid var(--border); color:var(--ink-muted); font-size:10px; font-family:'DM Mono',monospace; cursor:pointer; margin-left:6px; flex-shrink:0; transition:all 0.15s; }
-.info-btn:hover { background:var(--ink); color:var(--cream); border-color:var(--ink); }
+.info-btn { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:#E4DDD3; border:1.5px solid #D4CEC6; color:#A09A94; font-size:10px; font-family:'DM Mono',monospace; cursor:pointer; margin-left:6px; flex-shrink:0; transition:all 0.15s; }
+.info-btn:hover { background:#1A1714; color:#EDE8DF; border-color:#1A1714; }
 .field-with-info { display:flex; align-items:center; gap:0; }
 .field-with-info label { flex:1; }
-.reasoning-panel { display:none; background:var(--ink); color:#c8c0b8; border-radius:8px; padding:10px 14px; font-size:12px; line-height:1.6; margin-top:6px; font-family:'DM Mono',monospace; }
+.reasoning-panel { display:none; background:#1A1714; color:#c8c0b8; border-radius:8px; padding:10px 14px; font-size:12px; line-height:1.6; margin-top:6px; font-family:'DM Mono',monospace; }
 .reasoning-panel.visible { display:block; }
 .confidence-high { color:#6ee7b7; }
 .confidence-med  { color:#fcd34d; }
@@ -459,57 +459,57 @@ header {
 
 /* ── Category pills ── */
 .category-pills { display:flex; gap:8px; flex-wrap:wrap; }
-.cat-pill { display:inline-flex; align-items:center; gap:6px; background:var(--paper); border:1.5px solid var(--border); border-radius:8px; padding:8px 14px; cursor:pointer; font-size:13.5px; transition:all 0.12s; user-select:none; }
-.cat-pill:hover { border-color:var(--green); }
+.cat-pill { display:inline-flex; align-items:center; gap:6px; background:#E4DDD3; border:1.5px solid #D4CEC6; border-radius:8px; padding:8px 14px; cursor:pointer; font-size:13.5px; transition:all 0.12s; user-select:none; }
+.cat-pill:hover { border-color:#2D6A4F; }
 .cat-pill.selected { background:#D8EDDF; border-color:#2D6A4F; color:#2D6A4F; font-weight:500; }
 .cat-pill.selected::before { content:'✓ '; }
 
 
 /* ── Photo upload ── */
-.photo-drop-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 28px; text-align: center; background: var(--paper); transition: border-color 0.15s; cursor: pointer; }
-.photo-drop-zone:hover { border-color: var(--accent); }
+.photo-drop-zone { border: 2px dashed #D4CEC6; border-radius: 10px; padding: 28px; text-align: center; background: #E4DDD3; transition: border-color 0.15s; cursor: pointer; }
+.photo-drop-zone:hover { border-color: #E8541A; }
 .photo-preview-card { position:relative; width:160px; }
-.photo-preview-card img { width:160px; height:auto; border-radius:8px; border:1.5px solid var(--border); display:block; }
+.photo-preview-card img { width:160px; height:auto; border-radius:8px; border:1.5px solid #D4CEC6; display:block; }
 .photo-preview-card .remove-photo { position:absolute; top:6px; right:6px; width:24px; height:24px; background:rgba(0,0,0,0.55); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; border:none; backdrop-filter:blur(2px); }
-.photo-preview-card .photo-label { font-family:'DM Mono',monospace; font-size:10px; color:var(--ink-muted); text-align:center; margin-top:4px; }
+.photo-preview-card .photo-label { font-family:'DM Mono',monospace; font-size:10px; color:#A09A94; text-align:center; margin-top:4px; }
 .photo-preview-card .photo-status { font-size:10px; text-align:center; margin-top:2px; font-family:'DM Mono',monospace; }
-.photo-status.uploading { color:var(--ink-muted); }
+.photo-status.uploading { color:#A09A94; }
 .photo-status.done { color:#2D6A4F; }
 .photo-status.error { color:#991B1B; }
 
 
 /* ── Mode toggle ── */
-.mode-toggle { display:flex; gap:0; margin-bottom:28px; margin-top:8px; border:2px solid var(--border); border-radius:12px; overflow:hidden; width:100%; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-.mode-btn { flex:1; padding:12px 24px; font-size:14px; font-family:'DM Sans',sans-serif; font-weight:500; background:var(--paper); color:var(--ink); border:none; cursor:pointer; transition:all 0.18s; letter-spacing:-0.1px; }
-.mode-btn:hover:not(.active) { background:var(--border); color:var(--ink); }
-.mode-btn.active { background:var(--accent); color:white; font-weight:600; }
-.mode-btn:first-child { border-right:2px solid var(--border); }
+.mode-toggle { display:flex; gap:0; margin-bottom:28px; margin-top:8px; border:2px solid #D4CEC6; border-radius:12px; overflow:hidden; width:100%; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.mode-btn { flex:1; padding:12px 24px; font-size:14px; font-family:'DM Sans',sans-serif; font-weight:500; background:#E4DDD3; color:#1A1714; border:none; cursor:pointer; transition:all 0.18s; letter-spacing:-0.1px; }
+.mode-btn:hover:not(.active) { background:#D4CEC6; color:#1A1714; }
+.mode-btn.active { background:#E8541A; color:white; font-weight:600; }
+.mode-btn:first-child { border-right:2px solid #D4CEC6; }
 
 /* ── Photo-mode search ── */
-.photo-search-bar { background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:20px 24px; margin-bottom:16px; }
+.photo-search-bar { background:#FFFFFF; border:1.5px solid #D4CEC6; border-radius:12px; padding:20px 24px; margin-bottom:16px; }
 .photo-search-results { display:flex; flex-direction:column; gap:6px; margin-top:10px; max-height:240px; overflow-y:auto; }
-.photo-search-result { padding:10px 14px; border-radius:8px; border:1.5px solid var(--border); background:var(--paper); cursor:pointer; transition:border-color 0.15s; }
-.photo-search-result:hover { border-color:var(--accent); }
-.photo-search-result .res-name { font-size:13px; font-weight:600; color:var(--ink); }
-.photo-search-result .res-meta { font-size:11px; color:var(--ink-muted); margin-top:2px; font-family:'DM Mono',monospace; }
-.photo-mode-upload { background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:20px 24px; }
-.photo-mode-selected { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--paper); border:1.5px solid var(--border); border-radius:8px; margin-bottom:16px; }
-.photo-mode-selected .sel-name { font-size:14px; font-weight:600; color:var(--ink); }
-.photo-mode-selected .sel-meta { font-size:11px; color:var(--ink-muted); font-family:'DM Mono',monospace; }
-.photo-mode-selected .sel-change { margin-left:auto; font-size:12px; color:var(--accent); cursor:pointer; text-decoration:underline; }
+.photo-search-result { padding:10px 14px; border-radius:8px; border:1.5px solid #D4CEC6; background:#E4DDD3; cursor:pointer; transition:border-color 0.15s; }
+.photo-search-result:hover { border-color:#E8541A; }
+.photo-search-result .res-name { font-size:13px; font-weight:600; color:#1A1714; }
+.photo-search-result .res-meta { font-size:11px; color:#A09A94; margin-top:2px; font-family:'DM Mono',monospace; }
+.photo-mode-upload { background:#FFFFFF; border:1.5px solid #D4CEC6; border-radius:12px; padding:20px 24px; }
+.photo-mode-selected { display:flex; align-items:center; gap:12px; padding:12px 16px; background:#E4DDD3; border:1.5px solid #D4CEC6; border-radius:8px; margin-bottom:16px; }
+.photo-mode-selected .sel-name { font-size:14px; font-weight:600; color:#1A1714; }
+.photo-mode-selected .sel-meta { font-size:11px; color:#A09A94; font-family:'DM Mono',monospace; }
+.photo-mode-selected .sel-change { margin-left:auto; font-size:12px; color:#E8541A; cursor:pointer; text-decoration:underline; }
 
 
 /* ── Secondary category pills ── */
 .sec-group { display:flex; flex-direction:column; gap:6px; }
-.sec-group-label { font-family:'DM Mono',monospace; font-size:10px; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.06em; }
+.sec-group-label { font-family:'DM Mono',monospace; font-size:10px; color:#A09A94; text-transform:uppercase; letter-spacing:0.06em; }
 .sec-pills { display:flex; flex-wrap:wrap; gap:6px; }
 .sec-pill {
   display:inline-flex; align-items:center; gap:5px;
-  background:var(--paper); border:1.5px solid var(--border);
+  background:#E4DDD3; border:1.5px solid #D4CEC6;
   border-radius:8px; padding:7px 12px; cursor:pointer;
   font-size:13px; transition:all 0.12s; user-select:none;
 }
-.sec-pill:hover { border-color:var(--accent); }
+.sec-pill:hover { border-color:#E8541A; }
 .sec-pill.selected { background:#D8EDDF; border-color:#2D6A4F; color:#2D6A4F; font-weight:500; }
 .sec-pill .star-btn {
   display:none; background:none; border:none; cursor:pointer;
@@ -523,8 +523,8 @@ header {
 }
 
 /* ── Utility ── */
-.text-muted { color: var(--ink-muted); font-size: 12px; margin-top: 4px; }
-.divider { height: 1px; background: var(--border); margin: 16px 0; }
+.text-muted { color: #A09A94; font-size: 12px; margin-top: 4px; }
+.divider { height: 1px; background: #D4CEC6; margin: 16px 0; }
 
 /* ══ MOBILE RESPONSIVE ══════════════════════════════════════════ */
 @media (max-width: 600px) {
@@ -646,22 +646,22 @@ header {
 
 /* Recent locations list */
 .recent-section { margin-bottom: 12px; }
-.recent-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+.recent-label { font-family: 'DM Mono', monospace; font-size: 10px; color: #A09A94; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
 .recent-list { display: flex; flex-direction: column; gap: 4px; }
-.recent-item { padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--white); cursor: pointer; transition: border-color 0.15s; display: flex; justify-content: space-between; align-items: center; }
-.recent-item:hover { border-color: var(--accent); }
-.recent-item .ri-name { font-size: 13px; font-weight: 600; color: var(--ink); }
-.recent-item .ri-city { font-size: 11px; color: var(--ink-muted); font-family: 'DM Mono', monospace; }
+.recent-item { padding: 10px 14px; border-radius: 8px; border: 1.5px solid #D4CEC6; background: #FFFFFF; cursor: pointer; transition: border-color 0.15s; display: flex; justify-content: space-between; align-items: center; }
+.recent-item:hover { border-color: #E8541A; }
+.recent-item .ri-name { font-size: 13px; font-weight: 600; color: #1A1714; }
+.recent-item .ri-city { font-size: 11px; color: #A09A94; font-family: 'DM Mono', monospace; }
 
 /* Upload queue / retry */
-.pm-retry-btn { font-size: 11px; padding: 3px 8px; background: var(--accent); color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 3px; display: none; }
+.pm-retry-btn { font-size: 11px; padding: 3px 8px; background: #E8541A; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 3px; display: none; }
 .photo-status.error ~ .pm-retry-btn { display: inline-block; }
 
 /* Next location banner */
-.next-location-bar { display: none; background: var(--green-light); border: 1.5px solid #A7D7BB; border-radius: 10px; padding: 14px 18px; margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.next-location-bar { display: none; background: #D8EDDF; border: 1.5px solid #A7D7BB; border-radius: 10px; padding: 14px 18px; margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .next-location-bar.hidden { display: none !important; }
-.next-location-bar p { font-size: 13px; color: var(--green); font-weight: 500; }
-.next-location-bar button { background: var(--green); color: white; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.next-location-bar p { font-size: 13px; color: #2D6A4F; font-weight: 500; }
+.next-location-bar button { background: #2D6A4F; color: white; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; white-space: nowrap; }
 ```
 
   </style>
@@ -744,10 +744,10 @@ header {
 <div id="photo-mode-upload-panel" style="display:none;">
   <div class="photo-mode-upload">
     <div class="photo-mode-selected" id="photo-mode-selected"></div>
-    <p class="text-muted" style="margin-bottom:14px;">Resized to 1200×800 (display) + 400×267 (thumb). Pick a descriptor per photo — it becomes part of the SEO filename: <code style="font-family:'DM Mono',monospace;font-size:11px;background:var(--paper);padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.jpg</code></p>
+    <p class="text-muted" style="margin-bottom:14px;">Resized to 1200×800 (display) + 400×267 (thumb). Pick a descriptor per photo — it becomes part of the SEO filename: <code style="font-family:'DM Mono',monospace;font-size:11px;background:#E4DDD3;padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.jpg</code></p>
     <div class="photo-drop-zone" id="photo-mode-drop-zone" ondragover="event.preventDefault()" ondrop="handlePhotoModeFiles(event.dataTransfer.files)">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:var(--ink-muted);margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:6px;">Drag photos here or</p>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:#A09A94;margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      <p style="font-size:13px;color:#A09A94;margin-bottom:6px;">Drag photos here or</p>
       <label class="btn btn-secondary" style="cursor:pointer;font-size:13px;">
         Choose files
         <input type="file" id="photo-mode-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoModeFiles(this.files)" />
@@ -886,7 +886,7 @@ header {
     <div class="fields-grid">
 
       <div class="field full">
-        <label>Categories <span style="color:var(--ink-muted);font-weight:400;">(select all that apply)</span></label>
+        <label>Categories <span style="color:#A09A94;font-weight:400;">(select all that apply)</span></label>
         <div class="category-pills">
           <div class="cat-pill" onclick="toggleCatPill(this)">Active Play</div>
           <div class="cat-pill" onclick="toggleCatPill(this)">Animals &amp; Nature</div>
@@ -898,9 +898,9 @@ header {
       </div>
 
       <div class="field full" id="secondary-cat-field">
-        <label>Secondary Categories <span style="color:var(--accent);font-weight:500;">*</span> <span style="color:var(--ink-muted);font-weight:400;font-size:11px;">— select primaries above first; ★ = icon</span></label>
+        <label>Secondary Categories <span style="color:#E8541A;font-weight:500;">*</span> <span style="color:#A09A94;font-weight:400;font-size:11px;">— select primaries above first; ★ = icon</span></label>
         <div id="secondary-cat-pills" style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
-          <p style="font-size:12px;color:var(--ink-muted);font-style:italic;">Select a primary category above to see options.</p>
+          <p style="font-size:12px;color:#A09A94;font-style:italic;">Select a primary category above to see options.</p>
         </div>
       </div>
 
@@ -928,10 +928,10 @@ header {
         </div>
         <div class="reasoning-panel" id="reasoning-ages"></div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-          <input type="number" id="f-age-min" min="0" max="18" placeholder="0" style="width:70px;text-align:center;background:var(--paper);border:1.5px solid var(--border);border-radius:8px;padding:8px;font-size:13.5px;outline:none;" />
-          <span style="color:var(--ink-muted);font-size:13px;">to</span>
-          <input type="number" id="f-age-max" min="0" max="18" placeholder="12" style="width:70px;text-align:center;background:var(--paper);border:1.5px solid var(--border);border-radius:8px;padding:8px;font-size:13.5px;outline:none;" />
-          <span style="color:var(--ink-muted);font-size:13px;">years</span>
+          <input type="number" id="f-age-min" min="0" max="18" placeholder="0" style="width:70px;text-align:center;background:#E4DDD3;border:1.5px solid #D4CEC6;border-radius:8px;padding:8px;font-size:13.5px;outline:none;" />
+          <span style="color:#A09A94;font-size:13px;">to</span>
+          <input type="number" id="f-age-max" min="0" max="18" placeholder="12" style="width:70px;text-align:center;background:#E4DDD3;border:1.5px solid #D4CEC6;border-radius:8px;padding:8px;font-size:13.5px;outline:none;" />
+          <span style="color:#A09A94;font-size:13px;">years</span>
           <div class="check-pill" id="pill-all-ages" onclick="toggleAllAges(this)" style="margin-left:8px;">All Ages</div>
           <div class="check-pill" id="pill-no-max" onclick="toggleNoMax(this)" style="margin-left:4px;">No max (e.g. 4+)</div>
         </div>
@@ -997,7 +997,7 @@ header {
       </div>
       <div class="field full">
         <div class="field-with-info">
-          <label>Tips <span style="color:var(--ink-muted);font-weight:400;">(optional — practical advice worth highlighting)</span></label>
+          <label>Tips <span style="color:#A09A94;font-weight:400;">(optional — practical advice worth highlighting)</span></label>
           <span class="info-btn" onclick="toggleReasoning('reasoning-tips')" title="AI reasoning">?</span>
         </div>
         <textarea id="f-tips" placeholder="e.g. Book tickets in advance — they sell out fast." style="min-height:70px;"></textarea>
@@ -1017,11 +1017,11 @@ header {
     <span class="section-badge badge-manual">Upload</span>
   </div>
   <div class="section-body">
-    <p class="text-muted" style="margin-bottom:14px;">Upload up to 3 photos. Resized to 1200×800 (display) + 400×267 (thumb). Pick a descriptor per photo — it becomes part of the filename for SEO: <code style="font-family:'DM Mono',monospace;font-size:11px;background:var(--paper);padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.jpg</code></p>
+    <p class="text-muted" style="margin-bottom:14px;">Upload up to 3 photos. Resized to 1200×800 (display) + 400×267 (thumb). Pick a descriptor per photo — it becomes part of the filename for SEO: <code style="font-family:'DM Mono',monospace;font-size:11px;background:#E4DDD3;padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.jpg</code></p>
     <div id="photo-upload-area" style="display:none;">
       <div class="photo-drop-zone" id="photo-drop-zone" ondragover="event.preventDefault()" ondrop="handlePhotoDrop(event)">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:var(--ink-muted);margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:6px;">Drag photos here or</p>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:#A09A94;margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <p style="font-size:13px;color:#A09A94;margin-bottom:6px;">Drag photos here or</p>
         <label class="btn btn-secondary" style="cursor:pointer;font-size:13px;">
           Choose files
           <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoFiles(this.files)" />
@@ -1029,7 +1029,7 @@ header {
       </div>
       <div id="photo-previews" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;"></div>
     </div>
-    <p id="photo-no-place" style="font-size:13px;color:var(--ink-muted);">Look up a place first — photos are stored by Place ID.</p>
+    <p id="photo-no-place" style="font-size:13px;color:#A09A94;">Look up a place first — photos are stored by Place ID.</p>
   </div>
 </div>
 
@@ -1877,11 +1877,11 @@ function renderPhotoPreviews() {
         </div>
         <button class="remove-photo" onclick="removePhoto(${idx})">✕</button>
         <div class="photo-label" style="margin-top:6px;">
-          <select onchange="updateDescriptor(${idx}, this.value)" style="width:100%;font-size:11px;padding:3px 6px;background:var(--paper);border:1.5px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;">
+          <select onchange="updateDescriptor(${idx}, this.value)" style="width:100%;font-size:11px;padding:3px 6px;background:#E4DDD3;border:1.5px solid #D4CEC6;border-radius:6px;font-family:'DM Mono',monospace;">
             ${descriptorOpts}
           </select>
         </div>
-        <div class="photo-label" id="photo-filename-${idx}" style="font-size:9px;color:var(--ink-muted);word-break:break-all;margin-top:3px;">${filename}</div>
+        <div class="photo-label" id="photo-filename-${idx}" style="font-size:9px;color:#A09A94;word-break:break-all;margin-top:3px;">${filename}</div>
         <div class="photo-status" id="photo-status-${idx}">Ready</div>
       `;
     };
@@ -2041,7 +2041,7 @@ function renderRecentList() {
         <div class="ri-name">${r.name}</div>
         <div class="ri-city">${r.city || '—'}</div>
       </div>
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="#A09A94" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
   `).join('');
 }
@@ -2064,7 +2064,7 @@ async function searchLocations(query) {
   if (query.length < 2) { resultsEl.innerHTML = ''; return; }
   const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
   if (!supabaseUrl || !supabaseKey) {
-    resultsEl.innerHTML = '<p style="font-size:12px;color:var(--ink-muted);padding:8px;">Enter Supabase config above first.</p>';
+    resultsEl.innerHTML = '<p style="font-size:12px;color:#A09A94;padding:8px;">Enter Supabase config above first.</p>';
     return;
   }
   try {
@@ -2074,7 +2074,7 @@ async function searchLocations(query) {
     );
     const rows = await res.json();
     if (!rows.length) {
-      resultsEl.innerHTML = '<p style="font-size:12px;color:var(--ink-muted);padding:8px;">No matches found.</p>';
+      resultsEl.innerHTML = '<p style="font-size:12px;color:#A09A94;padding:8px;">No matches found.</p>';
       return;
     }
     resultsEl.innerHTML = rows.map(r => `
@@ -2161,16 +2161,16 @@ function renderPhotoModePreviews() {
 
       card.innerHTML = `
         <div class="photo-preview-wrap" style="display:block;position:relative;">
-          <img src="${ev.target.result}" alt="preview" style="width:100%;height:auto;border-radius:8px;border:1.5px solid var(--border);display:block;" />
+          <img src="${ev.target.result}" alt="preview" style="width:100%;height:auto;border-radius:8px;border:1.5px solid #D4CEC6;display:block;" />
           <div class="ratio-overlay"></div>
           <button class="remove-photo" onclick="removePhotoMode(${idx})" style="position:absolute;top:-6px;right:-6px;">✕</button>
         </div>
         <div class="photo-label" style="margin-top:8px;">
-          <select onchange="updatePhotoModeDescriptor(${idx}, this.value)" class="pm-descriptor-select" style="width:100%;font-size:13px;padding:8px 10px;background:var(--paper);border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;">
+          <select onchange="updatePhotoModeDescriptor(${idx}, this.value)" class="pm-descriptor-select" style="width:100%;font-size:13px;padding:8px 10px;background:#E4DDD3;border:1.5px solid #D4CEC6;border-radius:6px;font-family:'DM Sans',sans-serif;">
             ${descriptorOpts}
           </select>
         </div>
-        <div class="photo-label" id="pm-filename-${idx}" style="font-size:10px;color:var(--ink-muted);word-break:break-all;margin-top:4px;">${filename}</div>
+        <div class="photo-label" id="pm-filename-${idx}" style="font-size:10px;color:#A09A94;word-break:break-all;margin-top:4px;">${filename}</div>
         <div class="photo-status" id="pm-status-${idx}">Ready</div>
         <button class="pm-retry-btn" id="pm-retry-${idx}" onclick="retryUpload(${idx})">↺ Retry</button>
       `;
@@ -2279,7 +2279,7 @@ function renderSecondaryPills() {
   const selectedPrimaries = getSelectedCategories();
 
   if (!selectedPrimaries.length) {
-    container.innerHTML = '<p style="font-size:12px;color:var(--ink-muted);font-style:italic;">Select a primary category above to see options.</p>';
+    container.innerHTML = '<p style="font-size:12px;color:#A09A94;font-style:italic;">Select a primary category above to see options.</p>';
     return;
   }
 
