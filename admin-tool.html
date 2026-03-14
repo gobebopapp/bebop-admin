@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#1A1714" />
+  <meta name="theme-color" content="#4daabb" />
   <title>bebop — add location</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -20,7 +20,7 @@ html {
   --ink: #1A1714;
   --ink-soft: #6B6560;
   --ink-muted: #A09A94;
-  --accent: #E8541A;
+  --accent: #4daabb;
   --accent-light: #FBE8DF;
   --green: #2D6A4F;
   --green-light: #D8EDDF;
@@ -63,7 +63,7 @@ header {
 }
 
 .logo span {
-  color: #E8541A;
+  color: #4daabb;
   font-style: italic;
 }
 
@@ -137,7 +137,7 @@ header {
   transition: border-color 0.15s;
 }
 
-.lookup-bar input:focus { border-color: #E8541A; }
+.lookup-bar input:focus { border-color: #4daabb; }
 .lookup-bar input::placeholder { color: #A09A94; }
 
 /* ── Buttons ── */
@@ -157,10 +157,10 @@ header {
 }
 
 .btn-primary {
-  background: #E8541A;
+  background: #4daabb;
   color: white;
 }
-.btn-primary:hover { background: #C9430E; transform: translateY(-1px); }
+.btn-primary:hover { background: #3a9aaa; transform: translateY(-1px); }
 .btn-primary:active { transform: translateY(0); }
 .btn-primary:disabled { background: #A09A94; cursor: not-allowed; transform: none; }
 
@@ -199,7 +199,7 @@ header {
 .spinner {
   width: 16px; height: 16px;
   border: 2px solid #D4CEC6;
-  border-top-color: #E8541A;
+  border-top-color: #4daabb;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   flex-shrink: 0;
@@ -253,7 +253,7 @@ header {
   letter-spacing: 0.04em;
 }
 .badge-auto { background: #D8EDDF; color: #2D6A4F; }
-.badge-manual { background: #FBE8DF; color: #E8541A; }
+.badge-manual { background: #FBE8DF; color: #4daabb; }
 
 .section-body { padding: 24px; }
 
@@ -296,7 +296,7 @@ header {
 
 .field input:focus,
 .field select:focus,
-.field textarea:focus { border-color: #E8541A; }
+.field textarea:focus { border-color: #4daabb; }
 
 .field input[readonly] {
   color: #6B6560;
@@ -331,7 +331,7 @@ header {
   transition: all 0.12s;
   user-select: none;
 }
-.check-pill:hover { border-color: #E8541A; }
+.check-pill:hover { border-color: #4daabb; }
 .check-pill input[type="checkbox"] { display: none; }
 .check-pill.checked { background: #D8EDDF; border-color: #2D6A4F; color: #2D6A4F; font-weight: 500; }
 .check-pill.checked::before { content: '✓ '; }
@@ -441,10 +441,10 @@ header {
 .hours-row { display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: center; }
 .hours-day { font-family: 'DM Mono', 'Courier New', monospace; font-size: 12px; color: #6B6560; }
 .hours-input { background: #E4DDD3; border: 1.5px solid #D4CEC6; border-radius: 8px; padding: 7px 12px; font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #1A1714; outline: none; transition: border-color 0.15s; }
-.hours-input:focus { border-color: #E8541A; }
+.hours-input:focus { border-color: #4daabb; }
 /* ── AI Enrich button ── */
-.btn-enrich { background: #3D5A80; color: #FFFFFF; font-size: 13px; padding: 8px 16px; }
-.btn-enrich:hover { background: #2c4460; }
+.btn-enrich { background: #4daabb; color: #FFFFFF; font-size: 13px; padding: 8px 16px; }
+.btn-enrich:hover { background: #3a9aaa; }
 .btn-enrich:disabled { background: #A09A94; cursor: not-allowed; }
 
 /* ── Reasoning tooltip ── */
@@ -468,7 +468,7 @@ header {
 
 /* ── Photo upload ── */
 .photo-drop-zone { border: 2px dashed #D4CEC6; border-radius: 10px; padding: 28px; text-align: center; background: #E4DDD3; transition: border-color 0.15s; cursor: pointer; }
-.photo-drop-zone:hover { border-color: #E8541A; }
+.photo-drop-zone:hover { border-color: #4daabb; }
 .photo-preview-card { position:relative; width:160px; }
 .photo-preview-card img { width:160px; height:auto; border-radius:8px; border:1.5px solid #D4CEC6; display:block; }
 .photo-preview-card .remove-photo { position:absolute; top:6px; right:6px; width:24px; height:24px; background:rgba(0,0,0,0.55); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; border:none; backdrop-filter:blur(2px); }
@@ -481,23 +481,23 @@ header {
 
 /* ── Mode toggle ── */
 .mode-toggle { display:flex; gap:0; margin-bottom:28px; margin-top:8px; border:2px solid #D4CEC6; border-radius:12px; overflow:hidden; width:100%; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-.mode-btn { flex:1; padding:12px 24px; font-size:14px; font-family:'DM Sans',sans-serif; font-weight:500; background:#E4DDD3; color:#1A1714; border:none; cursor:pointer; transition:all 0.18s; letter-spacing:-0.1px; }
+.mode-btn { flex:1; padding:12px 16px; font-size:13.5px; font-family:'DM Sans',sans-serif; font-weight:500; background:#E4DDD3; color:#1A1714; border:none; border-right:2px solid #D4CEC6; cursor:pointer; transition:all 0.18s; letter-spacing:-0.1px; white-space:nowrap; }
+.mode-btn:last-child { border-right:none; }
 .mode-btn:hover:not(.active) { background:#D4CEC6; color:#1A1714; }
-.mode-btn.active { background:#E8541A; color:white; font-weight:600; }
-.mode-btn:first-child { border-right:2px solid #D4CEC6; }
+.mode-btn.active { background:#4daabb; color:white; font-weight:600; }
 
 /* ── Photo-mode search ── */
 .photo-search-bar { background:#FFFFFF; border:1.5px solid #D4CEC6; border-radius:12px; padding:20px 24px; margin-bottom:16px; }
 .photo-search-results { display:flex; flex-direction:column; gap:6px; margin-top:10px; max-height:240px; overflow-y:auto; }
 .photo-search-result { padding:10px 14px; border-radius:8px; border:1.5px solid #D4CEC6; background:#E4DDD3; cursor:pointer; transition:border-color 0.15s; }
-.photo-search-result:hover { border-color:#E8541A; }
+.photo-search-result:hover { border-color:#4daabb; }
 .photo-search-result .res-name { font-size:13px; font-weight:600; color:#1A1714; }
 .photo-search-result .res-meta { font-size:11px; color:#A09A94; margin-top:2px; font-family:'DM Mono',monospace; }
 .photo-mode-upload { background:#FFFFFF; border:1.5px solid #D4CEC6; border-radius:12px; padding:20px 24px; }
 .photo-mode-selected { display:flex; align-items:center; gap:12px; padding:12px 16px; background:#E4DDD3; border:1.5px solid #D4CEC6; border-radius:8px; margin-bottom:16px; }
 .photo-mode-selected .sel-name { font-size:14px; font-weight:600; color:#1A1714; }
 .photo-mode-selected .sel-meta { font-size:11px; color:#A09A94; font-family:'DM Mono',monospace; }
-.photo-mode-selected .sel-change { margin-left:auto; font-size:12px; color:#E8541A; cursor:pointer; text-decoration:underline; }
+.photo-mode-selected .sel-change { margin-left:auto; font-size:12px; color:#4daabb; cursor:pointer; text-decoration:underline; }
 
 
 /* ── Secondary category pills ── */
@@ -510,7 +510,7 @@ header {
   border-radius:8px; padding:7px 12px; cursor:pointer;
   font-size:13px; transition:all 0.12s; user-select:none;
 }
-.sec-pill:hover { border-color:#E8541A; }
+.sec-pill:hover { border-color:#4daabb; }
 .sec-pill.selected { background:#D8EDDF; border-color:#2D6A4F; color:#2D6A4F; font-weight:500; }
 .sec-pill .star-btn {
   display:none; background:none; border:none; cursor:pointer;
@@ -518,7 +518,7 @@ header {
 }
 .sec-pill.selected .star-btn { display:inline; }
 .sec-pill.is-lead { background:#D8EDDF; border-color:#2D6A4F; border-width:2px; }
-.sec-pill.is-lead .star-btn { color: #E8541A; }
+.sec-pill.is-lead .star-btn { color: #4daabb; }
 @media (max-width:600px) {
   .sec-pill { padding:10px 12px; font-size:14px; }
 }
@@ -536,8 +536,9 @@ header {
   .page-sub { font-size: 13px; margin-bottom: 24px; }
 
   /* Mode toggle — full width on mobile */
-  .mode-toggle { width: 100%; }
-  .mode-btn { flex: 1; padding: 13px 12px; font-size: 13px; justify-content: center; }
+  .mode-toggle { width: 100%; flex-wrap: wrap; border-radius: 12px; }
+  .mode-btn { flex: 1; min-width: 30%; padding: 12px 8px; font-size: 12px; text-align: center; justify-content: center; }
+  .mode-btn:nth-child(3) { border-right: none; }
 
   /* Lookup bar — stack vertically */
   .lookup-bar { flex-direction: column; padding: 16px; gap: 10px; }
@@ -650,12 +651,12 @@ header {
 .recent-label { font-family: 'DM Mono', monospace; font-size: 10px; color: #A09A94; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
 .recent-list { display: flex; flex-direction: column; gap: 4px; }
 .recent-item { padding: 10px 14px; border-radius: 8px; border: 1.5px solid #D4CEC6; background: #FFFFFF; cursor: pointer; transition: border-color 0.15s; display: flex; justify-content: space-between; align-items: center; }
-.recent-item:hover { border-color: #E8541A; }
+.recent-item:hover { border-color: #4daabb; }
 .recent-item .ri-name { font-size: 13px; font-weight: 600; color: #1A1714; }
 .recent-item .ri-city { font-size: 11px; color: #A09A94; font-family: 'DM Mono', monospace; }
 
 /* Upload queue / retry */
-.pm-retry-btn { font-size: 11px; padding: 3px 8px; background: #E8541A; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 3px; display: none; }
+.pm-retry-btn { font-size: 11px; padding: 3px 8px; background: #4daabb; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 3px; display: none; }
 .photo-status.error ~ .pm-retry-btn { display: inline-block; }
 
 /* Next location banner */
@@ -711,9 +712,9 @@ header {
   <!-- Mode toggle -->
 
   <div class="mode-toggle">
-    <button class="mode-btn active" id="mode-add" onclick="setMode('add')">＋ Add Location</button>
+    <button class="mode-btn active" id="mode-add" onclick="setMode('add')">📍 Add Location</button>
     <button class="mode-btn" id="mode-photos" onclick="setMode('photos')">📷 Add Photos</button>
-    <button class="mode-btn" id="mode-recs" onclick="setMode('recs')">⭐ Recommendations</button>
+    <button class="mode-btn" id="mode-recs" onclick="setMode('recs')">⭐ Recs</button>
   </div>
 
   <!-- Add Location mode -->
@@ -981,7 +982,7 @@ header {
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <button class="btn btn-enrich" id="enrich-btn" onclick="enrichWithAI()">✦ AI Enrich</button>
-      <button class="btn btn-enrich" id="describe-btn" onclick="describeWithAI()" style="background:#5c7a9e;">✦ Write Description</button>
+      <button class="btn btn-enrich" id="describe-btn" onclick="describeWithAI()" style="background:#3a9aaa;">✦ Write Description</button>
       <span class="section-badge badge-auto" id="enrich-badge" style="display:none;">AI filled</span>
     </div>
   </div>
@@ -1001,7 +1002,7 @@ header {
       </div>
 
       <div class="field full" id="secondary-cat-field">
-        <label>Secondary Categories <span style="color:#E8541A;font-weight:500;">*</span> <span style="color:#A09A94;font-weight:400;font-size:11px;">— select primaries above first; ★ = icon</span></label>
+        <label>Secondary Categories <span style="color:#4daabb;font-weight:500;">*</span> <span style="color:#A09A94;font-weight:400;font-size:11px;">— select primaries above first; ★ = icon</span></label>
         <div id="secondary-cat-pills" style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
           <p style="font-size:12px;color:#A09A94;font-style:italic;">Select a primary category above to see options.</p>
         </div>
@@ -1671,10 +1672,10 @@ Return ONLY a valid JSON object with these exact keys:
   "secondary_categories": [],  // array, pick 1-3 that apply from: ["Playground", "Indoor Playground", "Trampoline Park", "Skatepark", "Sports Field", "Swimming Pool", "Paddling Pool", "Water Park", "Climbing Centre", "Minigolf", "Bowling", "Ice Skating", "Cycling Track", "Nature Playground", "Adventure Park",  "Sensory Play Space", "Baby Spa", "Zoo", "Children's Farm", "Pick-Your-Own Farm", "Aquarium", "Butterfly House", "Wildlife Park", "Botanical Garden", "Nature Reserve", "Hiking Trail", "Gnome Trail", "Barefoot Path", "Pony Rides", "Theme Park", "Amusement Park", "Role-Play Village", "Immersive Experience", "Interactive Store", "Cinema", "Theater", "Puppet Show", "Planetarium", "Ferris Wheel / Observation Tower", "Boat Trip", "Train Ride", "Plane Spotting", "Children's Museum", "Natural History Museum", "Science Museum", "Space Museum", "History Museum", "Art Museum", "Culture Museum", "Maritime Museum", "Railway Museum", "Aviation Museum", "Open Air Museum", "Film Museum", "Music Museum", "Library", "Bookshop", "Swimming Lessons", "Gymnastics Classes", "Dance Classes", "Martial Arts", "Music Lessons", "Art Classes", "Drama Classes", "Cooking Classes", "Yoga / Mindfulness", "Coding Classes", "Language Classes", "Sports Coaching", "Sensory Classes",  "Horse Riding", "Playgroup", "Kids Cafe", "Pancake House", "Restaurant", "Cafe", "Ice Cream Shop", "Bakery"]
   "secondary_category_lead": null, // string, the single most defining secondary — must be one of secondary_categories
   "indoor_outdoor": "",     // "Indoor", "Outdoor", or "Mixed" — null if unsure
-  "ideal_age_min": null,    // youngest suitable age in years (integer), null if truly all ages
+  "ideal_age_min": null,    // youngest suitable age in years (integer), null if truly all ages. Age ranges are INCLUSIVE — a place with min age 2 should have age_baby: true.
   "ideal_age_max": null,    // oldest suitable age in years (integer), null if truly all ages
   "all_ages": false,        // true ONLY if genuinely suitable for all ages with no upper limit
-  "age_baby": null,         // true/false — suitable for 0-2 year olds
+  "age_baby": null,         // true/false — suitable for 0-2 year olds (inclusive — select true if min age is 2 or under)
   "age_preschooler": null,  // true/false — suitable for 3-6 year olds
   "age_bigkid": null,       // true/false — suitable for 7-12 year olds
   "cost": null,             // "Free" if no entry fee, or e.g. "€12.50 adults, Free under 3" if paid. null only if genuinely unknown.
@@ -2374,7 +2375,7 @@ async function uploadPhotoMode() {
 // ─── Secondary category taxonomy ─────────────────────────────────────────────
 
 const SECONDARY_TAXONOMY = {
-  "Active Play": ["Playground","Indoor Playground","Trampoline Park","Skatepark","Sports Field","Swimming Pool","Paddling Pool","Water Park","Climbing Centre","Minigolf","Bowling","Ice Skating","Cycling Track","Nature Playground","Adventure Park","Sensory Play Space","Baby Spa","Construction Playground","Construction Playground"],
+  "Active Play": ["Playground","Indoor Playground","Trampoline Park","Skatepark","Sports Field","Swimming Pool","Paddling Pool","Water Park","Climbing Centre","Minigolf","Bowling","Ice Skating","Cycling Track","Nature Playground","Adventure Park","Sensory Play Space","Baby Spa","Construction Playground"],
   "Animals & Nature": ["Zoo","Children's Farm","Pick-Your-Own Farm","Aquarium","Butterfly House","Wildlife Park","Botanical Garden","Nature Reserve","Hiking Trail","Gnome Trail","Barefoot Path","Pony Rides"],
   "Amusements & Attractions": ["Theme Park","Amusement Park","Role-Play Village","Immersive Experience","Interactive Store","Cinema","Theater","Puppet Show","Planetarium","Ferris Wheel / Observation Tower","Boat Trip","Train Ride","Plane Spotting"],
   "Culture & Learning": ["Children's Museum","Natural History Museum","Science Museum","Space Museum","History Museum","Art Museum","Culture Museum","Maritime Museum","Railway Museum","Aviation Museum","Open Air Museum","Film Museum","Music Museum","Library","Bookshop","Concert Hall","Historic Site"],
@@ -2622,7 +2623,7 @@ Do ONE web search to learn more about this place, then write:
 Return ONLY valid JSON — no preamble, start with { end with }:
 {
   "headline": "",   // punchy 6-10 word reason to visit. Not the place name. E.g. "Amsterdam's best rainy day escape" or "Where toddlers rule the sandbox"
-  "body": ""        // 2-4 sentences. Warm, specific, written for parents. What makes it special this week. Reference the editor's notes if provided. Plain text only, no markdown.
+  "body": ""        // 2-4 sentences. Warm, specific, written for parents. What makes it special this week. Reference the editor's notes if provided. Plain text only — absolutely no HTML, no markdown, no <cite> tags, no markup of any kind.
 }`;
 
   try {
@@ -2652,8 +2653,9 @@ Return ONLY valid JSON — no preamble, start with { end with }:
     if (first === -1 || last === -1) throw new Error('No JSON in response. Try again.');
     const result = JSON.parse(text.slice(first, last + 1));
 
-    if (result.headline) document.getElementById('rec-headline').value = result.headline;
-    if (result.body)     document.getElementById('rec-body').value     = result.body;
+    const stripCite = s => s ? s.replace(/<cite[^>]*>|<\/cite>/gi, '').replace(/\s+/g, ' ').trim() : s;
+    if (result.headline) document.getElementById('rec-headline').value = stripCite(result.headline);
+    if (result.body)     document.getElementById('rec-body').value     = stripCite(result.body);
 
   } catch(err) {
     alert('Generation failed: ' + err.message);
@@ -2757,7 +2759,7 @@ async function loadRecommendations() {
         ? '<span style="background:#D8EDDF;color:#2D6A4F;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">● Live</span>'
         : isPast
           ? '<span style="background:#F0EBE3;color:#A09A94;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Past</span>'
-          : '<span style="background:#FBE8DF;color:#E8541A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Scheduled</span>';
+          : '<span style="background:#FBE8DF;color:#4daabb;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Scheduled</span>';
 
       return `
         <div style="padding:16px 24px;border-bottom:1px solid #E8E3DC;display:flex;gap:16px;align-items:flex-start;">
@@ -2768,7 +2770,7 @@ async function loadRecommendations() {
               <span style="font-size:11px;color:#A09A94;">${loc.city || ''}</span>
               ${statusBadge}
             </div>
-            ${r.headline ? `<div style="font-size:12px;color:#E8541A;font-weight:500;margin-bottom:4px;">${r.headline}</div>` : ''}
+            ${r.headline ? `<div style="font-size:12px;color:#4daabb;font-weight:500;margin-bottom:4px;">${r.headline}</div>` : ''}
             <div style="font-size:12px;color:#6B6560;line-height:1.5;">${r.body}</div>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0;">
