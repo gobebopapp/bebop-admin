@@ -31,7 +31,7 @@ html {
 }
 
 body {
-  background: #EDE8DF;
+  background: #F7F3ED;
   color: #1A1714;
   font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
   font-size: 14px;
@@ -41,8 +41,9 @@ body {
 
 /* ── Header ── */
 header {
-  background: #1A1714;
-  color: #EDE8DF;
+  background: #FFFFFF;
+  color: #1A1714;
+  border-bottom: 1px solid #E8E3DC;
   padding: 0 40px;
   display: flex;
   align-items: center;
@@ -58,7 +59,7 @@ header {
   font-size: 22px;
   font-weight: 300;
   letter-spacing: -0.02em;
-  color: #EDE8DF;
+  color: #1A1714;
 }
 
 .logo span {
@@ -69,7 +70,7 @@ header {
 .header-tag {
   font-family: 'DM Mono', 'Courier New', monospace;
   font-size: 11px;
-  color: #A09A94;
+  color: #6B6560;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -281,8 +282,8 @@ header {
 .field input,
 .field select,
 .field textarea {
-  background: #E4DDD3;
-  border: 1.5px solid #D4CEC6;
+  background: #F0EBE3;
+  border: 1.5px solid #DDD7CF;
   border-radius: 8px;
   padding: 9px 13px;
   font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
@@ -389,7 +390,7 @@ header {
   gap: 8px;
   font-family: 'DM Mono', 'Courier New', monospace;
   font-size: 11px;
-  color: #A09A94;
+  color: #6B6560;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
@@ -442,8 +443,8 @@ header {
 .hours-input { background: #E4DDD3; border: 1.5px solid #D4CEC6; border-radius: 8px; padding: 7px 12px; font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #1A1714; outline: none; transition: border-color 0.15s; }
 .hours-input:focus { border-color: #E8541A; }
 /* ── AI Enrich button ── */
-.btn-enrich { background: #1A1714; color: #EDE8DF; font-size: 13px; padding: 8px 16px; }
-.btn-enrich:hover { background: #3a3530; }
+.btn-enrich { background: #3D5A80; color: #FFFFFF; font-size: 13px; padding: 8px 16px; }
+.btn-enrich:hover { background: #2c4460; }
 .btn-enrich:disabled { background: #A09A94; cursor: not-allowed; }
 
 /* ── Reasoning tooltip ── */
@@ -451,7 +452,7 @@ header {
 .info-btn:hover { background:#1A1714; color:#EDE8DF; border-color:#1A1714; }
 .field-with-info { display:flex; align-items:center; gap:0; }
 .field-with-info label { flex:1; }
-.reasoning-panel { display:none; background:#1A1714; color:#c8c0b8; border-radius:8px; padding:10px 14px; font-size:12px; line-height:1.6; margin-top:6px; font-family:'DM Mono',monospace; }
+.reasoning-panel { display:none; background:#EEF2F7; color:#3D5A80; border-radius:8px; padding:10px 14px; font-size:12px; line-height:1.6; margin-top:6px; font-family:'DM Mono',monospace; }
 .reasoning-panel.visible { display:block; }
 .confidence-high { color:#6ee7b7; }
 .confidence-med  { color:#fcd34d; }
@@ -669,7 +670,7 @@ header {
 <body>
 
 <header>
-  <div class="logo">be<span>bop</span></div>
+  <img src="https://gobebop.app/gobebop-logo.png" alt="GoBebop" style="height:32px;" />
   <div class="header-tag">Location Admin</div>
 </header>
 
@@ -878,7 +879,7 @@ header {
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <button class="btn btn-enrich" id="enrich-btn" onclick="enrichWithAI()">✦ AI Enrich</button>
-      <button class="btn btn-enrich" id="describe-btn" onclick="describeWithAI()" style="background:#4a5568;">✦ Write Description</button>
+      <button class="btn btn-enrich" id="describe-btn" onclick="describeWithAI()" style="background:#5c7a9e;">✦ Write Description</button>
       <span class="section-badge badge-auto" id="enrich-badge" style="display:none;">AI filled</span>
     </div>
   </div>
