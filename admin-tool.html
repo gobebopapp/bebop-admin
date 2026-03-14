@@ -713,6 +713,7 @@ header {
   <div class="mode-toggle">
     <button class="mode-btn active" id="mode-add" onclick="setMode('add')">＋ Add Location</button>
     <button class="mode-btn" id="mode-photos" onclick="setMode('photos')">📷 Add Photos</button>
+    <button class="mode-btn" id="mode-recs" onclick="setMode('recs')">⭐ Recommendations</button>
   </div>
 
   <!-- Add Location mode -->
@@ -764,6 +765,107 @@ header {
     <div class="next-location-bar hidden" id="next-location-bar">
       <p>✓ Photos uploaded! Ready for next location?</p>
       <button onclick="startNextLocation()">Next location →</button>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- Recommendations mode -->
+
+  <div id="recs-mode-ui" style="display:none;">
+    <div class="page-title">Recommendations</div>
+    <p class="page-sub">Schedule weekly GoBebop picks. Search a location, add your notes, generate with AI, then publish.</p>
+
+```
+<!-- New recommendation form -->
+<div class="form-section" id="rec-form-section">
+  <div class="section-header">
+    <div class="section-title">✦ New recommendation</div>
+  </div>
+  <div class="section-body">
+
+    <!-- Location search -->
+    <div class="field" style="margin-bottom:16px;">
+      <label>Location</label>
+      <input type="text" id="rec-search-input" placeholder="Start typing a name…" oninput="recSearchLocations(this.value)" autocomplete="off" style="font-size:16px;" />
+      <div class="photo-search-results" id="rec-search-results"></div>
+    </div>
+
+    <!-- Selected location chip -->
+    <div id="rec-selected" style="display:none;margin-bottom:16px;">
+      <div class="photo-mode-selected">
+        <div>
+          <div class="sel-name" id="rec-sel-name"></div>
+          <div class="sel-meta" id="rec-sel-meta"></div>
+        </div>
+        <span class="sel-change" onclick="recClearLocation()">Change</span>
+      </div>
+    </div>
+
+    <!-- Existing description (read-only reference) -->
+    <div id="rec-existing-desc-wrap" style="display:none;margin-bottom:16px;">
+      <label class="field"><span style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.07em;color:#6B6560;">Current description</span></label>
+      <div id="rec-existing-desc" style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:10px 14px;font-size:13px;color:#6B6560;line-height:1.6;margin-top:6px;"></div>
+    </div>
+
+    <!-- Your notes -->
+    <div class="field" style="margin-bottom:16px;">
+      <label>Your notes <span style="font-weight:400;color:#A09A94;">(key takeaways, opinions — AI will use these)</span></label>
+      <textarea id="rec-notes" placeholder="e.g. Great for rainy days. Staff are really friendly. The climbing frame is huge. Best for ages 3-8." style="min-height:80px;"></textarea>
+    </div>
+
+    <!-- Generate button -->
+    <div style="margin-bottom:16px;">
+      <button class="btn btn-enrich" id="rec-generate-btn" onclick="generateRecommendation()">✦ Generate with AI</button>
+    </div>
+
+    <!-- Generated output -->
+    <div class="fields-grid" style="margin-bottom:16px;">
+      <div class="field full">
+        <label>Headline</label>
+        <input type="text" id="rec-headline" placeholder="e.g. Amsterdam's best rainy day escape" />
+      </div>
+      <div class="field full">
+        <label>Recommendation text</label>
+        <textarea id="rec-body" placeholder="The recommendation blurb shown to users…" style="min-height:100px;"></textarea>
+      </div>
+    </div>
+
+    <!-- Publish date + active -->
+    <div class="fields-grid" style="margin-bottom:20px;">
+      <div class="field">
+        <label>Publish date</label>
+        <input type="date" id="rec-publish-date" />
+      </div>
+      <div class="field" style="justify-content:flex-end;padding-top:22px;">
+        <label class="check-pill" id="rec-active-pill" onclick="toggleRecActive()">
+          <input type="checkbox" id="rec-active" />
+          Active
+        </label>
+      </div>
+    </div>
+
+    <div class="actions-bar">
+      <button class="btn btn-save" onclick="saveRecommendation()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 4l3.5-3.5L10 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Save Recommendation
+      </button>
+    </div>
+    <div id="rec-status" style="margin-top:12px;font-size:13px;font-family:'DM Mono',monospace;"></div>
+  </div>
+</div>
+
+<!-- Scheduled recommendations list -->
+<div class="form-section" style="margin-top:24px;">
+  <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
+    <div class="section-title">📅 Scheduled</div>
+    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadRecommendations()">↺ Refresh</button>
+  </div>
+  <div class="section-body" style="padding:0;">
+    <div id="rec-list">
+      <div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Load your scheduled recommendations above.</div>
     </div>
   </div>
 </div>
@@ -1994,23 +2096,32 @@ async function supabaseUpload(url, key, path, blob) {
 // ─── Mode toggle ─────────────────────────────────────────────────────────────
 
 function setMode(mode) {
-  const isAdd = mode === 'add';
+  const isAdd   = mode === 'add';
+  const isPhoto = mode === 'photos';
+  const isRecs  = mode === 'recs';
+
   document.getElementById('mode-add').classList.toggle('active', isAdd);
-  document.getElementById('mode-photos').classList.toggle('active', !isAdd);
-  document.getElementById('add-mode-ui').style.display    = isAdd ? '' : 'none';
-  document.getElementById('photo-mode-ui').style.display  = isAdd ? 'none' : '';
-  document.getElementById('lookup-bar-wrap').style.display = isAdd ? '' : 'none';
-  document.getElementById('location-form').style.display  = isAdd ? '' : 'none';
+  document.getElementById('mode-photos').classList.toggle('active', isPhoto);
+  document.getElementById('mode-recs').classList.toggle('active', isRecs);
+
+  document.getElementById('add-mode-ui').style.display    = isAdd   ? '' : 'none';
+  document.getElementById('photo-mode-ui').style.display  = isPhoto ? '' : 'none';
+  document.getElementById('recs-mode-ui').style.display   = isRecs  ? '' : 'none';
+  document.getElementById('lookup-bar-wrap').style.display = isAdd  ? '' : 'none';
+  document.getElementById('location-form').style.display  = isAdd   ? '' : 'none';
   document.getElementById('status').style.display = 'none';
   document.getElementById('status').textContent = '';
-  if (!isAdd) {
-    // reset photo mode state
+
+  if (isPhoto) {
     photoModeQueue.length = 0;
     photoModeRecord = null;
     document.getElementById('photo-search-input').value = '';
     document.getElementById('photo-search-results').innerHTML = '';
     document.getElementById('photo-mode-upload-panel').style.display = 'none';
     document.getElementById('photo-mode-previews').innerHTML = '';
+  }
+  if (isRecs) {
+    loadRecommendations();
   }
 }
 
@@ -2426,6 +2537,276 @@ async function saveToSupabase() {
 document.getElementById('maps-url').addEventListener('keydown', e => {
   if (e.key === 'Enter') lookupPlace();
 });
+
+
+// ─── Recommendations ──────────────────────────────────────────────────────────
+
+let recRecord = null; // currently selected location for recommendation
+
+function recSearchLocations(query) {
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  const resultsEl = document.getElementById('rec-search-results');
+  if (query.length < 2) { resultsEl.innerHTML = ''; return; }
+  if (!supabaseUrl || !supabaseKey) return;
+
+  fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?select=id,name,city,description&name=ilike.*${encodeURIComponent(query)}*&limit=8`, {
+    headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+  })
+  .then(r => r.json())
+  .then(rows => {
+    if (!Array.isArray(rows) || !rows.length) {
+      resultsEl.innerHTML = '<div style="padding:10px 14px;font-size:13px;color:#A09A94;">No results</div>';
+      return;
+    }
+    resultsEl.innerHTML = rows.map(r => `
+      <div class="photo-search-result" onclick="recSelectLocation(${JSON.stringify(r).replace(/"/g, '&quot;')})">
+        <div class="res-name">${r.name}</div>
+        <div class="res-meta">${r.city || ''}</div>
+      </div>
+    `).join('');
+  })
+  .catch(() => {});
+}
+
+function recSelectLocation(loc) {
+  recRecord = loc;
+  document.getElementById('rec-search-input').value = '';
+  document.getElementById('rec-search-results').innerHTML = '';
+  document.getElementById('rec-sel-name').textContent = loc.name;
+  document.getElementById('rec-sel-meta').textContent = loc.city || loc.id;
+  document.getElementById('rec-selected').style.display = '';
+
+  if (loc.description) {
+    document.getElementById('rec-existing-desc').textContent = loc.description;
+    document.getElementById('rec-existing-desc-wrap').style.display = '';
+  } else {
+    document.getElementById('rec-existing-desc-wrap').style.display = 'none';
+  }
+}
+
+function recClearLocation() {
+  recRecord = null;
+  document.getElementById('rec-selected').style.display = 'none';
+  document.getElementById('rec-existing-desc-wrap').style.display = 'none';
+  document.getElementById('rec-search-input').value = '';
+}
+
+function toggleRecActive() {
+  const cb = document.getElementById('rec-active');
+  const pill = document.getElementById('rec-active-pill');
+  cb.checked = !cb.checked;
+  pill.classList.toggle('checked', cb.checked);
+}
+
+async function generateRecommendation() {
+  const { anthropicKey } = getConfig();
+  if (!anthropicKey) return alert('Please enter your Anthropic API key in the config panel.');
+  if (!recRecord) return alert('Please select a location first.');
+
+  const notes = document.getElementById('rec-notes').value.trim();
+  const btn = document.getElementById('rec-generate-btn');
+  btn.disabled = true;
+  btn.textContent = '✦ Generating…';
+
+  const prompt = `You are a copywriter for GoBebop (gobebop.app), a family-friendly places guide for the Netherlands.
+
+Write a weekly "GoBebop Recommends" feature for this location.
+
+Location: ${recRecord.name}
+City: ${recRecord.city || 'Netherlands'}
+${recRecord.description ? `Our description: ${recRecord.description}` : ''}
+${notes ? `Editor's notes: ${notes}` : ''}
+
+Do ONE web search to learn more about this place, then write:
+
+Return ONLY valid JSON — no preamble, start with { end with }:
+{
+  "headline": "",   // punchy 6-10 word reason to visit. Not the place name. E.g. "Amsterdam's best rainy day escape" or "Where toddlers rule the sandbox"
+  "body": ""        // 2-4 sentences. Warm, specific, written for parents. What makes it special this week. Reference the editor's notes if provided. Plain text only, no markdown.
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 600,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        tool_choice: { type: 'auto', disable_parallel_tool_use: true },
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'API error');
+
+    const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    const first = text.indexOf('{');
+    const last  = text.lastIndexOf('}');
+    if (first === -1 || last === -1) throw new Error('No JSON in response. Try again.');
+    const result = JSON.parse(text.slice(first, last + 1));
+
+    if (result.headline) document.getElementById('rec-headline').value = result.headline;
+    if (result.body)     document.getElementById('rec-body').value     = result.body;
+
+  } catch(err) {
+    alert('Generation failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ Generate with AI';
+  }
+}
+
+async function saveRecommendation() {
+  const { supabaseUrl, supabaseKey } = getConfig();
+  if (!supabaseUrl || !supabaseKey) return alert('Please configure Supabase in the config panel.');
+  if (!recRecord) return alert('Please select a location first.');
+
+  const headline    = document.getElementById('rec-headline').value.trim();
+  const body        = document.getElementById('rec-body').value.trim();
+  const publishDate = document.getElementById('rec-publish-date').value;
+  const active      = document.getElementById('rec-active').checked;
+
+  if (!body)        return alert('Please add recommendation text.');
+  if (!publishDate) return alert('Please set a publish date.');
+
+  const payload = {
+    location_id:  recRecord.id,
+    headline:     headline || null,
+    body,
+    publish_date: publishDate,
+    active,
+  };
+
+  const statusEl = document.getElementById('rec-status');
+  statusEl.textContent = 'Saving…';
+  statusEl.style.color = '#A09A94';
+
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/recommendations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+
+    statusEl.textContent = '✓ Saved successfully';
+    statusEl.style.color = '#2D6A4F';
+
+    // Reset form
+    recClearLocation();
+    document.getElementById('rec-notes').value = '';
+    document.getElementById('rec-headline').value = '';
+    document.getElementById('rec-body').value = '';
+    document.getElementById('rec-publish-date').value = '';
+    document.getElementById('rec-active').checked = false;
+    document.getElementById('rec-active-pill').classList.remove('checked');
+
+    loadRecommendations();
+
+  } catch(err) {
+    statusEl.textContent = '✗ Error: ' + err.message;
+    statusEl.style.color = '#991B1B';
+  }
+}
+
+async function loadRecommendations() {
+  const { supabaseUrl, supabaseKey } = getConfig();
+  const listEl = document.getElementById('rec-list');
+  if (!supabaseUrl || !supabaseKey) {
+    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Configure Supabase to load recommendations.</div>';
+    return;
+  }
+
+  listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Loading…</div>';
+
+  try {
+    // Fetch recommendations joined with location name
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/recommendations?select=id,location_id,headline,body,publish_date,active,locations(name,city)&order=publish_date.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+
+    if (!Array.isArray(rows) || !rows.length) {
+      listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No recommendations yet.</div>';
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    listEl.innerHTML = rows.map(r => {
+      const loc = r.locations || {};
+      const isPast    = r.publish_date < today;
+      const isCurrent = r.active;
+      const statusBadge = isCurrent
+        ? '<span style="background:#D8EDDF;color:#2D6A4F;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">● Live</span>'
+        : isPast
+          ? '<span style="background:#F0EBE3;color:#A09A94;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Past</span>'
+          : '<span style="background:#FBE8DF;color:#E8541A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Scheduled</span>';
+
+      return `
+        <div style="padding:16px 24px;border-bottom:1px solid #E8E3DC;display:flex;gap:16px;align-items:flex-start;">
+          <div style="min-width:80px;font-family:'DM Mono',monospace;font-size:11px;color:#A09A94;padding-top:2px;">${r.publish_date}</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <strong style="font-size:13px;">${loc.name || r.location_id}</strong>
+              <span style="font-size:11px;color:#A09A94;">${loc.city || ''}</span>
+              ${statusBadge}
+            </div>
+            ${r.headline ? `<div style="font-size:12px;color:#E8541A;font-weight:500;margin-bottom:4px;">${r.headline}</div>` : ''}
+            <div style="font-size:12px;color:#6B6560;line-height:1.5;">${r.body}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button onclick="toggleRecActiveById('${r.id}', ${!r.active})" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;">${r.active ? 'Deactivate' : 'Activate'}</button>
+            <button onclick="deleteRecommendation('${r.id}')" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;color:#991B1B;">Delete</button>
+          </div>
+        </div>`;
+    }).join('');
+
+  } catch(err) {
+    listEl.innerHTML = `<div style="padding:24px;color:#991B1B;font-size:13px;">Error: ${err.message}</div>`;
+  }
+}
+
+async function toggleRecActiveById(id, active) {
+  const { supabaseUrl, supabaseKey } = getConfig();
+  await fetch(`${supabaseUrl}/rest/v1/recommendations?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify({ active }),
+  });
+  loadRecommendations();
+}
+
+async function deleteRecommendation(id) {
+  if (!confirm('Delete this recommendation?')) return;
+  const { supabaseUrl, supabaseKey } = getConfig();
+  await fetch(`${supabaseUrl}/rest/v1/recommendations?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
+  });
+  loadRecommendations();
+}
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
