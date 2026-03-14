@@ -712,9 +712,9 @@ header {
   <!-- Mode toggle -->
 
   <div class="mode-toggle">
-    <button class="mode-btn active" id="mode-add" onclick="setMode('add')">📍 Add Location</button>
+    <button class="mode-btn active" id="mode-add" onclick="setMode('add')">📍 New Location</button>
     <button class="mode-btn" id="mode-photos" onclick="setMode('photos')">📷 Add Photos</button>
-    <button class="mode-btn" id="mode-recs" onclick="setMode('recs')">⭐ Recs</button>
+    <button class="mode-btn" id="mode-recs" onclick="setMode('recs')">⭐ Recommend</button>
   </div>
 
   <!-- Add Location mode -->
@@ -982,7 +982,7 @@ header {
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <button class="btn btn-enrich" id="enrich-btn" onclick="enrichWithAI()">✦ AI Enrich</button>
-      <button class="btn btn-enrich" id="describe-btn" onclick="describeWithAI()" style="background:#3a9aaa;">✦ Write Description</button>
+      <button class="btn btn-enrich" id="describe-btn" onclick="describeWithAI()" style="background:#4daabb;">✦ Write Description</button>
       <span class="section-badge badge-auto" id="enrich-badge" style="display:none;">AI filled</span>
     </div>
   </div>
@@ -2738,9 +2738,8 @@ async function loadRecommendations() {
   listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Loading…</div>';
 
   try {
-    // Fetch recommendations joined with location name
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/recommendations?select=id,location_id,headline,body,publish_date,active,locations(name,city)&order=publish_date.asc`,
+      `${supabaseUrl}/rest/v1/recommendations?select=id,location_id,headline,body,publish_date,active,locations(name,city)&order=publish_date.desc`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
     const rows = await res.json();
@@ -2751,21 +2750,21 @@ async function loadRecommendations() {
     }
 
     const today = new Date().toISOString().split('T')[0];
-    listEl.innerHTML = rows.map(r => {
+
+    const renderRow = r => {
       const loc = r.locations || {};
-      const isPast    = r.publish_date < today;
+      const isPast    = r.publish_date < today && !r.active;
       const isCurrent = r.active;
       const statusBadge = isCurrent
         ? '<span style="background:#D8EDDF;color:#2D6A4F;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">● Live</span>'
         : isPast
           ? '<span style="background:#F0EBE3;color:#A09A94;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Past</span>'
-          : '<span style="background:#FBE8DF;color:#4daabb;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Scheduled</span>';
-
+          : '<span style="background:#dff0f5;color:#4daabb;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Scheduled</span>';
       return `
         <div style="padding:16px 24px;border-bottom:1px solid #E8E3DC;display:flex;gap:16px;align-items:flex-start;">
           <div style="min-width:80px;font-family:'DM Mono',monospace;font-size:11px;color:#A09A94;padding-top:2px;">${r.publish_date}</div>
-          <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
               <strong style="font-size:13px;">${loc.name || r.location_id}</strong>
               <span style="font-size:11px;color:#A09A94;">${loc.city || ''}</span>
               ${statusBadge}
@@ -2778,11 +2777,44 @@ async function loadRecommendations() {
             <button onclick="deleteRecommendation('${r.id}')" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;color:#991B1B;">Delete</button>
           </div>
         </div>`;
-    }).join('');
+    };
+
+    const active    = rows.filter(r => r.active);
+    const scheduled = rows.filter(r => !r.active && r.publish_date >= today);
+    const past      = rows.filter(r => !r.active && r.publish_date < today);
+
+    let html = '';
+
+    if (!active.length && !scheduled.length) {
+      html += '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No upcoming recommendations.</div>';
+    } else {
+      html += active.map(renderRow).join('') + scheduled.map(renderRow).join('');
+    }
+
+    if (past.length) {
+      html += `
+        <div id="rec-archive-toggle" onclick="toggleRecArchive()" style="padding:12px 24px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:#F7F3ED;border-top:1px solid #E8E3DC;">
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:#A09A94;text-transform:uppercase;letter-spacing:0.06em;">▶ Archive (${past.length})</span>
+        </div>
+        <div id="rec-archive" style="display:none;">
+          ${past.map(renderRow).join('')}
+        </div>`;
+    }
+
+    listEl.innerHTML = html;
 
   } catch(err) {
     listEl.innerHTML = `<div style="padding:24px;color:#991B1B;font-size:13px;">Error: ${err.message}</div>`;
   }
+}
+
+function toggleRecArchive() {
+  const el = document.getElementById('rec-archive');
+  const toggle = document.getElementById('rec-archive-toggle').querySelector('span');
+  const isHidden = el.style.display === 'none';
+  el.style.display = isHidden ? '' : 'none';
+  const count = el.querySelectorAll('[style*="border-bottom"]').length;
+  toggle.textContent = (isHidden ? '▼' : '▶') + ` Archive (${count})`;
 }
 
 async function toggleRecActiveById(id, active) {
