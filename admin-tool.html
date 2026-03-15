@@ -1381,15 +1381,23 @@ function loadLocationForEdit(loc) {
   // All ages + no max
   pillState['all_ages'] = loc.all_ages ?? false;
   pillState['no_max']   = loc.ideal_age_max === null && loc.ideal_age_min !== null;
-  const allAgesPill = document.getElementById('pill-all_ages');
+  const allAgesPill = document.getElementById('pill-all-ages');
   if (allAgesPill) allAgesPill.classList.toggle('checked', !!loc.all_ages);
+  const noMaxPill = document.getElementById('pill-no-max');
+  if (noMaxPill) noMaxPill.classList.toggle('checked', pillState['no_max']);
 
-  // Facility pills
-  const facilities = ['toilet','changing_table','lockers','pram_parking','food_drink','highchairs','accessible','party_venue','events'];
-  facilities.forEach(key => {
+  // Facility pills — HTML ids use hyphens, DB keys use underscores
+  const facilityPillIds = {
+    'toilet': 'pill-toilet', 'changing_table': 'pill-changing-table',
+    'lockers': 'pill-lockers', 'pram_parking': 'pill-pram-parking',
+    'food_drink': 'pill-food-drink', 'highchairs': 'pill-highchairs',
+    'accessible': 'pill-accessible', 'party_venue': 'pill-party-venue',
+    'events': 'pill-events'
+  };
+  Object.entries(facilityPillIds).forEach(([key, pillId]) => {
     const val = loc[key];
     pillState[key] = val ?? null;
-    const pill = document.getElementById('pill-' + key);
+    const pill = document.getElementById(pillId);
     if (pill) {
       pill.classList.remove('checked', 'denied');
       if (val === true)  pill.classList.add('checked');
