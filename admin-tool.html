@@ -720,8 +720,38 @@ header {
   <!-- Add Location mode -->
 
   <div id="add-mode-ui">
-    <div class="page-title">Add a location</div>
-    <p class="page-sub">Paste a Google Maps URL or Place ID to auto-fill details, then complete the manual fields.</p>
+    <!-- New / Edit sub-toggle -->
+    <div style="display:flex;gap:0;margin-bottom:24px;border:1.5px solid #D4CEC6;border-radius:10px;overflow:hidden;width:fit-content;">
+      <button id="sub-new-btn" onclick="setAddSubMode('new')" style="padding:9px 20px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;background:#4daabb;color:white;border:none;cursor:pointer;transition:all 0.15s;">＋ New location</button>
+      <button id="sub-edit-btn" onclick="setAddSubMode('edit')" style="padding:9px 20px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;background:#E4DDD3;color:#1A1714;border:none;border-left:1.5px solid #D4CEC6;cursor:pointer;transition:all 0.15s;">✎ Edit existing</button>
+    </div>
+
+```
+<!-- New mode header -->
+<div id="add-new-header">
+  <div class="page-title">Add a location</div>
+  <p class="page-sub">Paste a Google Maps URL or Place ID to auto-fill details, then complete the manual fields.</p>
+</div>
+
+<!-- Edit mode header + search -->
+<div id="add-edit-header" style="display:none;">
+  <div class="page-title">Edit a location</div>
+  <p class="page-sub">Search for an existing location in your database to load and edit its details.</p>
+  <div class="lookup-bar" style="flex-direction:column;gap:8px;margin-top:24px;">
+    <div class="field-wrap" style="width:100%;">
+      <label>Search locations</label>
+      <input type="text" id="edit-search-input" placeholder="Start typing a name…" oninput="editSearchLocations(this.value)" autocomplete="off" style="font-size:16px;" />
+    </div>
+    <div id="edit-search-results" class="photo-search-results"></div>
+  </div>
+  <!-- Editing indicator -->
+  <div id="edit-indicator" style="display:none;background:#dff0f5;border:1.5px solid #4daabb;border-radius:8px;padding:10px 16px;margin-top:8px;display:none;align-items:center;justify-content:space-between;">
+    <span style="font-size:13px;color:#4daabb;font-weight:600;">✎ Editing: <span id="edit-indicator-name"></span></span>
+    <span onclick="clearEditMode()" style="font-size:12px;color:#4daabb;cursor:pointer;text-decoration:underline;">Clear</span>
+  </div>
+</div>
+```
+
   </div>
 
   <!-- Photo mode -->
@@ -1229,6 +1259,150 @@ function clearStatus() {
   const el = document.getElementById('status');
   el.className = 'status';
   el.style.display = 'none';
+}
+
+// ─── Edit mode state ─────────────────────────────────────────────────────────
+let editLocationId = null; // UUID of location being edited, null = new mode
+
+function setAddSubMode(mode) {
+  const isEdit = mode === 'edit';
+  document.getElementById('sub-new-btn').style.background  = isEdit ? '#E4DDD3' : '#4daabb';
+  document.getElementById('sub-new-btn').style.color       = isEdit ? '#1A1714' : 'white';
+  document.getElementById('sub-edit-btn').style.background = isEdit ? '#4daabb' : '#E4DDD3';
+  document.getElementById('sub-edit-btn').style.color      = isEdit ? 'white'   : '#1A1714';
+  document.getElementById('add-new-header').style.display  = isEdit ? 'none' : '';
+  document.getElementById('add-edit-header').style.display = isEdit ? '' : 'none';
+  document.getElementById('lookup-bar-wrap').style.display = isEdit ? 'none' : '';
+  if (!isEdit) {
+    clearEditMode();
+  }
+}
+
+function clearEditMode() {
+  editLocationId = null;
+  document.getElementById('edit-search-input').value = '';
+  document.getElementById('edit-search-results').innerHTML = '';
+  document.getElementById('edit-indicator').style.display = 'none';
+  document.getElementById('location-form').style.display = 'none';
+  clearManualFields();
+}
+
+async function editSearchLocations(query) {
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  const resultsEl = document.getElementById('edit-search-results');
+  if (query.length < 2) { resultsEl.innerHTML = ''; return; }
+  if (!supabaseUrl || !supabaseKey) return;
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?name=ilike.*${encodeURIComponent(query)}*&select=id,name,city,google_place_id,address,province,lat,lon,website,opening_hours,opening_status,status,primary_category,secondary_categories,secondary_category_lead,indoor_outdoor,ideal_age_min,ideal_age_max,all_ages,age_baby,age_preschooler,age_bigkid,cost,toilet,changing_table,lockers,pram_parking,food_drink,highchairs,accessible,party_venue,events,description,tips,google_maps_url&limit=8`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    if (!Array.isArray(rows) || !rows.length) {
+      resultsEl.innerHTML = '<div style="padding:10px 14px;font-size:13px;color:#A09A94;">No results</div>';
+      return;
+    }
+    resultsEl.innerHTML = rows.map(r => `
+      <div class="photo-search-result" onclick="loadLocationForEdit(${JSON.stringify(r).replace(/"/g, '&quot;')})">
+        <div class="res-name">${r.name}</div>
+        <div class="res-meta">${r.city || '—'} · ${r.google_place_id || r.id}</div>
+      </div>
+    `).join('');
+  } catch(e) {
+    resultsEl.innerHTML = `<div style="padding:10px;font-size:12px;color:#991B1B;">Error: ${e.message}</div>`;
+  }
+}
+
+function loadLocationForEdit(loc) {
+  editLocationId = loc.id;
+
+  // Clear search UI
+  document.getElementById('edit-search-input').value = '';
+  document.getElementById('edit-search-results').innerHTML = '';
+
+  // Show indicator
+  const ind = document.getElementById('edit-indicator');
+  document.getElementById('edit-indicator-name').textContent = loc.name;
+  ind.style.display = 'flex';
+
+  // Populate auto-filled fields
+  document.getElementById('f-name').value      = loc.name || '';
+  document.getElementById('f-place-id').value  = loc.google_place_id || '';
+  document.getElementById('f-maps-url').value  = loc.google_maps_url || '';
+  document.getElementById('f-address').value   = loc.address || '';
+  document.getElementById('f-city').value      = loc.city || '';
+  document.getElementById('f-province').value  = loc.province || '';
+  document.getElementById('f-lat').value       = loc.lat || '';
+  document.getElementById('f-lon').value       = loc.lon || '';
+
+  // Manual fields
+  document.getElementById('f-website').value         = loc.website || '';
+  document.getElementById('f-indoor-outdoor').value  = loc.indoor_outdoor || '';
+  document.getElementById('f-cost').value            = loc.cost || '';
+  document.getElementById('f-description').value     = loc.description || '';
+  document.getElementById('f-tips').value            = loc.tips || '';
+  document.getElementById('f-opening-status').value  = loc.opening_status || '';
+  document.getElementById('f-status').value          = loc.status || 'draft';
+  document.getElementById('f-age-min').value         = loc.ideal_age_min ?? '';
+  document.getElementById('f-age-max').value         = loc.ideal_age_max ?? '';
+
+  // Opening hours
+  if (loc.opening_hours && Array.isArray(loc.opening_hours)) {
+    loc.opening_hours.forEach(h => {
+      const input = document.querySelector(`#hours-rows .hours-input[data-day="${h.day}"]`);
+      if (input) input.value = h.hours === 'Closed' ? '' : (h.hours || '');
+    });
+  }
+
+  // Primary categories
+  document.querySelectorAll('.cat-pill').forEach(pill => {
+    const label = pill.textContent.replace(/^✓\s*/, '').trim();
+    pill.classList.toggle('selected', Array.isArray(loc.primary_category) && loc.primary_category.includes(label));
+  });
+
+  // Secondary categories
+  selectedSecondaries = loc.secondary_categories || [];
+  leadSecondary       = loc.secondary_category_lead || null;
+  renderSecondaryPills();
+
+  // Age pills
+  const ageMap = { baby: loc.age_baby, preschooler: loc.age_preschooler, bigkid: loc.age_bigkid };
+  Object.entries(ageMap).forEach(([key, val]) => {
+    pillState[key] = val ?? null;
+    const pill = document.getElementById('pill-' + key);
+    if (pill) {
+      pill.classList.remove('checked', 'denied');
+      if (val === true)  pill.classList.add('checked');
+      if (val === false) pill.classList.add('denied');
+    }
+  });
+
+  // All ages + no max
+  pillState['all_ages'] = loc.all_ages ?? false;
+  pillState['no_max']   = loc.ideal_age_max === null && loc.ideal_age_min !== null;
+  const allAgesPill = document.getElementById('pill-all_ages');
+  if (allAgesPill) allAgesPill.classList.toggle('checked', !!loc.all_ages);
+
+  // Facility pills
+  const facilities = ['toilet','changing_table','lockers','pram_parking','food_drink','highchairs','accessible','party_venue','events'];
+  facilities.forEach(key => {
+    const val = loc[key];
+    pillState[key] = val ?? null;
+    const pill = document.getElementById('pill-' + key);
+    if (pill) {
+      pill.classList.remove('checked', 'denied');
+      if (val === true)  pill.classList.add('checked');
+      if (val === false) pill.classList.add('denied');
+    }
+  });
+
+  // Show form
+  document.getElementById('location-form').style.display = '';
+  document.getElementById('location-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Update save button label
+  const saveBtn = document.getElementById('save-btn');
+  if (saveBtn) saveBtn.innerHTML = saveBtn.innerHTML.replace('Save to Supabase', 'Update location');
 }
 
 // ─── Place lookup ────────────────────────────────────────────────────────────
@@ -2113,6 +2287,12 @@ function setMode(mode) {
   document.getElementById('status').style.display = 'none';
   document.getElementById('status').textContent = '';
 
+  if (isAdd) {
+    // Reset edit mode when switching back to add tab
+    editLocationId = null;
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) saveBtn.innerHTML = saveBtn.innerHTML.replace('Update location', 'Save to Supabase');
+  }
   if (isPhoto) {
     photoModeQueue.length = 0;
     photoModeRecord = null;
@@ -2614,44 +2794,64 @@ async function saveToSupabase() {
   }
 
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`,
-        'Prefer': 'return=representation',
-      },
-      body: JSON.stringify(data),
-    });
+    let res;
+    if (editLocationId) {
+      // UPDATE existing location
+      res = await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${editLocationId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify(data),
+      });
+    } else {
+      // INSERT new location
+      res = await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Prefer': 'return=representation',
+        },
+        body: JSON.stringify(data),
+      });
+    }
 
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.message || err.details || 'Supabase error');
     }
 
-    setStatus('success', `✅ "${data.name}" saved to Supabase successfully!`);
+    const verb = editLocationId ? 'updated' : 'saved';
+    setStatus('success', `✅ "${data.name}" ${verb} successfully!`);
     document.getElementById('status').scrollIntoView({ behavior: 'smooth' });
 
-    // Reset for next entry
-    setTimeout(() => {
-      document.getElementById('maps-url').value = '';
-      document.getElementById('location-form').style.display = 'none';
-      document.getElementById('json-output').style.display = 'none';
-      currentPlaceData = null;
-      Object.keys(pillState).forEach(k => {
-        pillState[k] = false;
-        const pill = document.getElementById(`pill-${k}`);
-        if (pill) pill.classList.remove('checked');
-      });
-      clearStatus();
-    }, 3000);
+    if (!editLocationId) {
+      // Reset for next new entry
+      setTimeout(() => {
+        document.getElementById('maps-url').value = '';
+        document.getElementById('location-form').style.display = 'none';
+        document.getElementById('json-output').style.display = 'none';
+        currentPlaceData = null;
+        Object.keys(pillState).forEach(k => {
+          pillState[k] = false;
+          const pill = document.getElementById(`pill-${k}`);
+          if (pill) pill.classList.remove('checked');
+        });
+        clearStatus();
+      }, 3000);
+    }
 
   } catch (err) {
     setStatus('error', '❌ Save failed: ' + err.message);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5l3.5 3.5 6.5-6.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Save to Supabase';
+    const label = editLocationId ? 'Update location' : 'Save to Supabase';
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5l3.5 3.5 6.5-6.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> ${label}`;
   }
 }
 
