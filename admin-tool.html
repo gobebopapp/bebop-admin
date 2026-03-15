@@ -1143,32 +1143,6 @@ header {
   </div>
 </div>
 
-<!-- ── Photos ── -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">
-      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="2.5" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="6.5" cy="6.5" r="1.8" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 2.5l.8-1h2.4l.8 1" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-      Photos
-    </div>
-    <span class="section-badge badge-manual">Upload</span>
-  </div>
-  <div class="section-body">
-    <p class="text-muted" style="margin-bottom:14px;">Upload up to 3 photos. Resized to 1200×800 (display) + 400×267 (thumb). Pick a descriptor per photo — it becomes part of the filename for SEO: <code style="font-family:'DM Mono',monospace;font-size:11px;background:#E4DDD3;padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.jpg</code></p>
-    <div id="photo-upload-area" style="display:none;">
-      <div class="photo-drop-zone" id="photo-drop-zone" ondragover="event.preventDefault()" ondrop="handlePhotoDrop(event)">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:#A09A94;margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-        <p style="font-size:13px;color:#A09A94;margin-bottom:6px;">Drag photos here or</p>
-        <label class="btn btn-secondary" style="cursor:pointer;font-size:13px;">
-          Choose files
-          <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoFiles(this.files)" />
-        </label>
-      </div>
-      <div id="photo-previews" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;"></div>
-    </div>
-    <p id="photo-no-place" style="font-size:13px;color:#A09A94;">Look up a place first — photos are stored by Place ID.</p>
-  </div>
-</div>
-
 <!-- ── Record Status ── -->
 <div class="form-section">
   <div class="section-body" style="padding:16px 24px;">
@@ -1185,10 +1159,6 @@ header {
 
 <!-- Save / export -->
 <div class="actions-bar">
-  <button class="btn btn-secondary" onclick="uploadPhotos()" id="upload-photos-btn">
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 4l3.5-3.5L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    Upload Photos
-  </button>
   <button class="btn btn-secondary" onclick="exportJSON()">
     <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3 6l3.5 3.5L10 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
     Export JSON
@@ -2091,8 +2061,8 @@ Plain text only. No HTML, no markdown, no citation tags.`;
 
 const photoQueue = []; // [{file, descriptor, status}]
 const MAX_PHOTOS = 3;
-const DISPLAY_W = 1200, DISPLAY_H = 800;
-const THUMB_W = 400,    THUMB_H = 267;
+const DISPLAY_MAX = 1200; // max long edge for display image
+const THUMB_MAX = 400;   // max long edge for thumbnail
 
 const PHOTO_DESCRIPTORS = [
   'interior', 'exterior', 'play-area', 'kids-cafe',
@@ -2193,26 +2163,26 @@ function removePhoto(idx) {
   renderPhotoPreviews();
 }
 
-async function resizeImage(file, width, height) {
+async function resizeImage(file, maxLongEdge) {
   return new Promise(resolve => {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      const srcRatio = img.width / img.height;
-      const dstRatio = width / height;
-      let sx, sy, sw, sh;
-      if (srcRatio > dstRatio) {
-        sh = img.height; sw = sh * dstRatio;
-        sy = 0; sx = (img.width - sw) / 2;
+      // Preserve aspect ratio — scale so the long edge = maxLongEdge
+      const isLandscape = img.width >= img.height;
+      let outW, outH;
+      if (isLandscape) {
+        outW = Math.min(img.width, maxLongEdge);
+        outH = Math.round(outW * img.height / img.width);
       } else {
-        sw = img.width; sh = sw / dstRatio;
-        sx = 0; sy = (img.height - sh) / 2;
+        outH = Math.min(img.height, maxLongEdge);
+        outW = Math.round(outH * img.width / img.height);
       }
-      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, width, height);
+      const canvas = document.createElement('canvas');
+      canvas.width  = outW;
+      canvas.height = outH;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, outW, outH);
       URL.revokeObjectURL(url);
       canvas.toBlob(resolve, 'image/jpeg', 0.88);
     };
@@ -2234,8 +2204,8 @@ async function uploadPhotos() {
 
     try {
       const [displayBlob, thumbBlob] = await Promise.all([
-        resizeImage(entry.file, DISPLAY_W, DISPLAY_H),
-        resizeImage(entry.file, THUMB_W, THUMB_H),
+        resizeImage(entry.file, DISPLAY_MAX),
+        resizeImage(entry.file, THUMB_MAX),
       ]);
 
       if (statusEl) statusEl.textContent = 'Uploading…';
@@ -2575,8 +2545,8 @@ async function uploadSinglePhoto(idx) {
   if (retryBtn) retryBtn.style.display = 'none';
 
   const [displayBlob, thumbBlob] = await Promise.all([
-    resizeImage(entry.file, DISPLAY_W, DISPLAY_H),
-    resizeImage(entry.file, THUMB_W,   THUMB_H),
+    resizeImage(entry.file, DISPLAY_MAX),
+    resizeImage(entry.file, THUMB_MAX),
   ]);
   if (statusEl) statusEl.textContent = 'Uploading…';
 
