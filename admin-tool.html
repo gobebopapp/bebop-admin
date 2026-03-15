@@ -2130,6 +2130,8 @@ function setMode(mode) {
 
 const photoModeQueue = [];
 let photoModeRecord = null; // {id, name, city, google_place_id}
+let primaryPhotoIdx = null;  // index of the designated primary photo
+let primaryPhotoIdx = null;  // index of the designated primary photo
 
 // Recent locations — stored in memory (persists in session)
 const recentLocations = [];
@@ -2204,6 +2206,7 @@ async function searchLocations(query) {
 async function selectPhotoModeRecord(record) {
   photoModeRecord = record;
   photoModeQueue.length = 0;
+  primaryPhotoIdx = null;
   document.getElementById('photo-search-results').innerHTML = '';
   document.getElementById('photo-search-input').value = '';
   document.getElementById('photo-mode-previews').innerHTML = '';
@@ -2268,6 +2271,7 @@ async function checkExistingPhotos(locationId) {
 function resetPhotoModeSelection() {
   photoModeRecord = null;
   photoModeQueue.length = 0;
+  primaryPhotoIdx = null;
   document.getElementById('photo-mode-upload-panel').style.display = 'none';
   document.getElementById('photo-mode-previews').innerHTML = '';
 }
@@ -2317,18 +2321,25 @@ function renderPhotoModePreviews() {
       };
       img.src = ev.target.result;
 
+      const isPrimary = primaryPhotoIdx === idx;
       card.innerHTML = `
         <div class="photo-preview-wrap" style="display:block;position:relative;">
-          <img src="${ev.target.result}" alt="preview" style="width:100%;height:auto;border-radius:8px;border:1.5px solid #D4CEC6;display:block;" />
+          <img src="${ev.target.result}" alt="preview" style="width:100%;height:auto;border-radius:8px;border:1.5px solid ${isPrimary ? '#4daabb' : '#D4CEC6'};display:block;" />
           <div class="ratio-overlay"></div>
-          <button class="remove-photo" onclick="removePhotoMode(${idx})" style="position:absolute;top:-6px;right:-6px;">✕</button>
+          <button class="remove-photo" onclick="removePhotoMode(${idx})" style="position:absolute;top:6px;right:6px;">✕</button>
+        </div>
+        <div style="margin-top:8px;">
+          <button id="pm-primary-btn-${idx}" onclick="setPrimaryPhoto(${idx})"
+            style="width:100%;padding:7px 10px;border-radius:6px;border:1.5px solid ${isPrimary ? '#4daabb' : '#D4CEC6'};background:${isPrimary ? '#dff0f5' : '#FFFFFF'};color:${isPrimary ? '#4daabb' : '#A09A94'};font-size:12px;font-weight:${isPrimary ? '600' : '400'};cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;">
+            ${isPrimary ? '★ Primary' : '☆ Set as primary'}
+          </button>
         </div>
         <div class="photo-label" style="margin-top:8px;">
           <select onchange="updatePhotoModeDescriptor(${idx}, this.value)" class="pm-descriptor-select" style="width:100%;font-size:13px;padding:8px 10px;background:#E4DDD3;border:1.5px solid #D4CEC6;border-radius:6px;font-family:'DM Sans',sans-serif;">
             ${descriptorOpts}
           </select>
         </div>
-        <div class="photo-label" id="pm-filename-${idx}" style="font-size:10px;color:#A09A94;word-break:break-all;margin-top:4px;">${idx === 0 ? '<span style="background:#dff0f5;color:#4daabb;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;margin-right:4px;">Primary</span>' : ''}${filename}</div>
+        <div class="photo-label" id="pm-filename-${idx}" style="font-size:10px;color:#A09A94;word-break:break-all;margin-top:4px;">${filename}</div>
         <div class="photo-status" id="pm-status-${idx}">Ready</div>
         <button class="pm-retry-btn" id="pm-retry-${idx}" onclick="retryUpload(${idx})">↺ Retry</button>
       `;
@@ -2350,6 +2361,14 @@ function updatePhotoModeDescriptor(idx, val) {
 
 function removePhotoMode(idx) {
   photoModeQueue.splice(idx, 1);
+  // Adjust primary index
+  if (primaryPhotoIdx === idx) primaryPhotoIdx = null;
+  else if (primaryPhotoIdx > idx) primaryPhotoIdx--;
+  renderPhotoModePreviews();
+}
+
+function setPrimaryPhoto(idx) {
+  primaryPhotoIdx = idx;
   renderPhotoModePreviews();
 }
 
@@ -2386,9 +2405,19 @@ async function uploadSinglePhoto(idx) {
   // Build public URL
   const publicUrl = `${supabaseUrl}/storage/v1/object/public/photos/${displayPath}`;
 
-  // Determine sort_order: existing photo count + queue position + 1
+  // sort_order: primary = 1, others follow in queue order
   const existingCount = await getExistingPhotoCount(locationUuid);
-  const sortOrder = existingCount + idx + 1;
+  let sortOrder;
+  if (idx === primaryPhotoIdx) {
+    sortOrder = 1;
+  } else {
+    // Non-primary photos: offset from 2, skipping the primary slot
+    const queuePos = photoModeQueue.reduce((pos, _, i) => {
+      if (i === primaryPhotoIdx || i >= idx) return pos;
+      return pos + 1;
+    }, 0);
+    sortOrder = existingCount + queuePos + 2;
+  }
 
   // Write record to photos table
   await fetch(`${supabaseUrl}/rest/v1/photos`, {
@@ -2440,6 +2469,7 @@ async function retryUpload(idx) {
 async function uploadPhotoMode() {
   if (!photoModeRecord) return alert('Select a location first.');
   if (!photoModeQueue.length) return alert('Add at least one photo first.');
+  if (primaryPhotoIdx === null) return alert('Please set a primary photo before uploading. Tap "☆ Set as primary" on one of the photos.');
   const btn = document.getElementById('pm-upload-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
 
