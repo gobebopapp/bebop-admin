@@ -2413,17 +2413,65 @@ async function checkExistingPhotos(locationId) {
         : '';
     }).join('');
 
+    // Store rows on the element so deleteAllPhotos can access them
+    warningEl._photoRows = rows;
+
     warningEl.innerHTML = `
       <div style="display:flex;align-items:flex-start;gap:12px;">
         <div style="flex:1;">
           <strong style="font-size:13px;color:#854d0e;">⚠ This location already has ${display.length} photo${display.length > 1 ? 's' : ''}</strong>
           <p style="font-size:12px;color:#92400e;margin-top:2px;">New uploads will be added alongside existing ones. Sort order will continue from ${display.length + 1}.</p>
         </div>
+        <button onclick="deleteAllPhotos('${locationId}')" style="flex-shrink:0;padding:6px 12px;font-size:12px;font-weight:600;background:white;color:#991B1B;border:1.5px solid #fca5a5;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">
+          🗑 Remove all
+        </button>
       </div>
       ${thumbs ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">${thumbs}</div>` : ''}
     `;
     warningEl.style.display = 'block';
   } catch(e) { /* silently ignore */ }
+}
+
+async function deleteAllPhotos(locationId) {
+  if (!confirm('Delete all photos for this location? This removes both the files in storage and the database records.')) return;
+
+  const { supabaseUrl, supabaseKey } = getConfig();
+  const warningEl = document.getElementById('existing-photos-warning');
+  const rows = warningEl._photoRows || [];
+
+  warningEl.innerHTML = '<p style="font-size:13px;color:#92400e;">Deleting…</p>';
+
+  let errors = 0;
+
+  // Delete each file from storage
+  for (const row of rows) {
+    try {
+      await fetch(`${supabaseUrl}/storage/v1/object/photos/${row.path}`, {
+        method: 'DELETE',
+        headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+      });
+    } catch(e) { errors++; }
+  }
+
+  // Delete all rows from photos table for this location
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/photos?location_id=eq.${locationId}`, {
+      method: 'DELETE',
+      headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+    });
+    if (!res.ok) errors++;
+  } catch(e) { errors++; }
+
+  // Clear cache so sort order recalculates
+  delete _existingCountCache[locationId];
+
+  if (errors === 0) {
+    warningEl.style.display = 'none';
+    warningEl.innerHTML = '';
+    warningEl._photoRows = [];
+  } else {
+    warningEl.innerHTML = `<p style="font-size:13px;color:#991B1B;">⚠ Finished with ${errors} error(s). Some files may not have been deleted from storage — check manually.</p>`;
+  }
 }
 
 function resetPhotoModeSelection() {
