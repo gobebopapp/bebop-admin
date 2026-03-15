@@ -747,6 +747,7 @@ header {
 <div id="photo-mode-upload-panel" style="display:none;">
   <div class="photo-mode-upload">
     <div class="photo-mode-selected" id="photo-mode-selected"></div>
+    <div id="existing-photos-warning" style="display:none;background:#fef9c3;border:1.5px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:14px;"></div>
     <p class="text-muted" style="margin-bottom:14px;">Resized to 1200×800 (display) + 400×267 (thumb). Pick a descriptor per photo — it becomes part of the SEO filename: <code style="font-family:'DM Mono',monospace;font-size:11px;background:#E4DDD3;padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.jpg</code></p>
     <div class="photo-drop-zone" id="photo-mode-drop-zone" ondragover="event.preventDefault()" ondrop="handlePhotoModeFiles(event.dataTransfer.files)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:#A09A94;margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
@@ -1921,12 +1922,11 @@ function slugify(str) {
     .replace(/^-+|-+$/g, '');
 }
 
-function buildPhotoFilename(placeId, city, descriptor, num) {
+function buildPhotoFilename(locationId, city, descriptor, num) {
   // SEO pattern: {place-slug}-{city}-{descriptor}-{n}.jpg
   // e.g. nijntje-museum-utrecht-play-area-1.jpg
-  const formName = document.getElementById('f-name')?.value;
-  const name = formName || (photoModeRecord && photoModeRecord.name) || '';
-  const placePart = slugify(name || placeId.slice(0, 12));
+  const name = (photoModeRecord && photoModeRecord.name) || document.getElementById('f-name')?.value || '';
+  const placePart = slugify(name || locationId.slice(0, 12));
   const cityPart  = slugify(city || 'amsterdam');
   return `${placePart}-${cityPart}-${descriptor}-${num}.jpg`;
 }
@@ -2201,7 +2201,7 @@ async function searchLocations(query) {
   }
 }
 
-function selectPhotoModeRecord(record) {
+async function selectPhotoModeRecord(record) {
   photoModeRecord = record;
   photoModeQueue.length = 0;
   document.getElementById('photo-search-results').innerHTML = '';
@@ -2218,6 +2218,51 @@ function selectPhotoModeRecord(record) {
   `;
   document.getElementById('photo-mode-upload-panel').style.display = 'block';
   addToRecent(record);
+
+  // Check for existing photos
+  await checkExistingPhotos(record.id);
+}
+
+async function checkExistingPhotos(locationId) {
+  const { supabaseUrl, supabaseKey } = getConfig();
+  const warningEl = document.getElementById('existing-photos-warning');
+  if (!warningEl || !supabaseUrl || !supabaseKey) return;
+
+  warningEl.style.display = 'none';
+  warningEl.innerHTML = '';
+
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/photos?location_id=eq.${locationId}&order=sort_order.asc&select=id,path,url,sort_order`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    if (!Array.isArray(rows) || !rows.length) return;
+
+    // Filter display photos only (no thumbs)
+    const display = rows.filter(r => !r.path.includes('-thumb'));
+    if (!display.length) return;
+
+    const thumbs = display.map(r => {
+      const thumbPath = r.path.replace('.jpg', '') + '-thumb.jpg';
+      // Construct thumb URL from display URL or path
+      const thumbUrl = r.url ? r.url.replace(/([^/]+)\.jpg$/, '$1-thumb.jpg') : '';
+      return thumbUrl
+        ? `<img src="${thumbUrl}" style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:1.5px solid #D4CEC6;" onerror="this.style.display='none'" />`
+        : '';
+    }).join('');
+
+    warningEl.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="flex:1;">
+          <strong style="font-size:13px;color:#854d0e;">⚠ This location already has ${display.length} photo${display.length > 1 ? 's' : ''}</strong>
+          <p style="font-size:12px;color:#92400e;margin-top:2px;">New uploads will be added alongside existing ones. Sort order will continue from ${display.length + 1}.</p>
+        </div>
+      </div>
+      ${thumbs ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">${thumbs}</div>` : ''}
+    `;
+    warningEl.style.display = 'block';
+  } catch(e) { /* silently ignore */ }
 }
 
 function resetPhotoModeSelection() {
@@ -2283,7 +2328,7 @@ function renderPhotoModePreviews() {
             ${descriptorOpts}
           </select>
         </div>
-        <div class="photo-label" id="pm-filename-${idx}" style="font-size:10px;color:#A09A94;word-break:break-all;margin-top:4px;">${filename}</div>
+        <div class="photo-label" id="pm-filename-${idx}" style="font-size:10px;color:#A09A94;word-break:break-all;margin-top:4px;">${idx === 0 ? '<span style="background:#dff0f5;color:#4daabb;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;margin-right:4px;">Primary</span>' : ''}${filename}</div>
         <div class="photo-status" id="pm-status-${idx}">Ready</div>
         <button class="pm-retry-btn" id="pm-retry-${idx}" onclick="retryUpload(${idx})">↺ Retry</button>
       `;
@@ -2312,10 +2357,12 @@ async function uploadSinglePhoto(idx) {
   const entry = photoModeQueue[idx];
   if (!entry) return;
   const { supabaseUrl, supabaseKey } = getConfig();
-  const placeId   = photoModeRecord.google_place_id || photoModeRecord.id;
-  const city      = photoModeRecord.city || '';
-  const statusEl  = document.getElementById('pm-status-' + idx);
-  const retryBtn  = document.getElementById('pm-retry-' + idx);
+
+  // Always use UUID as folder — stable, not dependent on Google Place ID
+  const locationUuid = photoModeRecord.id;
+  const city         = photoModeRecord.city || '';
+  const statusEl     = document.getElementById('pm-status-' + idx);
+  const retryBtn     = document.getElementById('pm-retry-' + idx);
 
   if (statusEl) { statusEl.textContent = 'Resizing…'; statusEl.className = 'photo-status uploading'; }
   if (retryBtn) retryBtn.style.display = 'none';
@@ -2325,14 +2372,60 @@ async function uploadSinglePhoto(idx) {
     resizeImage(entry.file, THUMB_W,   THUMB_H),
   ]);
   if (statusEl) statusEl.textContent = 'Uploading…';
-  const filename      = buildPhotoFilename(placeId, city, entry.descriptor, idx + 1);
-  const thumbFilename = buildPhotoFilename(placeId, city, entry.descriptor + '-thumb', idx + 1);
+
+  const filename      = buildPhotoFilename(locationUuid, city, entry.descriptor, idx + 1);
+  const thumbFilename = buildPhotoFilename(locationUuid, city, entry.descriptor + '-thumb', idx + 1);
+  const displayPath   = `${locationUuid}/${filename}`;
+  const thumbPath     = `${locationUuid}/${thumbFilename}`;
+
   await Promise.all([
-    supabaseUpload(supabaseUrl, supabaseKey, `photos/${placeId}/${filename}`,     displayBlob),
-    supabaseUpload(supabaseUrl, supabaseKey, `photos/${placeId}/${thumbFilename}`, thumbBlob),
+    supabaseUpload(supabaseUrl, supabaseKey, displayPath, displayBlob),
+    supabaseUpload(supabaseUrl, supabaseKey, thumbPath,   thumbBlob),
   ]);
+
+  // Build public URL
+  const publicUrl = `${supabaseUrl}/storage/v1/object/public/photos/${displayPath}`;
+
+  // Determine sort_order: existing photo count + queue position + 1
+  const existingCount = await getExistingPhotoCount(locationUuid);
+  const sortOrder = existingCount + idx + 1;
+
+  // Write record to photos table
+  await fetch(`${supabaseUrl}/rest/v1/photos`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify({
+      location_id: locationUuid,
+      path: displayPath,
+      url: publicUrl,
+      sort_order: sortOrder,
+    }),
+  });
+
   if (statusEl) { statusEl.textContent = '✓ ' + filename; statusEl.className = 'photo-status done'; }
   entry.uploadStatus = 'done';
+}
+
+// Cache existing count per session to avoid re-querying per photo
+const _existingCountCache = {};
+async function getExistingPhotoCount(locationId) {
+  if (_existingCountCache[locationId] !== undefined) return _existingCountCache[locationId];
+  const { supabaseUrl, supabaseKey } = getConfig();
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/photos?location_id=eq.${locationId}&select=id`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Prefer': 'count=exact' } }
+    );
+    const rows = await res.json();
+    const count = Array.isArray(rows) ? rows.filter(r => !r.path?.includes('-thumb')).length : 0;
+    _existingCountCache[locationId] = count;
+    return count;
+  } catch { return 0; }
 }
 
 async function retryUpload(idx) {
