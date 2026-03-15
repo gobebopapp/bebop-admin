@@ -2443,15 +2443,20 @@ async function deleteAllPhotos(locationId) {
 
   let errors = 0;
 
-  // Delete each file from storage
-  for (const row of rows) {
-    try {
-      await fetch(`${supabaseUrl}/storage/v1/object/photos/${row.path}`, {
-        method: 'DELETE',
-        headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
-      });
-    } catch(e) { errors++; }
-  }
+  // Delete all files from storage in one batch call
+  try {
+    const paths = rows.map(r => r.path);
+    const res = await fetch(`${supabaseUrl}/storage/v1/object/photos`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prefixes: paths }),
+    });
+    if (!res.ok) errors++;
+  } catch(e) { errors++; }
 
   // Delete all rows from photos table for this location
   try {
