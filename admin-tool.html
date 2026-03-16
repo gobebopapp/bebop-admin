@@ -1411,7 +1411,6 @@ async function lookupPlace() {
     populateForm(details);
     clearStatus();
     document.getElementById('location-form').style.display = 'block';
-    showPhotoUpload();
     document.getElementById('location-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
     setStatus('error', '❌ ' + err.message);
@@ -1551,8 +1550,7 @@ function clearManualFields() {
   photoQueue.length = 0;
   const previews = document.getElementById('photo-previews');
   if (previews) previews.innerHTML = '';
-  document.getElementById('photo-upload-area').style.display = 'none';
-  document.getElementById('photo-no-place').style.display = 'block';
+
 }
 
 // ─── Form population ─────────────────────────────────────────────────────────
@@ -2084,14 +2082,6 @@ function buildPhotoFilename(locationId, city, descriptor, num) {
   return `${placePart}-${cityPart}-${descriptor}-${num}.webp`;
 }
 
-function showPhotoUpload() {
-  const placeId = document.getElementById('f-place-id').value;
-  if (placeId) {
-    document.getElementById('photo-upload-area').style.display = 'block';
-    document.getElementById('photo-no-place').style.display = 'none';
-  }
-}
-
 function handlePhotoDrop(e) {
   e.preventDefault();
   handlePhotoFiles(e.dataTransfer.files);
@@ -2443,22 +2433,24 @@ async function deleteAllPhotos(locationId) {
 
   let errors = 0;
 
-  // Delete each file from storage individually
+  // Delete each display file and its thumbnail from storage
   for (const row of rows) {
-    try {
-      const res = await fetch(`${supabaseUrl}/storage/v1/object/photos/${row.path}`, {
-        method: 'DELETE',
-        headers: {
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-        },
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        console.error('Storage delete error for', row.path, err);
-        errors++;
-      }
-    } catch(e) { console.error('Storage delete exception:', e); errors++; }
+    // Build thumb path from display path: uuid/name.webp -> uuid/name-thumb.webp
+    const thumbPath = row.path.replace(/(\.webp|\.jpg)$/, '-thumb$1');
+    for (const path of [row.path, thumbPath]) {
+      try {
+        const res = await fetch(`${supabaseUrl}/storage/v1/object/photos/${path}`, {
+          method: 'DELETE',
+          headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          console.error('Storage delete error for', path, err);
+          // Don't count thumb 404s as errors — thumb may not exist for old uploads
+          if (path === row.path) errors++;
+        }
+      } catch(e) { console.error('Storage delete exception:', e); if (path === row.path) errors++; }
+    }
   }
 
   // Delete all rows from photos table for this location
