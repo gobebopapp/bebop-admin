@@ -2443,24 +2443,23 @@ async function deleteAllPhotos(locationId) {
 
   let errors = 0;
 
-  // Delete all files from storage using the correct bulk delete endpoint
-  try {
-    const paths = rows.map(r => r.path);
-    const res = await fetch(`${supabaseUrl}/storage/v1/object/photos/delete`, {
-      method: 'POST',
-      headers: {
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prefixes: paths }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      console.error('Storage delete error:', err);
-      errors++;
-    }
-  } catch(e) { console.error('Storage delete exception:', e); errors++; }
+  // Delete each file from storage individually
+  for (const row of rows) {
+    try {
+      const res = await fetch(`${supabaseUrl}/storage/v1/object/photos/${row.path}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error('Storage delete error for', row.path, err);
+        errors++;
+      }
+    } catch(e) { console.error('Storage delete exception:', e); errors++; }
+  }
 
   // Delete all rows from photos table for this location
   try {
