@@ -2370,7 +2370,10 @@ async function selectPhotoModeRecord(record) {
   document.getElementById('photo-mode-upload-panel').style.display = 'block';
   addToRecent(record);
 
-  // Check for existing photos
+  // Pre-fetch existing count so filenames are numbered correctly from the start
+  await getExistingPhotoCount(record.id);
+
+  // Check for existing photos (shows warning + thumbnails)
   await checkExistingPhotos(record.id);
 }
 
@@ -2393,6 +2396,9 @@ async function checkExistingPhotos(locationId) {
     // Filter display photos only (no thumbs)
     const display = rows.filter(r => !r.path.includes('-thumb'));
     if (!display.length) return;
+
+    // Populate cache so uploadPhotoMode knows existing count without a second query
+    _existingCountCache[locationId] = display.length;
 
     // Store only display rows — thumb paths derived on delete
     warningEl._photoRows = display;
@@ -2534,13 +2540,15 @@ function renderPhotoModePreviews() {
   const placeId = photoModeRecord?.google_place_id || photoModeRecord?.id || '';
   const city    = photoModeRecord?.city || '';
 
+  const existingCount = (photoModeRecord && _existingCountCache[photoModeRecord.id]) || 0;
+
   photoModeQueue.forEach((entry, idx) => {
     const card = document.createElement('div');
     card.className = 'photo-preview-card';
     const descriptorOpts = PHOTO_DESCRIPTORS.map(d =>
       `<option value="${d}" ${d === entry.descriptor ? 'selected' : ''}>${d}</option>`
     ).join('');
-    const filename = buildPhotoFilename(placeId, city, entry.descriptor, idx + 1);
+    const filename = buildPhotoFilename(placeId, city, entry.descriptor, existingCount + idx + 1);
 
     card.className = 'photo-preview-card pm-card-mobile';
     const reader = new FileReader();
@@ -2597,8 +2605,9 @@ function updatePhotoModeDescriptor(idx, val) {
     photoModeQueue[idx].descriptor = val;
     const placeId = photoModeRecord?.google_place_id || photoModeRecord?.id || '';
     const city    = photoModeRecord?.city || '';
+    const existingCount = (photoModeRecord && _existingCountCache[photoModeRecord.id]) || 0;
     const el = document.getElementById('pm-filename-' + idx);
-    if (el) el.textContent = buildPhotoFilename(placeId, city, val, idx + 1);
+    if (el) el.textContent = buildPhotoFilename(placeId, city, val, existingCount + idx + 1);
   }
 }
 
@@ -2652,18 +2661,22 @@ async function uploadSinglePhoto(idx) {
   // Build public URL
   const publicUrl = `${supabaseUrl}/storage/v1/object/public/photos/${displayPath}`;
 
-  // sort_order: primary = 1, others follow in queue order
+  // sort_order: if no existing photos, primary=1; otherwise continue from existingCount+1
   const existingCount = await getExistingPhotoCount(locationUuid);
   let sortOrder;
-  if (idx === primaryPhotoIdx) {
+  if (existingCount === 0 && idx === primaryPhotoIdx) {
+    // First batch: primary gets sort_order 1
     sortOrder = 1;
-  } else {
-    // Non-primary photos: offset from 2, skipping the primary slot
-    const queuePos = photoModeQueue.reduce((pos, _, i) => {
+  } else if (existingCount === 0) {
+    // First batch: non-primary photos slot in after primary
+    const nonPrimaryPos = photoModeQueue.reduce((pos, _, i) => {
       if (i === primaryPhotoIdx || i >= idx) return pos;
       return pos + 1;
     }, 0);
-    sortOrder = existingCount + queuePos + 2;
+    sortOrder = nonPrimaryPos + 2;
+  } else {
+    // Adding to existing: just continue the sequence
+    sortOrder = existingCount + idx + 1;
   }
 
   // Write record to photos table
@@ -2717,7 +2730,8 @@ async function retryUpload(idx) {
 async function uploadPhotoMode() {
   if (!photoModeRecord) return alert('Select a location first.');
   if (!photoModeQueue.length) return alert('Add at least one photo first.');
-  if (primaryPhotoIdx === null) return alert('Please set a primary photo before uploading. Tap "☆ Set as primary" on one of the photos.');
+  const existingPhotoCount = (photoModeRecord && _existingCountCache[photoModeRecord.id]) || 0;
+  if (primaryPhotoIdx === null && existingPhotoCount === 0) return alert('Please set a primary photo before uploading. Tap "☆ Set as primary" on one of the photos.');
   const btn = document.getElementById('pm-upload-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
 
