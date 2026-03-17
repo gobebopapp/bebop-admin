@@ -2394,20 +2394,24 @@ async function checkExistingPhotos(locationId) {
     const display = rows.filter(r => !r.path.includes('-thumb'));
     if (!display.length) return;
 
-    const thumbs = display.map(r => {
-      const thumbPath = r.path.replace('.jpg', '') + '-thumb.jpg';
-      // Construct thumb URL from display URL or path
-      const thumbUrl = r.url ? r.url.replace(/([^/]+)\.jpg$/, '$1-thumb.jpg') : '';
-      return thumbUrl
-        ? `<img src="${thumbUrl}" style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:1.5px solid #D4CEC6;" onerror="this.style.display='none'" />`
-        : '';
-    }).join('');
+    // Store only display rows — thumb paths derived on delete
+    warningEl._photoRows = display;
 
-    // Store rows on the element so deleteAllPhotos can access them
-    warningEl._photoRows = rows;
+    // Build thumb URL: replace extension with -thumb.ext
+    const thumbUrl = r => r.url
+      ? r.url.replace(/-(\d+)(\.webp|\.jpg)$/, '-thumb-$1$2')
+      : '';
+
+    const photoCards = display.map((r, i) => `
+      <div style="position:relative;display:inline-block;">
+        <img src="${thumbUrl(r)}" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1.5px solid #D4CEC6;" onerror="this.style.display='none'" />
+        <button onclick="deleteSinglePhoto('${locationId}', '${r.id}', '${r.path}')"
+          style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;background:#991B1B;color:white;border:none;border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
+      </div>
+    `).join('');
 
     warningEl.innerHTML = `
-      <div style="display:flex;align-items:flex-start;gap:12px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:${display.length ? '10px' : '0'};">
         <div style="flex:1;">
           <strong style="font-size:13px;color:#854d0e;">⚠ This location already has ${display.length} photo${display.length > 1 ? 's' : ''}</strong>
           <p style="font-size:12px;color:#92400e;margin-top:2px;">New uploads will be added alongside existing ones. Sort order will continue from ${display.length + 1}.</p>
@@ -2416,7 +2420,7 @@ async function checkExistingPhotos(locationId) {
           🗑 Remove all
         </button>
       </div>
-      ${thumbs ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">${thumbs}</div>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">${photoCards}</div>
     `;
     warningEl.style.display = 'block';
   } catch(e) { /* silently ignore */ }
@@ -2436,7 +2440,7 @@ async function deleteAllPhotos(locationId) {
   // Delete each display file and its thumbnail from storage
   for (const row of rows) {
     // Build thumb path from display path: uuid/name.webp -> uuid/name-thumb.webp
-    const thumbPath = row.path.replace(/(\.webp|\.jpg)$/, '-thumb$1');
+    const thumbPath = row.path.replace(/-(\d+)(\.webp|\.jpg)$/, '-thumb-$1$2');
     for (const path of [row.path, thumbPath]) {
       try {
         const res = await fetch(`${supabaseUrl}/storage/v1/object/photos/${path}`, {
@@ -2472,6 +2476,34 @@ async function deleteAllPhotos(locationId) {
   } else {
     warningEl.innerHTML = `<p style="font-size:13px;color:#991B1B;">⚠ Finished with ${errors} error(s). Some files may not have been deleted from storage — check manually.</p>`;
   }
+}
+
+async function deleteSinglePhoto(locationId, photoId, path) {
+  if (!confirm('Delete this photo?')) return;
+  const { supabaseUrl, supabaseKey } = getConfig();
+  const thumbPath = path.replace(/-(\d+)(\.webp|\.jpg)$/, '-thumb-$1$2');
+
+  // Delete from storage (display + thumb)
+  for (const p of [path, thumbPath]) {
+    try {
+      await fetch(`${supabaseUrl}/storage/v1/object/photos/${p}`, {
+        method: 'DELETE',
+        headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
+      });
+    } catch(e) {}
+  }
+
+  // Delete from photos table
+  try {
+    await fetch(`${supabaseUrl}/rest/v1/photos?id=eq.${photoId}`, {
+      method: 'DELETE',
+      headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
+    });
+  } catch(e) {}
+
+  // Clear cache and refresh warning
+  delete _existingCountCache[locationId];
+  await checkExistingPhotos(locationId);
 }
 
 function resetPhotoModeSelection() {
