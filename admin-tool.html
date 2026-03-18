@@ -2648,8 +2648,12 @@ async function uploadSinglePhoto(idx) {
   ]);
   if (statusEl) statusEl.textContent = 'Uploading…';
 
-  const filename      = buildPhotoFilename(locationUuid, city, entry.descriptor, idx + 1);
-  const thumbFilename = buildPhotoFilename(locationUuid, city, entry.descriptor + '-thumb', idx + 1);
+  // Get existing count first so filenames and sort_order are both correct
+  const existingCount = await getExistingPhotoCount(locationUuid);
+  const photoNum      = existingCount + idx + 1;
+
+  const filename      = buildPhotoFilename(locationUuid, city, entry.descriptor, photoNum);
+  const thumbFilename = buildPhotoFilename(locationUuid, city, entry.descriptor + '-thumb', photoNum);
   const displayPath   = `${locationUuid}/${filename}`;
   const thumbPath     = `${locationUuid}/${thumbFilename}`;
 
@@ -2662,7 +2666,6 @@ async function uploadSinglePhoto(idx) {
   const publicUrl = `${supabaseUrl}/storage/v1/object/public/photos/${displayPath}`;
 
   // sort_order: if no existing photos, primary=1; otherwise continue from existingCount+1
-  const existingCount = await getExistingPhotoCount(locationUuid);
   let sortOrder;
   if (existingCount === 0 && idx === primaryPhotoIdx) {
     // First batch: primary gets sort_order 1
