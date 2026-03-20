@@ -722,6 +722,7 @@ header {
     <button class="mode-btn active" id="mode-add" onclick="setMode('add')">📍 Locations</button>
     <button class="mode-btn" id="mode-photos" onclick="setMode('photos')">📷 Photos</button>
     <button class="mode-btn" id="mode-recs" onclick="setMode('recs')">⭐ Recs</button>
+    <button class="mode-btn" id="mode-discover" onclick="setMode('discover')">🔍 Discover</button>
   </div>
 
   <!-- Add Location mode -->
@@ -908,6 +909,37 @@ header {
     </div>
   </div>
 </div>
+```
+
+  </div>
+
+  <!-- Discovery mode -->
+
+  <div id="discover-mode-ui" style="display:none;">
+    <div class="page-title">Discover</div>
+    <p class="page-sub">Search Google Places for family-friendly locations. Results are checked against your database so you can see what's already added.</p>
+
+```
+<!-- Search form -->
+<div class="lookup-bar" style="flex-direction:column;gap:12px;">
+  <div style="display:flex;gap:12px;flex-wrap:wrap;">
+    <div class="field-wrap" style="flex:2;min-width:200px;">
+      <label>Search term</label>
+      <input type="text" id="disc-query" placeholder="e.g. speeltuin, kinderboerderij, pancake" style="font-size:16px;" onkeydown="if(event.key==='Enter') runDiscovery()" />
+    </div>
+    <div class="field-wrap" style="flex:1;min-width:140px;">
+      <label>City / area</label>
+      <input type="text" id="disc-city" placeholder="Amsterdam" value="Amsterdam" style="font-size:16px;" onkeydown="if(event.key==='Enter') runDiscovery()" />
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <button class="btn btn-primary" onclick="runDiscovery()" id="disc-btn">🔍 Search</button>
+    <span id="disc-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;"></span>
+  </div>
+</div>
+
+<!-- Results -->
+<div id="disc-results" style="margin-top:8px;"></div>
 ```
 
   </div>
@@ -2265,24 +2297,26 @@ async function supabaseUpload(url, key, path, blob) {
 // ─── Mode toggle ─────────────────────────────────────────────────────────────
 
 function setMode(mode) {
-  const isAdd   = mode === 'add';
-  const isPhoto = mode === 'photos';
-  const isRecs  = mode === 'recs';
+  const isAdd      = mode === 'add';
+  const isPhoto    = mode === 'photos';
+  const isRecs     = mode === 'recs';
+  const isDiscover = mode === 'discover';
 
   document.getElementById('mode-add').classList.toggle('active', isAdd);
   document.getElementById('mode-photos').classList.toggle('active', isPhoto);
   document.getElementById('mode-recs').classList.toggle('active', isRecs);
+  document.getElementById('mode-discover').classList.toggle('active', isDiscover);
 
-  document.getElementById('add-mode-ui').style.display    = isAdd   ? '' : 'none';
-  document.getElementById('photo-mode-ui').style.display  = isPhoto ? '' : 'none';
-  document.getElementById('recs-mode-ui').style.display   = isRecs  ? '' : 'none';
-  document.getElementById('lookup-bar-wrap').style.display = isAdd  ? '' : 'none';
-  document.getElementById('location-form').style.display  = isAdd   ? 'block' : 'none';
+  document.getElementById('add-mode-ui').style.display      = isAdd      ? '' : 'none';
+  document.getElementById('photo-mode-ui').style.display    = isPhoto    ? '' : 'none';
+  document.getElementById('recs-mode-ui').style.display     = isRecs     ? '' : 'none';
+  document.getElementById('discover-mode-ui').style.display = isDiscover ? '' : 'none';
+  document.getElementById('lookup-bar-wrap').style.display  = isAdd      ? '' : 'none';
+  document.getElementById('location-form').style.display    = isAdd      ? 'block' : 'none';
   document.getElementById('status').style.display = 'none';
   document.getElementById('status').textContent = '';
 
   if (isAdd) {
-    // Reset edit mode when switching back to add tab
     editLocationId = null;
     const saveBtn = document.getElementById('save-btn');
     if (saveBtn) saveBtn.innerHTML = saveBtn.innerHTML.replace('Update location', 'Save to Supabase');
@@ -3289,6 +3323,130 @@ function closeLightbox() {
 }
 // Close on Escape key
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// ─── Discovery ───────────────────────────────────────────────────────────────
+
+let discExistingPlaceIds = new Set(); // cache of google_place_ids already in DB
+
+async function loadExistingPlaceIds() {
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  if (!supabaseUrl || !supabaseKey) return;
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?select=google_place_id&google_place_id=not.is.null`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    discExistingPlaceIds = new Set(rows.map(r => r.google_place_id).filter(Boolean));
+  } catch(e) {}
+}
+
+async function runDiscovery() {
+  const query = document.getElementById('disc-query').value.trim();
+  const city  = document.getElementById('disc-city').value.trim() || 'Amsterdam';
+  if (!query) return alert('Enter a search term first.');
+
+  const { googleKey } = getConfig();
+  if (!googleKey) return alert('Please enter your Google Places API key in the config panel.');
+
+  const btn    = document.getElementById('disc-btn');
+  const status = document.getElementById('disc-status');
+  const results = document.getElementById('disc-results');
+
+  btn.disabled = true;
+  btn.textContent = 'Searching…';
+  status.textContent = '';
+  results.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Searching…</div>';
+
+  // Refresh existing place IDs before each search
+  await loadExistingPlaceIds();
+
+  try {
+    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': googleKey,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.types,places.rating,places.userRatingCount,places.websiteUri,places.googleMapsUri',
+      },
+      body: JSON.stringify({
+        textQuery: `${query} ${city}`,
+        locationBias: {
+          circle: { center: { latitude: 52.3676, longitude: 4.9041 }, radius: 80000 }
+        },
+        maxResultCount: 20,
+      }),
+    });
+
+    const data = await res.json();
+    const places = data.places || [];
+
+    if (!places.length) {
+      results.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No results found. Try a different search term.</div>';
+      status.textContent = '0 results';
+      return;
+    }
+
+    const newPlaces      = places.filter(p => !discExistingPlaceIds.has(p.id));
+    const existingPlaces = places.filter(p => discExistingPlaceIds.has(p.id));
+
+    status.textContent = `${places.length} results · ${newPlaces.length} new · ${existingPlaces.length} already in DB`;
+
+    const renderCard = (p, alreadyAdded) => {
+      const types = (p.types || []).slice(0, 3).join(', ').replace(/_/g, ' ');
+      const rating = p.rating ? `⭐ ${p.rating} (${p.userRatingCount || 0})` : '';
+      return `
+        <div style="padding:16px;border-radius:10px;border:1.5px solid ${alreadyAdded ? '#D4CEC6' : '#D4CEC6'};background:${alreadyAdded ? '#F7F3ED' : '#FFFFFF'};display:flex;gap:14px;align-items:flex-start;opacity:${alreadyAdded ? '0.6' : '1'};">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+              <strong style="font-size:14px;color:#1A1714;">${p.displayName?.text || '—'}</strong>
+              ${alreadyAdded ? '<span style="background:#D8EDDF;color:#2D6A4F;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">✓ In database</span>' : '<span style="background:#dff0f5;color:#4daabb;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">New</span>'}
+            </div>
+            <div style="font-size:12px;color:#6B6560;margin-bottom:4px;">${p.formattedAddress || ''}</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              ${rating ? `<span style="font-size:11px;color:#A09A94;">${rating}</span>` : ''}
+              ${types ? `<span style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;">${types}</span>` : ''}
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+            ${!alreadyAdded ? `<button onclick="discoverAddLocation('${p.id}')" class="btn btn-primary" style="font-size:12px;padding:7px 14px;white-space:nowrap;">+ Add location</button>` : ''}
+            ${p.googleMapsUri ? `<a href="${p.googleMapsUri}" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:7px 14px;text-decoration:none;text-align:center;">Maps ↗</a>` : ''}
+          </div>
+        </div>`;
+    };
+
+    results.innerHTML = `
+      ${newPlaces.length ? `
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.07em;margin:16px 0 8px;">New (${newPlaces.length})</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${newPlaces.map(p => renderCard(p, false)).join('')}
+        </div>` : ''}
+      ${existingPlaces.length ? `
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.07em;margin:20px 0 8px;">Already in database (${existingPlaces.length})</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${existingPlaces.map(p => renderCard(p, true)).join('')}
+        </div>` : ''}
+    `;
+
+  } catch(e) {
+    results.innerHTML = `<div style="padding:24px;color:#991B1B;font-size:13px;">Error: ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 Search';
+  }
+}
+
+async function discoverAddLocation(placeId) {
+  // Switch to Locations tab, put the Place ID in, and trigger lookup
+  setMode('add');
+  setAddSubMode('new');
+  document.getElementById('maps-url').value = placeId;
+  document.getElementById('place-autocomplete').value = '';
+  document.getElementById('autocomplete-results').innerHTML = '';
+  await lookupPlace();
+  // Scroll to top of form
+  document.getElementById('lookup-bar-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 // ─── Places Autocomplete ─────────────────────────────────────────────────────
 
