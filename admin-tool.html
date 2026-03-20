@@ -3372,7 +3372,7 @@ async function runDiscovery() {
       body: JSON.stringify({
         textQuery: `${query} ${city}`,
         locationBias: {
-          circle: { center: { latitude: 52.3676, longitude: 4.9041 }, radius: 80000 }
+          circle: { center: { latitude: 52.3676, longitude: 4.9041 }, radius: 50000 }
         },
         maxResultCount: 20,
       }),
