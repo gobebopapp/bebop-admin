@@ -3367,7 +3367,7 @@ async function runDiscovery() {
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': googleKey,
-        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.types,places.rating,places.userRatingCount,places.websiteUri,places.googleMapsUri',
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.types,places.rating,places.userRatingCount,places.websiteUri',
       },
       body: JSON.stringify({
         textQuery: `${query} ${city}`,
@@ -3410,7 +3410,7 @@ async function runDiscovery() {
           </div>
           <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
             ${!alreadyAdded ? `<button onclick="discoverAddLocation('${p.id}')" class="btn btn-primary" style="font-size:12px;padding:7px 14px;white-space:nowrap;">+ Add location</button>` : ''}
-            ${p.googleMapsUri ? `<a href="${p.googleMapsUri}" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:7px 14px;text-decoration:none;text-align:center;">Maps ↗</a>` : ''}
+            <a href="https://www.google.com/maps/place/?q=place_id:${p.id}" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:7px 14px;text-decoration:none;text-align:center;">Maps ↗</a>
           </div>
         </div>`;
     };
