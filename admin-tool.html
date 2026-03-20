@@ -3367,7 +3367,7 @@ async function runDiscovery() {
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': googleKey,
-        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.types,places.rating,places.userRatingCount,places.primaryType',
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.primaryType',
       },
       body: JSON.stringify({
         textQuery: `${query} ${city}`,
@@ -3379,6 +3379,10 @@ async function runDiscovery() {
     });
 
     const data = await res.json();
+    if (!res.ok) {
+      console.error('Places API error:', JSON.stringify(data));
+      throw new Error(data.error?.message || `HTTP ${res.status}`);
+    }
     const places = data.places || [];
 
     if (!places.length) {
@@ -3488,6 +3492,10 @@ async function searchPlacesAutocomplete(query) {
       }),
     });
     const data = await res.json();
+    if (!res.ok) {
+      console.error('Places API error:', JSON.stringify(data));
+      throw new Error(data.error?.message || `HTTP ${res.status}`);
+    }
     const places = data.places || [];
 
     if (!places.length) {
