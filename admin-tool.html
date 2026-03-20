@@ -3367,7 +3367,7 @@ async function runDiscovery() {
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': googleKey,
-        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.types,places.rating,places.userRatingCount,places.websiteUri',
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.types,places.rating,places.userRatingCount,places.primaryType',
       },
       body: JSON.stringify({
         textQuery: `${query} ${city}`,
@@ -3393,7 +3393,7 @@ async function runDiscovery() {
     status.textContent = `${places.length} results · ${newPlaces.length} new · ${existingPlaces.length} already in DB`;
 
     const renderCard = (p, alreadyAdded) => {
-      const types = (p.types || []).slice(0, 3).join(', ').replace(/_/g, ' ');
+      const types = (p.primaryType || (p.types || [])[0] || '').replace(/_/g, ' ');
       const rating = p.rating ? `⭐ ${p.rating} (${p.userRatingCount || 0})` : '';
       return `
         <div style="padding:16px;border-radius:10px;border:1.5px solid ${alreadyAdded ? '#D4CEC6' : '#D4CEC6'};background:${alreadyAdded ? '#F7F3ED' : '#FFFFFF'};display:flex;gap:14px;align-items:flex-start;opacity:${alreadyAdded ? '0.6' : '1'};">
