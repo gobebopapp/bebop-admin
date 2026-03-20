@@ -598,6 +598,12 @@ header {
   .recent-item { padding: 12px 14px; }
 }
 
+/* ── Lightbox ── */
+#photo-lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:9999; align-items:center; justify-content:center; padding:20px; }
+#photo-lightbox.open { display:flex; }
+#photo-lightbox img { max-width:100%; max-height:90vh; border-radius:8px; object-fit:contain; }
+#photo-lightbox-close { position:absolute; top:16px; right:20px; font-size:28px; color:white; cursor:pointer; background:none; border:none; line-height:1; }
+
 /* Aspect ratio overlay on preview images */
 .photo-preview-wrap {
   position: relative;
@@ -909,16 +915,31 @@ header {
   <!-- Lookup bar -->
 
   <div id="lookup-bar-wrap">
-  <div class="lookup-bar">
-    <div class="field-wrap">
-      <label>Google Maps URL or Place ID</label>
-      <input type="text" id="maps-url" placeholder="https://maps.google.com/maps/place/Vondelpark/... or ChIJ..." />
+  <div class="lookup-bar" style="flex-direction:column;gap:12px;">
+    <!-- Place search autocomplete -->
+    <div class="field-wrap" style="width:100%;">
+      <label>Search for a place</label>
+      <input type="text" id="place-autocomplete" placeholder="Start typing a place name…" style="font-size:16px;width:100%;" autocomplete="off" />
+      <div id="autocomplete-results" style="display:flex;flex-direction:column;gap:4px;margin-top:6px;"></div>
     </div>
-    <div style="padding-top:22px;">
-      <button class="btn btn-primary" onclick="lookupPlace()" id="lookup-btn">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="white" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Lookup
-      </button>
+    <!-- Divider -->
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="flex:1;height:1px;background:#D4CEC6;"></div>
+      <span style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;">or paste Place ID directly</span>
+      <div style="flex:1;height:1px;background:#D4CEC6;"></div>
+    </div>
+    <!-- Direct Place ID input -->
+    <div style="display:flex;gap:10px;align-items:flex-end;">
+      <div class="field-wrap" style="flex:1;">
+        <label>Google Maps URL or Place ID</label>
+        <input type="text" id="maps-url" placeholder="ChIJ..." />
+      </div>
+      <div>
+        <button class="btn btn-primary" onclick="lookupPlace()" id="lookup-btn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="white" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Lookup
+        </button>
+      </div>
     </div>
   </div>
   </div><!-- /lookup-bar-wrap -->
@@ -1300,6 +1321,9 @@ function loadLocationForEdit(loc) {
   document.getElementById('f-name').value      = loc.name || '';
   document.getElementById('f-place-id').value  = loc.google_place_id || '';
   document.getElementById('f-maps-url').value  = loc.google_maps_url || '';
+  // Update the Open ↗ links
+  const mapsLink = document.getElementById('maps-url-link');
+  if (mapsLink && loc.google_maps_url) mapsLink.href = loc.google_maps_url;
   document.getElementById('f-address').value   = loc.address || '';
   document.getElementById('f-city').value      = loc.city || '';
   document.getElementById('f-province').value  = loc.province || '';
@@ -1308,6 +1332,7 @@ function loadLocationForEdit(loc) {
 
   // Manual fields
   document.getElementById('f-website').value         = loc.website || '';
+  if (loc.website) updateWebsiteLink(loc.website);
   document.getElementById('f-indoor-outdoor').value  = loc.indoor_outdoor || '';
   document.getElementById('f-cost').value            = loc.cost || '';
   document.getElementById('f-description').value     = loc.description || '';
@@ -2573,6 +2598,7 @@ function renderPhotoModePreviews() {
           <img src="${ev.target.result}" alt="preview" style="width:100%;height:auto;border-radius:8px;border:1.5px solid ${isPrimary ? '#4daabb' : '#D4CEC6'};display:block;" />
           <div class="ratio-overlay"></div>
           <button class="remove-photo" onclick="removePhotoMode(${idx})" style="position:absolute;top:6px;right:6px;">✕</button>
+          <button onclick="openLightbox('${ev.target.result}')" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.45);color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;backdrop-filter:blur(2px);">⤢ Enlarge</button>
         </div>
         <div style="margin-top:8px;">
           <button id="pm-primary-btn-${idx}" onclick="setPrimaryPhoto(${idx})"
@@ -3250,9 +3276,94 @@ async function deleteRecommendation(id) {
   loadRecommendations();
 }
 
+// ─── Lightbox ────────────────────────────────────────────────────────────────
+function openLightbox(src) {
+  document.getElementById('photo-lightbox-img').src = src;
+  document.getElementById('photo-lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('photo-lightbox').classList.remove('open');
+  document.getElementById('photo-lightbox-img').src = '';
+  document.body.style.overflow = '';
+}
+// Close on Escape key
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// ─── Places Autocomplete ─────────────────────────────────────────────────────
+
+let autocompleteTimeout = null;
+
+function initPlacesAutocomplete() {
+  const input = document.getElementById('place-autocomplete');
+  if (!input) return;
+  input.addEventListener('input', () => {
+    clearTimeout(autocompleteTimeout);
+    const q = input.value.trim();
+    if (q.length < 3) {
+      document.getElementById('autocomplete-results').innerHTML = '';
+      return;
+    }
+    autocompleteTimeout = setTimeout(() => searchPlacesAutocomplete(q), 300);
+  });
+}
+
+async function searchPlacesAutocomplete(query) {
+  const { googleKey } = getConfig();
+  if (!googleKey) return;
+  const resultsEl = document.getElementById('autocomplete-results');
+
+  try {
+    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': googleKey,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress',
+      },
+      body: JSON.stringify({
+        textQuery: query,
+        locationBias: {
+          circle: { center: { latitude: 52.3676, longitude: 4.9041 }, radius: 50000 }
+        },
+        maxResultCount: 5,
+      }),
+    });
+    const data = await res.json();
+    const places = data.places || [];
+
+    if (!places.length) {
+      resultsEl.innerHTML = '<div style="font-size:12px;color:#A09A94;padding:6px 0;">No results found</div>';
+      return;
+    }
+
+    resultsEl.innerHTML = places.map(p => `
+      <div onclick="selectAutocompletePlace('${p.id}', this)"
+        style="padding:10px 14px;border-radius:8px;border:1.5px solid #D4CEC6;background:#FFFFFF;cursor:pointer;transition:border-color 0.15s;"
+        onmouseover="this.style.borderColor='#4daabb'" onmouseout="this.style.borderColor='#D4CEC6'">
+        <div style="font-size:13px;font-weight:600;color:#1A1714;">${p.displayName?.text || ''}</div>
+        <div style="font-size:11px;color:#A09A94;margin-top:2px;font-family:'DM Mono',monospace;">${p.formattedAddress || ''}</div>
+      </div>
+    `).join('');
+  } catch(e) {
+    resultsEl.innerHTML = `<div style="font-size:12px;color:#991B1B;padding:6px 0;">Search failed: ${e.message}</div>`;
+  }
+}
+
+async function selectAutocompletePlace(placeId, el) {
+  // Clear autocomplete UI
+  document.getElementById('place-autocomplete').value = el.querySelector('div').textContent;
+  document.getElementById('autocomplete-results').innerHTML = '';
+
+  // Put place ID in the field and trigger lookup
+  document.getElementById('maps-url').value = placeId;
+  await lookupPlace();
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 loadConfig();
+initPlacesAutocomplete();
 
 // Open config on first load if no API key set
 if (!localStorage.getItem('bebop_google_key')) {
@@ -3260,6 +3371,13 @@ if (!localStorage.getItem('bebop_google_key')) {
   document.getElementById('config-toggle').classList.add('open');
 }
 </script>
+
+  <!-- Lightbox -->
+
+  <div id="photo-lightbox" onclick="closeLightbox()">
+    <button id="photo-lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="photo-lightbox-img" src="" alt="" onclick="event.stopPropagation()" />
+  </div>
 
 </body>
 </html>
