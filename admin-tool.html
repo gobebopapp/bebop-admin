@@ -706,7 +706,11 @@ header {
       </div>
       <div class="field">
         <label>Supabase Anon Key</label>
-        <input type="password" id="cfg-supabase-key" placeholder="eyJ..." oninput="saveConfig()" />
+        <input type="password" id="cfg-supabase-key" placeholder="eyJ... (anon key)" oninput="saveConfig()" />
+      </div>
+      <div class="field">
+        <label>Supabase Service Role Key</label>
+        <input type="password" id="cfg-supabase-service-key" placeholder="eyJ... (service role key — for writes)" oninput="saveConfig()" />
       </div>
       <div class="field">
         <label>Supabase Table Name</label>
@@ -1237,6 +1241,7 @@ function saveConfig() {
   localStorage.setItem('bebop_anthropic_key', document.getElementById('cfg-anthropic-key').value);
   localStorage.setItem('bebop_supabase_url', document.getElementById('cfg-supabase-url').value);
   localStorage.setItem('bebop_supabase_key', document.getElementById('cfg-supabase-key').value);
+  localStorage.setItem('bebop_supabase_service_key', document.getElementById('cfg-supabase-service-key').value);
   localStorage.setItem('bebop_supabase_table', document.getElementById('cfg-supabase-table').value);
 }
 
@@ -1245,6 +1250,7 @@ function loadConfig() {
   document.getElementById('cfg-anthropic-key').value = localStorage.getItem('bebop_anthropic_key') || '';
   document.getElementById('cfg-supabase-url').value = localStorage.getItem('bebop_supabase_url') || '';
   document.getElementById('cfg-supabase-key').value = localStorage.getItem('bebop_supabase_key') || '';
+  document.getElementById('cfg-supabase-service-key').value = localStorage.getItem('bebop_supabase_service_key') || '';
   document.getElementById('cfg-supabase-table').value = localStorage.getItem('bebop_supabase_table') || 'locations';
 }
 
@@ -1254,6 +1260,7 @@ function getConfig() {
     anthropicKey: localStorage.getItem('bebop_anthropic_key') || '',
     supabaseUrl: localStorage.getItem('bebop_supabase_url') || '',
     supabaseKey: localStorage.getItem('bebop_supabase_key') || '',
+    serviceKey: localStorage.getItem('bebop_supabase_service_key') || '',
     supabaseTable: localStorage.getItem('bebop_supabase_table') || 'locations',
   };
 }
@@ -2494,7 +2501,8 @@ async function checkExistingPhotos(locationId) {
 async function deleteAllPhotos(locationId) {
   if (!confirm('Delete all photos for this location? This removes both the files in storage and the database records.')) return;
 
-  const { supabaseUrl, supabaseKey } = getConfig();
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
   const warningEl = document.getElementById('existing-photos-warning');
   const rows = warningEl._photoRows || [];
 
@@ -2510,7 +2518,7 @@ async function deleteAllPhotos(locationId) {
       try {
         const res = await fetch(`${supabaseUrl}/storage/v1/object/photos/${path}`, {
           method: 'DELETE',
-          headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
+          headers: { 'apikey': writeKey, 'Authorization': `Bearer ${writeKey}` },
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
@@ -2526,7 +2534,7 @@ async function deleteAllPhotos(locationId) {
   try {
     const res = await fetch(`${supabaseUrl}/rest/v1/photos?location_id=eq.${locationId}`, {
       method: 'DELETE',
-      headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+      headers: { 'apikey': writeKey, 'Authorization': `Bearer ${writeKey}` }
     });
     if (!res.ok) errors++;
   } catch(e) { errors++; }
@@ -2545,7 +2553,8 @@ async function deleteAllPhotos(locationId) {
 
 async function deleteSinglePhoto(locationId, photoId, path) {
   if (!confirm('Delete this photo?')) return;
-  const { supabaseUrl, supabaseKey } = getConfig();
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
   const thumbPath = path.replace(/-(\d+)(\.webp|\.jpg)$/, '-thumb-$1$2');
 
   // Delete from storage (display + thumb)
@@ -2562,7 +2571,7 @@ async function deleteSinglePhoto(locationId, photoId, path) {
   try {
     await fetch(`${supabaseUrl}/rest/v1/photos?id=eq.${photoId}`, {
       method: 'DELETE',
-      headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
+      headers: { 'apikey': writeKey, 'Authorization': `Bearer ${writeKey}` },
     });
   } catch(e) {}
 
@@ -2691,7 +2700,8 @@ function setPrimaryPhoto(idx) {
 async function uploadSinglePhoto(idx) {
   const entry = photoModeQueue[idx];
   if (!entry) return;
-  const { supabaseUrl, supabaseKey } = getConfig();
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
 
   // Always use UUID as folder — stable, not dependent on Google Place ID
   const locationUuid = photoModeRecord.id;
@@ -2718,8 +2728,8 @@ async function uploadSinglePhoto(idx) {
   const thumbPath     = `${locationUuid}/${thumbFilename}`;
 
   await Promise.all([
-    supabaseUpload(supabaseUrl, supabaseKey, displayPath, displayBlob),
-    supabaseUpload(supabaseUrl, supabaseKey, thumbPath,   thumbBlob),
+    supabaseUpload(supabaseUrl, writeKey, displayPath, displayBlob),
+    supabaseUpload(supabaseUrl, writeKey, thumbPath,   thumbBlob),
   ]);
 
   // Build public URL
@@ -2747,8 +2757,8 @@ async function uploadSinglePhoto(idx) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'apikey': supabaseKey,
-      'Authorization': `Bearer ${supabaseKey}`,
+      'apikey': writeKey,
+      'Authorization': `Bearer ${writeKey}`,
       'Prefer': 'return=minimal',
     },
     body: JSON.stringify({
@@ -2920,7 +2930,8 @@ function exportJSON() {
 // ─── Save to Supabase ─────────────────────────────────────────────────────────
 
 async function saveToSupabase() {
-  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  const { supabaseUrl, supabaseKey, serviceKey, supabaseTable } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
 
   if (!supabaseUrl || !supabaseKey) {
     document.getElementById('config-panel').classList.add('visible');
@@ -2947,8 +2958,8 @@ async function saveToSupabase() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
+          'apikey': writeKey,
+          'Authorization': `Bearer ${writeKey}`,
           'Prefer': 'return=minimal',
         },
         body: JSON.stringify(data),
@@ -2959,8 +2970,8 @@ async function saveToSupabase() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
+          'apikey': writeKey,
+          'Authorization': `Bearer ${writeKey}`,
           'Prefer': 'return=representation',
         },
         body: JSON.stringify(data),
@@ -3134,7 +3145,8 @@ Return ONLY valid JSON — no preamble, start with { end with }:
 }
 
 async function saveRecommendation() {
-  const { supabaseUrl, supabaseKey } = getConfig();
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
   if (!supabaseUrl || !supabaseKey) return alert('Please configure Supabase in the config panel.');
   if (!recRecord) return alert('Please select a location first.');
 
@@ -3163,8 +3175,8 @@ async function saveRecommendation() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`,
+        'apikey': writeKey,
+        'Authorization': `Bearer ${writeKey}`,
         'Prefer': 'return=minimal',
       },
       body: JSON.stringify(payload),
@@ -3286,7 +3298,8 @@ function toggleRecArchive() {
 }
 
 async function toggleRecActiveById(id, active) {
-  const { supabaseUrl, supabaseKey } = getConfig();
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
   await fetch(`${supabaseUrl}/rest/v1/recommendations?id=eq.${id}`, {
     method: 'PATCH',
     headers: {
@@ -3302,10 +3315,11 @@ async function toggleRecActiveById(id, active) {
 
 async function deleteRecommendation(id) {
   if (!confirm('Delete this recommendation?')) return;
-  const { supabaseUrl, supabaseKey } = getConfig();
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
   await fetch(`${supabaseUrl}/rest/v1/recommendations?id=eq.${id}`, {
     method: 'DELETE',
-    headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
+    headers: { 'apikey': writeKey, 'Authorization': `Bearer ${writeKey}` },
   });
   loadRecommendations();
 }
