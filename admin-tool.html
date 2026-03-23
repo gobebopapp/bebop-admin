@@ -555,9 +555,12 @@ header {
   .fields-grid { grid-template-columns: 1fr !important; gap: 14px; }
   .coords-row { grid-template-columns: 1fr 1fr; } /* keep coords side by side */
 
-  /* Bigger tap targets for pills */
-  .check-pill { padding: 11px 14px; font-size: 14px; }
-  .cat-pill   { padding: 11px 14px; font-size: 14px; }
+  /* Bigger tap targets for pills — constrain width to prevent overflow */
+  .check-pill { padding: 11px 14px; font-size: 14px; max-width: calc(50% - 4px); }
+  .cat-pill   { padding: 11px 14px; font-size: 14px; max-width: calc(50% - 4px); }
+  .sec-pill   { max-width: calc(50% - 4px); word-break: break-word; }
+  .category-pills { overflow: hidden; }
+  .sec-pills { overflow: hidden; }
 
   /* Age range */
   .age-range-row input { max-width: 70px; }
@@ -2168,7 +2171,7 @@ function handlePhotoFiles(files) {
   const toAdd = Array.from(files).slice(0, remaining);
   toAdd.forEach(file => {
     if (!file.type.startsWith('image/')) return;
-    const entry = { file, descriptor: PHOTO_DESCRIPTORS[0], status: 'ready' };
+    const entry = { file, descriptor: '', status: 'ready' };
     photoQueue.push(entry);
     renderPhotoPreviews();
   });
@@ -2608,8 +2611,7 @@ function handlePhotoModeFiles(files) {
   Array.from(files).slice(0, remaining).forEach(file => {
     if (!file.type.startsWith('image/')) return;
     const slotIdx = photoModeQueue.length; // before push
-    const autoDesc = AUTO_DESCRIPTORS[slotIdx] || PHOTO_DESCRIPTORS[0];
-    photoModeQueue.push({ file, descriptor: autoDesc, altText: '', uploadStatus: 'pending' });
+    photoModeQueue.push({ file, descriptor: '', altText: '', uploadStatus: 'pending' });
   });
   renderPhotoModePreviews();
 }
@@ -3497,17 +3499,19 @@ async function generatePageTitle() {
   btn.disabled = true;
   btn.textContent = '✦ Generating…';
 
-  const prompt = `Generate a concise, SEO-friendly page title for a family-friendly location listing.
+  const prompt = `Generate a concise, SEO-friendly page title for a family-friendly location listing on GoBebop, a Dutch family guide.
 
 Location: ${name}
 City: ${city || 'Amsterdam'}
 Category: ${secLead || cats || 'family venue'}
 
 Rules:
-- Format: "[Location name] — [brief descriptor] in [city]"
-- Descriptor should be specific and searchable (e.g. "Free Outdoor Playground", "Indoor Climbing Centre", "Kids Pancake Restaurant")
+- Lead with what Dutch parents actually search for — the activity or venue type, not the brand name
+- Include the Dutch term where natural (e.g. "kinderboerderij", "speeltuin", "pannenkoekenrestaurant")
+- Format: "[Searchable type] in [city] — [Location name]" OR "[Location name] — [Dutch type] & [key detail] in [city]"
+- Be specific: "Gratis Outdoor Speeltuin" beats "Playground", "Pannenkoekenrestaurant" beats "Restaurant"
 - Max 70 characters total
-- Plain text only, no quotes
+- Plain text only, no quotes, no markdown
 - Return only the title, nothing else`;
 
   try {
