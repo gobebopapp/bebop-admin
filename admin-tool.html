@@ -1181,6 +1181,13 @@ header {
   <div class="section-body">
     <div class="fields-grid">
       <div class="field full">
+        <label>Page title <span style="color:#A09A94;font-weight:400;">(optional — for SEO. e.g. "Speeltuin Blijdag — Free Outdoor Playground in Amsterdam")</span></label>
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <input type="text" id="f-page-title" placeholder="Leave blank to auto-generate from name + category" style="flex:1;" />
+          <button class="btn btn-enrich" onclick="generatePageTitle()" id="page-title-btn" style="white-space:nowrap;flex-shrink:0;">✦ Generate</button>
+        </div>
+      </div>
+      <div class="field full">
         <div class="field-with-info">
           <label>Description</label>
           <span class="info-btn" onclick="toggleReasoning('reasoning-description')" title="AI reasoning">?</span>
@@ -1376,6 +1383,7 @@ function loadLocationForEdit(loc) {
   document.getElementById('f-cost').value            = loc.cost || '';
   document.getElementById('f-description').value     = loc.description || '';
   document.getElementById('f-tips').value            = loc.tips || '';
+  document.getElementById('f-page-title').value      = loc.page_title || '';
   document.getElementById('f-opening-status').value  = loc.opening_status || '';
   document.getElementById('f-status').value          = loc.status || 'draft';
   document.getElementById('f-age-min').value         = loc.ideal_age_min ?? '';
@@ -1586,7 +1594,7 @@ function clearManualFields() {
   document.querySelectorAll('.check-pill').forEach(p => p.classList.remove('checked', 'denied'));
   // Text fields
   resetSecondaryPills();
-  ['f-indoor-outdoor','f-cost','f-description','f-tips',
+  ['f-indoor-outdoor','f-cost','f-description','f-tips','f-page-title',
    'f-icon-url','f-website'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.value = ''; }
@@ -1622,7 +1630,10 @@ function clearManualFields() {
 function populateForm(place) {
   clearManualFields();
   // Places API (New) field names
-  document.getElementById('f-name').value = place.displayName?.text || '';
+  // Only set name if field is empty — preserve any manual edits
+  if (!document.getElementById('f-name').value) {
+    document.getElementById('f-name').value = place.displayName?.text || '';
+  }
   document.getElementById('f-address').value = place.formattedAddress || '';
   const r6 = v => v != null ? parseFloat(v.toFixed(6)) : '';
   document.getElementById('f-lat').value = r6(place.location?.latitude);
@@ -1827,7 +1838,7 @@ function collectFormData() {
     secondary_category_lead: leadSecondary || null,
     indoor_outdoor:    document.getElementById('f-indoor-outdoor').value || null,
     // Ideal age range
-    ideal_age_min:     parseInt(document.getElementById('f-age-min').value) || null,
+    ideal_age_min:     document.getElementById('f-age-min').value !== '' ? parseInt(document.getElementById('f-age-min').value) : null,
     ideal_age_max:     pillState['no_max'] ? null : (parseInt(document.getElementById('f-age-max').value) || null),
     all_ages:          pillState['all_ages'] ?? false,
     // Age group filters (separate boolean columns)
@@ -1849,6 +1860,7 @@ function collectFormData() {
     // Description & tips
     description:       document.getElementById('f-description').value || null,
     tips:              document.getElementById('f-tips').value || null,
+    page_title:        document.getElementById('f-page-title').value || null,
   };
 }
 
@@ -2173,7 +2185,7 @@ function renderPhotoPreviews() {
     card.className = 'photo-preview-card';
     card.id = 'photo-card-' + idx;
 
-    const descriptorOpts = PHOTO_DESCRIPTORS.map(d =>
+    const descriptorOpts = `<option value="">— select —</option>` + PHOTO_DESCRIPTORS.map(d =>
       `<option value="${d}" ${d === entry.descriptor ? 'selected' : ''}>${d}</option>`
     ).join('');
 
@@ -2589,7 +2601,7 @@ function resetPhotoModeSelection() {
 }
 
 // Auto-descriptor defaults by slot position
-const AUTO_DESCRIPTORS = ['exterior', 'interior', 'play-area'];
+const AUTO_DESCRIPTORS = ['', '', ''];
 
 function handlePhotoModeFiles(files) {
   const remaining = MAX_PHOTOS - photoModeQueue.length;
@@ -2613,7 +2625,7 @@ function renderPhotoModePreviews() {
   photoModeQueue.forEach((entry, idx) => {
     const card = document.createElement('div');
     card.className = 'photo-preview-card';
-    const descriptorOpts = PHOTO_DESCRIPTORS.map(d =>
+    const descriptorOpts = `<option value="">— select —</option>` + PHOTO_DESCRIPTORS.map(d =>
       `<option value="${d}" ${d === entry.descriptor ? 'selected' : ''}>${d}</option>`
     ).join('');
     const filename = buildPhotoFilename(placeId, city, entry.descriptor, existingCount + idx + 1);
@@ -2805,6 +2817,8 @@ async function uploadPhotoMode() {
   if (!photoModeQueue.length) return alert('Add at least one photo first.');
   const existingPhotoCount = (photoModeRecord && _existingCountCache[photoModeRecord.id]) || 0;
   if (primaryPhotoIdx === null && existingPhotoCount === 0) return alert('Please set a primary photo before uploading. Tap "☆ Set as primary" on one of the photos.');
+  const missingDesc = photoModeQueue.findIndex(e => !e.descriptor);
+  if (missingDesc !== -1) return alert(`Please select a descriptor for photo ${missingDesc + 1} before uploading.`);
   const btn = document.getElementById('pm-upload-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
 
@@ -3464,6 +3478,62 @@ async function discoverAddLocation(placeId) {
   await lookupPlace();
   // Scroll to top of form
   document.getElementById('lookup-bar-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── Page title generator ────────────────────────────────────────────────────
+
+async function generatePageTitle() {
+  const { anthropicKey } = getConfig();
+  if (!anthropicKey) return alert('Please enter your Anthropic API key in the config panel.');
+
+  const name    = document.getElementById('f-name').value.trim();
+  const city    = document.getElementById('f-city').value.trim();
+  const secLead = leadSecondary || selectedSecondaries[0] || '';
+  const cats    = getSelectedCategories().join(', ');
+
+  if (!name) return alert('Please fill in the location name first.');
+
+  const btn = document.getElementById('page-title-btn');
+  btn.disabled = true;
+  btn.textContent = '✦ Generating…';
+
+  const prompt = `Generate a concise, SEO-friendly page title for a family-friendly location listing.
+
+Location: ${name}
+City: ${city || 'Amsterdam'}
+Category: ${secLead || cats || 'family venue'}
+
+Rules:
+- Format: "[Location name] — [brief descriptor] in [city]"
+- Descriptor should be specific and searchable (e.g. "Free Outdoor Playground", "Indoor Climbing Centre", "Kids Pancake Restaurant")
+- Max 70 characters total
+- Plain text only, no quotes
+- Return only the title, nothing else`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 100,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const title = data.content?.[0]?.text?.trim().replace(/^["']|["']$/g, '');
+    if (title) document.getElementById('f-page-title').value = title;
+  } catch(e) {
+    alert('Failed to generate title: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ Generate';
+  }
 }
 
 // ─── Places Autocomplete ─────────────────────────────────────────────────────
