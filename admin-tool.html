@@ -947,6 +947,27 @@ header {
 
 <!-- Results -->
 <div id="disc-results" style="margin-top:8px;"></div>
+
+<!-- Batch title generator -->
+<div class="form-section" style="margin-top:24px;">
+  <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
+    <div class="section-title">✦ Batch page title generator</div>
+  </div>
+  <div class="section-body">
+    <p style="font-size:13px;color:#6B6560;margin-bottom:16px;line-height:1.6;">Generates SEO page titles for all locations that don't have one yet. Uses Claude Haiku — approximately €0.03 for 300 locations.</p>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="btn btn-enrich" onclick="startBatchTitles()" id="batch-title-btn">✦ Generate missing titles</button>
+      <button class="btn btn-secondary" onclick="previewBatchTitles()" id="batch-preview-btn">Preview locations without titles</button>
+    </div>
+    <div id="batch-title-progress" style="display:none;margin-top:16px;">
+      <div style="height:6px;background:#E4DDD3;border-radius:3px;overflow:hidden;margin-bottom:8px;">
+        <div id="batch-title-bar" style="height:100%;background:#4daabb;width:0%;transition:width 0.3s;border-radius:3px;"></div>
+      </div>
+      <div id="batch-title-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;"></div>
+    </div>
+    <div id="batch-title-results" style="margin-top:12px;max-height:320px;overflow-y:auto;"></div>
+  </div>
+</div>
 ```
 
   </div>
@@ -3537,6 +3558,158 @@ Rules:
   } finally {
     btn.disabled = false;
     btn.textContent = '✦ Generate';
+  }
+}
+
+// ─── Batch title generator ───────────────────────────────────────────────────
+
+async function previewBatchTitles() {
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+  const resultsEl = document.getElementById('batch-title-results');
+  resultsEl.innerHTML = '<p style="font-size:12px;color:#A09A94;">Loading…</p>';
+
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category&order=name.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    if (!rows.length) {
+      resultsEl.innerHTML = '<p style="font-size:13px;color:#2D6A4F;">✓ All locations have a page title!</p>';
+      return;
+    }
+    resultsEl.innerHTML = `
+      <p style="font-size:12px;color:#A09A94;margin-bottom:8px;">${rows.length} locations without a page title:</p>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        ${rows.map(r => `
+          <div style="font-size:12px;padding:6px 10px;background:#F7F3ED;border-radius:6px;display:flex;gap:8px;">
+            <span style="font-weight:600;color:#1A1714;">${r.name}</span>
+            <span style="color:#A09A94;">${r.city || ''}</span>
+          </div>`).join('')}
+      </div>`;
+  } catch(e) {
+    resultsEl.innerHTML = `<p style="font-size:12px;color:#991B1B;">Error: ${e.message}</p>`;
+  }
+}
+
+async function startBatchTitles() {
+  const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, anthropicKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+  if (!anthropicKey) return alert('Configure your Anthropic API key first.');
+
+  const btn = document.getElementById('batch-title-btn');
+  const progressEl = document.getElementById('batch-title-progress');
+  const barEl = document.getElementById('batch-title-bar');
+  const statusEl = document.getElementById('batch-title-status');
+  const resultsEl = document.getElementById('batch-title-results');
+
+  if (!confirm('This will generate page titles for all locations currently missing one. Continue?')) return;
+
+  btn.disabled = true;
+  progressEl.style.display = 'block';
+  resultsEl.innerHTML = '';
+
+  try {
+    // Fetch all locations without a page title
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category&order=name.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const locations = await res.json();
+
+    if (!locations.length) {
+      statusEl.textContent = '✓ All locations already have titles.';
+      btn.disabled = false;
+      return;
+    }
+
+    statusEl.textContent = `Found ${locations.length} locations. Starting…`;
+    const log = [];
+    let done = 0, errors = 0;
+
+    for (const loc of locations) {
+      statusEl.textContent = `Generating: ${loc.name} (${done + 1}/${locations.length})`;
+      barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
+
+      try {
+        const secLead = loc.secondary_category_lead || (loc.primary_category || [])[0] || '';
+        const prompt = `Generate a concise, SEO-friendly page title for a family-friendly location listing on GoBebop, a Dutch family guide.
+
+Location: ${loc.name}
+City: ${loc.city || 'Netherlands'}
+Category: ${secLead}
+
+Rules:
+- Lead with what Dutch parents actually search for — the activity or venue type, not the brand name
+- Include the Dutch term where natural (e.g. "kinderboerderij", "speeltuin", "pannenkoekenrestaurant")
+- Format: "[Searchable type] in [city] — [Location name]" OR "[Location name] — [Dutch type] & [key detail] in [city]"
+- Be specific: "Gratis Outdoor Speeltuin" beats "Playground"
+- Max 70 characters total
+- Plain text only, no quotes, no markdown
+- Return only the title, nothing else`;
+
+        const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': anthropicKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 100,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+        const aiData = await aiRes.json();
+        const title = aiData.content?.[0]?.text?.trim().replace(/^["']|["']$/g, '');
+
+        if (title) {
+          // Save to DB
+          await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': writeKey,
+              'Authorization': `Bearer ${writeKey}`,
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify({ page_title: title }),
+          });
+          log.push({ name: loc.name, title, ok: true });
+        } else {
+          throw new Error('Empty response');
+        }
+      } catch(e) {
+        errors++;
+        log.push({ name: loc.name, title: `Error: ${e.message}`, ok: false });
+      }
+
+      done++;
+      // Small delay to avoid rate limiting
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    statusEl.textContent = `✓ Done — ${done - errors} titles generated, ${errors} errors.`;
+    barEl.style.width = '100%';
+
+    // Show results
+    resultsEl.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;">
+        ${log.map(l => `
+          <div style="font-size:12px;padding:6px 10px;background:${l.ok ? '#F7F3ED' : '#FEE2E2'};border-radius:6px;">
+            <span style="font-weight:600;color:#1A1714;">${l.name}</span>
+            <span style="color:${l.ok ? '#6B6560' : '#991B1B'};margin-left:6px;">${l.title}</span>
+          </div>`).join('')}
+      </div>`;
+
+  } catch(e) {
+    statusEl.textContent = `Error: ${e.message}`;
+  } finally {
+    btn.disabled = false;
   }
 }
 
