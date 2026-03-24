@@ -1234,13 +1234,25 @@ header {
 <!-- ── Record Status ── -->
 <div class="form-section">
   <div class="section-body" style="padding:16px 24px;">
-    <div class="field" style="max-width:200px;">
-      <label>Record Status</label>
-      <select id="f-status">
-        <option value="draft">Draft</option>
-        <option value="ready">Ready</option>
-        <option value="published">Published</option>
-      </select>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+      <div class="field" style="min-width:160px;">
+        <label>Tier <span style="color:#E8541A;font-weight:500;">*</span></label>
+        <select id="f-tier">
+          <option value="">— required —</option>
+          <option value="1">1 — Destination (worth a trip from anywhere)</option>
+          <option value="2">2 — City pick (great within city / day trip)</option>
+          <option value="3">3 — Local gem (neighbourhood level)</option>
+        </select>
+        <p class="text-muted" style="margin-top:4px;font-size:11px;">Used to filter map density by distance.</p>
+      </div>
+      <div class="field" style="min-width:160px;">
+        <label>Record Status</label>
+        <select id="f-status">
+          <option value="draft">Draft</option>
+          <option value="ready">Ready</option>
+          <option value="published">Published</option>
+        </select>
+      </div>
     </div>
   </div>
 </div>
@@ -1356,7 +1368,7 @@ async function editSearchLocations(query) {
   if (!supabaseUrl || !supabaseKey) return;
   try {
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/${supabaseTable}?name=ilike.*${encodeURIComponent(query)}*&select=id,name,city,google_place_id,address,province,lat,lon,website,opening_hours,opening_status,status,primary_category,secondary_categories,secondary_category_lead,indoor_outdoor,ideal_age_min,ideal_age_max,all_ages,age_baby,age_preschooler,age_bigkid,cost,toilet,changing_table,lockers,pram_parking,food_drink,highchairs,accessible,party_venue,events,description,tips,google_maps_url&limit=8`,
+      `${supabaseUrl}/rest/v1/${supabaseTable}?name=ilike.*${encodeURIComponent(query)}*&select=id,name,city,google_place_id,address,province,lat,lon,website,opening_hours,opening_status,status,tier,primary_category,secondary_categories,secondary_category_lead,indoor_outdoor,ideal_age_min,ideal_age_max,all_ages,age_baby,age_preschooler,age_bigkid,cost,toilet,changing_table,lockers,pram_parking,food_drink,highchairs,accessible,party_venue,events,description,tips,google_maps_url,page_title&limit=8`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
     const rows = await res.json();
@@ -1409,6 +1421,7 @@ function loadLocationForEdit(loc) {
   document.getElementById('f-tips').value            = loc.tips || '';
   document.getElementById('f-page-title').value      = loc.page_title || '';
   document.getElementById('f-opening-status').value  = loc.opening_status || '';
+  document.getElementById('f-tier').value            = loc.tier || '';
   document.getElementById('f-status').value          = loc.status || 'draft';
   document.getElementById('f-age-min').value         = loc.ideal_age_min ?? '';
   document.getElementById('f-age-max').value         = loc.ideal_age_max ?? '';
@@ -1618,7 +1631,7 @@ function clearManualFields() {
   document.querySelectorAll('.check-pill').forEach(p => p.classList.remove('checked', 'denied'));
   // Text fields
   resetSecondaryPills();
-  ['f-indoor-outdoor','f-cost','f-description','f-tips','f-page-title',
+  ['f-tier','f-indoor-outdoor','f-cost','f-description','f-tips','f-page-title',
    'f-icon-url','f-website'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.value = ''; }
@@ -1855,6 +1868,7 @@ function collectFormData() {
     website:           document.getElementById('f-website').value || null,
     opening_hours:     opening_hours_val,
     opening_status:    document.getElementById('f-opening-status').value || null,
+    tier:              parseInt(document.getElementById('f-tier').value) || null,
     status:            document.getElementById('f-status').value || 'draft',
     // Manual — classification
     primary_category:  getSelectedCategories().length ? getSelectedCategories() : null,
@@ -1942,6 +1956,7 @@ Return ONLY a valid JSON object with these exact keys:
   "events": null,           // true if the place regularly offers children's events/programs/workshops/concerts. null if unknown.
   "description": "",        // 2-3 punchy fragments. NO age range text — that goes elsewhere. Format: "[What makes it special]. [Specific vivid details]. [One more detail if needed]." Do not start with the place name.
   "tips": null,             // ONE practical tip (booking, parking, seasonality, distance from Amsterdam). null if nothing notable.
+  "tier": null,             // 1, 2, or 3. 1 = major destination worth a trip from anywhere in NL (e.g. Efteling, NEMO, Artis). 2 = excellent within its city, worth seeking out on a day trip (e.g. a great kids cafe, local zoo, indoor playground). 3 = neighbourhood gem, only relevant if you are nearby (e.g. local playground, corner bakery with kids corner).
   "reasoning": {
     "ages": { "text": "", "confidence": "high|medium|low" },
     "facilities": { "text": "", "confidence": "high|medium|low" },
@@ -2025,6 +2040,10 @@ Rules:
       document.getElementById('f-age-max').disabled = true;
     } else {
       if (enriched.ideal_age_min != null) document.getElementById('f-age-min').value = enriched.ideal_age_min;
+    if (enriched.tier) {
+      const tierEl = document.getElementById('f-tier');
+      if (tierEl) tierEl.value = enriched.tier;
+    }
       if (enriched.ideal_age_max != null) document.getElementById('f-age-max').value = enriched.ideal_age_max;
     }
     // Cost
@@ -2981,6 +3000,11 @@ async function saveToSupabase() {
   btn.innerHTML = '<div class="spinner" style="border-top-color:white;width:14px;height:14px;"></div> Saving…';
 
   const data = collectFormData();
+  if (!data.tier) {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5l3.5 3.5 6.5-6.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Save to Supabase';
+    return setStatus('error', '❌ Please select a Tier before saving.');
+  }
   if (!data.secondary_categories?.length) {
     btn.disabled = false;
     btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5l3.5 3.5 6.5-6.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Save to Supabase';
