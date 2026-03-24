@@ -968,6 +968,26 @@ header {
     <div id="batch-title-results" style="margin-top:12px;max-height:320px;overflow-y:auto;"></div>
   </div>
 </div>
+
+<!-- Bulk rating refresh -->
+<div class="form-section" style="margin-top:24px;">
+  <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
+    <div class="section-title">★ Bulk rating refresh</div>
+  </div>
+  <div class="section-body">
+    <p style="font-size:13px;color:#6B6560;margin-bottom:16px;line-height:1.6;">Refreshes <code>google_rating</code> and <code>google_rating_count</code> for all locations that have a Google Place ID. ~$0.017 per location.</p>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="btn btn-enrich" onclick="startBulkRatingRefresh()" id="rating-refresh-btn">★ Refresh all ratings</button>
+      <span id="rating-refresh-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;"></span>
+    </div>
+    <div id="rating-refresh-progress" style="display:none;margin-top:16px;">
+      <div style="height:6px;background:#E4DDD3;border-radius:3px;overflow:hidden;margin-bottom:8px;">
+        <div id="rating-refresh-bar" style="height:100%;background:#4daabb;width:0%;transition:width 0.3s;border-radius:3px;"></div>
+      </div>
+      <div id="rating-refresh-log" style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;max-height:120px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
 ```
 
   </div>
@@ -1057,6 +1077,12 @@ header {
         <div style="display:flex;gap:8px;align-items:center;">
           <input type="text" id="f-maps-url" readonly style="flex:1;" />
           <a id="maps-url-link" href="#" target="_blank" class="btn btn-secondary" style="white-space:nowrap;text-decoration:none;padding:8px 14px;font-size:12.5px;">Open ↗</a>
+        </div>
+      </div>
+      <div class="field full">
+        <label>Google Rating</label>
+        <div id="f-rating-display" style="font-size:13px;color:#6B6560;padding:9px 13px;background:#E4DDD3;border:1.5px solid #D4CEC6;border-radius:8px;min-height:38px;">
+          <span style="color:#A09A94;font-style:italic;">Populated after lookup</span>
         </div>
       </div>
       <div class="field full">
@@ -1368,7 +1394,7 @@ async function editSearchLocations(query) {
   if (!supabaseUrl || !supabaseKey) return;
   try {
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/${supabaseTable}?name=ilike.*${encodeURIComponent(query)}*&select=id,name,city,google_place_id,address,province,lat,lon,website,opening_hours,opening_status,status,tier,primary_category,secondary_categories,secondary_category_lead,indoor_outdoor,ideal_age_min,ideal_age_max,all_ages,age_baby,age_preschooler,age_bigkid,cost,toilet,changing_table,lockers,pram_parking,food_drink,highchairs,accessible,party_venue,events,description,tips,google_maps_url,page_title&limit=8`,
+      `${supabaseUrl}/rest/v1/${supabaseTable}?name=ilike.*${encodeURIComponent(query)}*&select=id,name,city,google_place_id,address,province,lat,lon,website,opening_hours,opening_status,status,tier,google_rating,google_rating_count,primary_category,secondary_categories,secondary_category_lead,indoor_outdoor,ideal_age_min,ideal_age_max,all_ages,age_baby,age_preschooler,age_bigkid,cost,toilet,changing_table,lockers,pram_parking,food_drink,highchairs,accessible,party_venue,events,description,tips,google_maps_url,page_title&limit=8`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
     const rows = await res.json();
@@ -1422,6 +1448,19 @@ function loadLocationForEdit(loc) {
   document.getElementById('f-page-title').value      = loc.page_title || '';
   document.getElementById('f-opening-status').value  = loc.opening_status || '';
   document.getElementById('f-tier').value            = loc.tier || '';
+  // Show stored rating in edit mode
+  const ratingEl = document.getElementById('f-rating-display');
+  if (ratingEl) {
+    if (loc.google_rating) {
+      ratingEl.innerHTML = `<span style="color:#f59e0b;">★</span> <strong>${loc.google_rating}</strong> <span style="color:#A09A94;">(${(loc.google_rating_count || 0).toLocaleString()} reviews)</span>`;
+      ratingEl.dataset.rating = loc.google_rating;
+      ratingEl.dataset.count = loc.google_rating_count || 0;
+    } else {
+      ratingEl.innerHTML = '<span style="color:#A09A94;font-style:italic;">No rating on record</span>';
+      ratingEl.dataset.rating = '';
+      ratingEl.dataset.count = '';
+    }
+  }
   document.getElementById('f-status').value          = loc.status || 'draft';
   document.getElementById('f-age-min').value         = loc.ideal_age_min ?? '';
   document.getElementById('f-age-max').value         = loc.ideal_age_max ?? '';
@@ -1601,7 +1640,7 @@ async function fetchPlaceDetails(placeId, apiKey) {
   const placesUrl = `https://places.googleapis.com/v1/places/${placeId}`;
 
   // Places API (New) supports CORS from https:// origins — call directly with headers, no proxy needed.
-  const fieldMask = 'id,displayName,formattedAddress,location,types,addressComponents,googleMapsUri,businessStatus,websiteUri,regularOpeningHours';
+  const fieldMask = 'id,displayName,formattedAddress,location,types,addressComponents,googleMapsUri,businessStatus,websiteUri,regularOpeningHours,rating,userRatingCount';
 
   const res = await fetch(placesUrl, {
     headers: {
@@ -1700,6 +1739,20 @@ function populateForm(place) {
   if (place.websiteUri) {
     document.getElementById('f-website').value = place.websiteUri;
     updateWebsiteLink(place.websiteUri);
+  }
+
+  // Store and display Google rating
+  const ratingEl = document.getElementById('f-rating-display');
+  if (ratingEl) {
+    if (place.rating) {
+      ratingEl.innerHTML = `<span style="color:#f59e0b;">★</span> <strong>${place.rating}</strong> <span style="color:#A09A94;">(${(place.userRatingCount || 0).toLocaleString()} reviews)</span>`;
+      ratingEl.dataset.rating = place.rating;
+      ratingEl.dataset.count = place.userRatingCount || 0;
+    } else {
+      ratingEl.innerHTML = '<span style="color:#A09A94;font-style:italic;">No rating available</span>';
+      ratingEl.dataset.rating = '';
+      ratingEl.dataset.count = '';
+    }
   }
 
   // Auto-fill opening hours from Google if available, otherwise build empty rows
@@ -1869,6 +1922,8 @@ function collectFormData() {
     opening_hours:     opening_hours_val,
     opening_status:    document.getElementById('f-opening-status').value || null,
     tier:              parseInt(document.getElementById('f-tier').value) || null,
+    google_rating:     parseFloat(document.getElementById('f-rating-display')?.dataset.rating) || null,
+    google_rating_count: parseInt(document.getElementById('f-rating-display')?.dataset.count) || null,
     status:            document.getElementById('f-status').value || 'draft',
     // Manual — classification
     primary_category:  getSelectedCategories().length ? getSelectedCategories() : null,
@@ -3730,6 +3785,90 @@ Rules:
           </div>`).join('')}
       </div>`;
 
+  } catch(e) {
+    statusEl.textContent = `Error: ${e.message}`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ─── Bulk rating refresh ─────────────────────────────────────────────────────
+
+async function startBulkRatingRefresh() {
+  const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, googleKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+  if (!googleKey) return alert('Configure your Google Places API key first.');
+
+  const btn       = document.getElementById('rating-refresh-btn');
+  const statusEl  = document.getElementById('rating-refresh-status');
+  const progressEl = document.getElementById('rating-refresh-progress');
+  const barEl     = document.getElementById('rating-refresh-bar');
+  const logEl     = document.getElementById('rating-refresh-log');
+
+  if (!confirm('This will call the Google Places API once per location to refresh ratings. Costs ~$0.017 per location. Continue?')) return;
+
+  btn.disabled = true;
+  progressEl.style.display = 'block';
+  logEl.innerHTML = '';
+
+  try {
+    // Fetch all locations with a google_place_id
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,google_place_id&order=name.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const locations = await res.json();
+    if (!locations.length) { statusEl.textContent = 'No locations with a Place ID found.'; btn.disabled = false; return; }
+
+    statusEl.textContent = `Refreshing ${locations.length} locations…`;
+    let done = 0, errors = 0, updated = 0;
+
+    for (const loc of locations) {
+      barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
+      try {
+        const placeRes = await fetch(`https://places.googleapis.com/v1/places/${loc.google_place_id}`, {
+          headers: {
+            'X-Goog-Api-Key': googleKey,
+            'X-Goog-FieldMask': 'rating,userRatingCount',
+          }
+        });
+        if (!placeRes.ok) throw new Error(`HTTP ${placeRes.status}`);
+        const data = await placeRes.json();
+
+        if (data.rating !== undefined) {
+          await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': writeKey,
+              'Authorization': `Bearer ${writeKey}`,
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify({
+              google_rating: data.rating || null,
+              google_rating_count: data.userRatingCount || null,
+            }),
+          });
+          updated++;
+          logEl.innerHTML = `✓ ${loc.name}: ★ ${data.rating} (${data.userRatingCount || 0})
+` + logEl.innerHTML;
+        } else {
+          logEl.innerHTML = `— ${loc.name}: no rating
+` + logEl.innerHTML;
+        }
+      } catch(e) {
+        errors++;
+        logEl.innerHTML = `✗ ${loc.name}: ${e.message}
+` + logEl.innerHTML;
+      }
+      done++;
+      // Delay to avoid hitting rate limits
+      await new Promise(r => setTimeout(r, 150));
+    }
+
+    statusEl.textContent = `✓ Done — ${updated} updated, ${errors} errors.`;
+    barEl.style.width = '100%';
   } catch(e) {
     statusEl.textContent = `Error: ${e.message}`;
   } finally {
