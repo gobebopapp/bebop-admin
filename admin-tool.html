@@ -4053,63 +4053,125 @@ async function loadEvtQueue() {
 
   try {
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/${supabaseTable}?events=eq.true&select=id,name,city,tier,website,agenda_url&order=name.asc`,
+      `${supabaseUrl}/rest/v1/${supabaseTable}?events=eq.true&select=id,name,city,tier,website,agenda_url,primary_category&order=name.asc`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
-    const rows = await res.json();
+    let rows = await res.json();
     if (!rows.length) {
       listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No locations with events = true found.</div>';
       return;
     }
-    // Also fetch which locations have events this month
+
+    // Fetch covered location IDs for current month using plain date comparison
     const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const monthEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59).toISOString();
+    const y = now.getFullYear(), m = now.getMonth() + 1;
+    const monthStartStr = `${y}-${String(m).padStart(2,'0')}-01`;
+    const lastDay = new Date(y, m, 0).getDate();
+    const monthEndStr   = `${y}-${String(m).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}T23:59:59`;
+    const monthName = now.toLocaleDateString('en-GB', { month: 'long' });
+
     let coveredIds = new Set();
     try {
       const evtRes = await fetch(
-        `${supabaseUrl}/rest/v1/events?start_date=gte.${monthStart}&start_date=lte.${monthEnd}&select=location_id`,
+        `${supabaseUrl}/rest/v1/events?start_date=gte.${monthStartStr}&start_date=lte.${monthEndStr}&location_id=not.is.null&select=location_id`,
         { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
       );
       const evtRows = await evtRes.json();
-      coveredIds = new Set(evtRows.map(e => e.location_id).filter(Boolean));
-    } catch(e) {}
+      if (Array.isArray(evtRows)) coveredIds = new Set(evtRows.map(e => e.location_id).filter(Boolean));
+    } catch(e) { console.error('covered fetch error:', e); }
 
-    const monthName = now.toLocaleDateString('en-GB', { month: 'long' });
-    const tierLabel = t => t ? `<span style="background:#dff0f5;color:#4daabb;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;margin-left:4px;">Tier ${t}</span>` : '';
-    const coveredBadge = id => coveredIds.has(id) ? `<span style="background:#D8EDDF;color:#2D6A4F;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;margin-left:4px;">✓ ${monthName}</span>` : '';
+    // Render filter bar
+    const allCities = [...new Set(rows.map(r => r.city).filter(Boolean))].sort();
+    const allCats   = [...new Set(rows.flatMap(r => r.primary_category || []).filter(Boolean))].sort();
 
-    listEl.innerHTML = rows.map(r => {
-      const agendaUrl = r.agenda_url || r.website;
-      return `
-      <div style="padding:14px 24px;border-bottom:1px solid #E8E3DC;display:flex;align-items:center;gap:12px;">
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
-            <span style="font-size:13px;font-weight:600;color:#1A1714;">${r.name}</span>
-            ${tierLabel(r.tier)}
-            ${coveredBadge(r.id)}
-          </div>
-          <div style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;margin-top:2px;">
-            ${r.city || ''}
-            ${r.agenda_url ? ' · <a href="' + r.agenda_url + '" target="_blank" style="color:#4daabb;">agenda ↗</a>' : (r.website ? ' · ' + r.website.replace('https://','').split('/')[0] : '')}
-          </div>
-        </div>
-        <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
-          <button onclick="evtQueueOpen(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="btn btn-secondary" style="font-size:11px;padding:5px 12px;">＋ New event</button>
-          ${agendaUrl ? `<button onclick="evtQueueExtract(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="btn btn-enrich" style="font-size:11px;padding:5px 12px;">✦ Extract</button>` : ''}
-          ${agendaUrl ? `<a href="${agendaUrl}" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 12px;text-decoration:none;">↗</a>` : ''}
-        </div>
-      </div>`;
-    }).join('');
+    listEl.innerHTML = `
+      <div style="padding:12px 24px;border-bottom:1px solid #E8E3DC;display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#F7F3ED;">
+        <select id="qf-tier" onchange="applyQueueFilters()" style="font-size:12px;padding:5px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;">
+          <option value="">All tiers</option>
+          <option value="1">Tier 1</option>
+          <option value="2">Tier 2</option>
+          <option value="3">Tier 3</option>
+        </select>
+        <select id="qf-city" onchange="applyQueueFilters()" style="font-size:12px;padding:5px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;">
+          <option value="">All cities</option>
+          ${allCities.map(c => `<option value="${c}">${c}</option>`).join('')}
+        </select>
+        <select id="qf-cat" onchange="applyQueueFilters()" style="font-size:12px;padding:5px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;">
+          <option value="">All categories</option>
+          ${allCats.map(c => `<option value="${c}">${c}</option>`).join('')}
+        </select>
+        <span id="qf-count" style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;"></span>
+      </div>
+      <div id="evt-queue-rows"></div>`;
+
+    // Store rows for filtering
+    listEl._rows = rows;
+    listEl._coveredIds = coveredIds;
+    listEl._monthName = monthName;
+
+    renderQueueRows(rows, coveredIds, monthName);
+
   } catch(e) {
     listEl.innerHTML = `<div style="padding:24px;color:#991B1B;font-size:13px;">Error: ${e.message}</div>`;
   }
 }
 
+function applyQueueFilters() {
+  const listEl = document.getElementById('evt-queue-list');
+  const tier = document.getElementById('qf-tier')?.value;
+  const city = document.getElementById('qf-city')?.value;
+  const cat  = document.getElementById('qf-cat')?.value;
+  let rows = listEl._rows || [];
+  if (tier) rows = rows.filter(r => String(r.tier) === tier);
+  if (city) rows = rows.filter(r => r.city === city);
+  if (cat)  rows = rows.filter(r => (r.primary_category || []).includes(cat));
+  renderQueueRows(rows, listEl._coveredIds, listEl._monthName);
+}
+
+function renderQueueRows(rows, coveredIds, monthName) {
+  const container = document.getElementById('evt-queue-rows');
+  if (!container) return;
+  const countEl = document.getElementById('qf-count');
+  if (countEl) countEl.textContent = `${rows.length} venues`;
+
+  if (!rows.length) {
+    container.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No venues match the selected filters.</div>';
+    return;
+  }
+
+  const tierLabel = t => t ? `<span style="background:#dff0f5;color:#4daabb;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Tier ${t}</span>` : '';
+  const coveredBadge = id => coveredIds.has(id) ? `<span style="background:#D8EDDF;color:#2D6A4F;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">✓ ${monthName}</span>` : '';
+
+  container.innerHTML = rows.map(r => {
+    const agendaUrl = r.agenda_url || r.website;
+    const cats = (r.primary_category || []).join(', ');
+    return `
+    <div style="padding:14px 24px;border-bottom:1px solid #E8E3DC;display:flex;align-items:flex-start;gap:12px;">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:3px;">
+          <span style="font-size:13px;font-weight:600;color:#1A1714;">${r.name}</span>
+          ${tierLabel(r.tier)}
+          ${coveredBadge(r.id)}
+        </div>
+        <div style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;">
+          ${[r.city, cats].filter(Boolean).join(' · ')}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+        <button onclick="evtQueueOpen(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="btn btn-secondary" style="font-size:11px;padding:5px 12px;">＋ New</button>
+        ${agendaUrl ? `<button onclick="evtQueueExtract(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="btn btn-enrich" style="font-size:11px;padding:5px 12px;">✦ Extract</button>` : ''}
+        ${agendaUrl ? `<a href="${agendaUrl}" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 12px;text-decoration:none;">Agenda</a>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function evtQueueExtract(loc) {
   setEvtSubMode('new');
   evtSelectLocation(loc);
-  setTimeout(() => extractEventsFromWebsite(loc.agenda_url || loc.website), 300);
+  const agendaUrl = loc.agenda_url || loc.website;
+  if (agendaUrl) document.getElementById('evt-booking-url').value = agendaUrl;
+  setTimeout(() => extractEventsFromWebsite(agendaUrl), 300);
 }
 
 function evtQueueOpen(loc) {
