@@ -730,6 +730,7 @@ header {
     <button class="mode-btn" id="mode-photos" onclick="setMode('photos')">📷 Photos</button>
     <button class="mode-btn" id="mode-recs" onclick="setMode('recs')">⭐ Recs</button>
     <button class="mode-btn" id="mode-discover" onclick="setMode('discover')">🔍 Discover</button>
+    <button class="mode-btn" id="mode-events" onclick="setMode('events')">🎉 Events</button>
   </div>
 
   <!-- Add Location mode -->
@@ -985,6 +986,153 @@ header {
         <div id="rating-refresh-bar" style="height:100%;background:#4daabb;width:0%;transition:width 0.3s;border-radius:3px;"></div>
       </div>
       <div id="rating-refresh-log" style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;max-height:120px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- Events mode -->
+
+  <div id="events-mode-ui" style="display:none;">
+    <div class="page-title">Events</div>
+    <p class="page-sub">Manage family-friendly events. Link to locations in your database or add standalone one-off events.</p>
+
+```
+<!-- Sub-toggle: New / Queue / Upcoming -->
+<div style="display:flex;gap:0;margin-bottom:24px;border:1.5px solid #D4CEC6;border-radius:10px;overflow:hidden;">
+  <button id="evt-sub-new" onclick="setEvtSubMode('new')" style="flex:1;padding:9px 14px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;background:#4daabb;color:white;border:none;cursor:pointer;">＋ New event</button>
+  <button id="evt-sub-queue" onclick="setEvtSubMode('queue')" style="flex:1;padding:9px 14px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;background:#E4DDD3;color:#1A1714;border:none;border-left:1.5px solid #D4CEC6;cursor:pointer;">📋 Venue queue</button>
+  <button id="evt-sub-upcoming" onclick="setEvtSubMode('upcoming')" style="flex:1;padding:9px 14px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;background:#E4DDD3;color:#1A1714;border:none;border-left:1.5px solid #D4CEC6;cursor:pointer;">📅 Upcoming</button>
+</div>
+
+<!-- New event form -->
+<div id="evt-new-ui">
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-title">Event details</div>
+    </div>
+    <div class="section-body">
+      <div class="fields-grid">
+
+        <div class="field full">
+          <label>Title <span style="color:#E8541A;">*</span></label>
+          <input type="text" id="evt-title" placeholder="e.g. Zomerfestival Vondelpark" />
+        </div>
+
+        <div class="field full">
+          <label>Linked location <span style="color:#A09A94;font-weight:400;">(optional — for events at a venue in your DB)</span></label>
+          <input type="text" id="evt-loc-search" placeholder="Start typing a location name…" oninput="evtSearchLocations(this.value)" autocomplete="off" style="font-size:16px;" />
+          <div id="evt-loc-results" class="photo-search-results"></div>
+          <div id="evt-loc-selected" style="display:none;margin-top:8px;">
+            <div class="photo-mode-selected">
+              <div>
+                <div class="sel-name" id="evt-loc-name"></div>
+                <div class="sel-meta" id="evt-loc-meta"></div>
+              </div>
+              <span class="sel-change" onclick="evtClearLocation()">Clear</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field full">
+          <label>Address / venue <span style="color:#A09A94;font-weight:400;">(for standalone events without a DB location)</span></label>
+          <input type="text" id="evt-address" placeholder="e.g. Vondelpark, Amsterdam" />
+        </div>
+
+        <div class="field full">
+          <label>Description</label>
+          <textarea id="evt-description" placeholder="What's happening, who it's for, why it's worth going…" style="min-height:80px;"></textarea>
+        </div>
+
+        <div class="field">
+          <label>Start date <span style="color:#E8541A;">*</span></label>
+          <input type="datetime-local" id="evt-start" />
+        </div>
+
+        <div class="field">
+          <label>End date / time</label>
+          <input type="datetime-local" id="evt-end" />
+        </div>
+
+        <div class="field">
+          <label>Recurring</label>
+          <select id="evt-recurring">
+            <option value="">One-off</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="annual">Annual</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Recurring until</label>
+          <input type="date" id="evt-recurring-until" />
+        </div>
+
+        <div class="field">
+          <label>Price</label>
+          <input type="text" id="evt-price" placeholder='e.g. "Free" or "€5 per child"' />
+        </div>
+
+        <div class="field">
+          <label>Booking URL</label>
+          <input type="text" id="evt-booking-url" placeholder="https://..." />
+        </div>
+
+        <div class="field">
+          <label>Status</label>
+          <select id="evt-status">
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+
+        <div class="field" style="justify-content:flex-end;padding-top:22px;">
+          <button class="btn btn-enrich" onclick="extractEventsFromWebsite()" id="evt-extract-btn" style="white-space:nowrap;">✦ Extract from website</button>
+        </div>
+
+      </div>
+      <div id="evt-extract-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;margin-top:8px;"></div>
+
+      <div class="actions-bar" style="margin-top:20px;">
+        <button class="btn btn-save" onclick="saveEvent()" id="evt-save-btn">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 4l3.5-3.5L10 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Save event
+        </button>
+      </div>
+      <div id="evt-save-status" style="margin-top:10px;font-size:13px;font-family:'DM Mono',monospace;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Venue queue -->
+<div id="evt-queue-ui" style="display:none;">
+  <div class="form-section">
+    <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="section-title">Venues with events calendars</div>
+      <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadEvtQueue()">↺ Refresh</button>
+    </div>
+    <div class="section-body" style="padding:0;">
+      <div id="evt-queue-list">
+        <div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Loading…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upcoming events -->
+<div id="evt-upcoming-ui" style="display:none;">
+  <div class="form-section">
+    <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="section-title">Upcoming events</div>
+      <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadUpcomingEvents()">↺ Refresh</button>
+    </div>
+    <div class="section-body" style="padding:0;">
+      <div id="evt-upcoming-list">
+        <div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Loading…</div>
+      </div>
     </div>
   </div>
 </div>
@@ -2418,16 +2566,19 @@ function setMode(mode) {
   const isPhoto    = mode === 'photos';
   const isRecs     = mode === 'recs';
   const isDiscover = mode === 'discover';
+  const isEvents   = mode === 'events';
 
   document.getElementById('mode-add').classList.toggle('active', isAdd);
   document.getElementById('mode-photos').classList.toggle('active', isPhoto);
   document.getElementById('mode-recs').classList.toggle('active', isRecs);
   document.getElementById('mode-discover').classList.toggle('active', isDiscover);
+  document.getElementById('mode-events').classList.toggle('active', isEvents);
 
   document.getElementById('add-mode-ui').style.display      = isAdd      ? '' : 'none';
   document.getElementById('photo-mode-ui').style.display    = isPhoto    ? '' : 'none';
   document.getElementById('recs-mode-ui').style.display     = isRecs     ? '' : 'none';
   document.getElementById('discover-mode-ui').style.display = isDiscover ? '' : 'none';
+  document.getElementById('events-mode-ui').style.display   = isEvents   ? '' : 'none';
   document.getElementById('lookup-bar-wrap').style.display  = isAdd      ? '' : 'none';
   document.getElementById('location-form').style.display    = isAdd      ? 'block' : 'none';
   document.getElementById('status').style.display = 'none';
@@ -2448,6 +2599,9 @@ function setMode(mode) {
   }
   if (isRecs) {
     loadRecommendations();
+  }
+  if (isEvents) {
+    loadUpcomingEvents();
   }
 }
 
@@ -3638,6 +3792,358 @@ Rules:
     btn.disabled = false;
     btn.textContent = '✦ Generate';
   }
+}
+
+// ─── Events ──────────────────────────────────────────────────────────────────
+
+let evtLinkedLocation = null; // {id, name, city, website}
+
+function setEvtSubMode(mode) {
+  const modes = ['new', 'queue', 'upcoming'];
+  modes.forEach(m => {
+    const btn = document.getElementById(`evt-sub-${m}`);
+    const ui  = document.getElementById(`evt-${m}-ui`);
+    const active = m === mode;
+    if (btn) { btn.style.background = active ? '#4daabb' : '#E4DDD3'; btn.style.color = active ? 'white' : '#1A1714'; }
+    if (ui)  ui.style.display = active ? '' : 'none';
+  });
+  if (mode === 'queue')    loadEvtQueue();
+  if (mode === 'upcoming') loadUpcomingEvents();
+}
+
+// ── Location search for event linking ────────────────────────────────────────
+async function evtSearchLocations(query) {
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  const resultsEl = document.getElementById('evt-loc-results');
+  if (query.length < 2) { resultsEl.innerHTML = ''; return; }
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?name=ilike.*${encodeURIComponent(query)}*&select=id,name,city,website&limit=6`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    if (!rows.length) { resultsEl.innerHTML = '<div style="padding:8px 14px;font-size:13px;color:#A09A94;">No results</div>'; return; }
+    resultsEl.innerHTML = rows.map(r => `
+      <div class="photo-search-result" onclick="evtSelectLocation(${JSON.stringify(r).replace(/"/g, '&quot;')})">
+        <div class="res-name">${r.name}</div>
+        <div class="res-meta">${r.city || ''}</div>
+      </div>`).join('');
+  } catch(e) {}
+}
+
+function evtSelectLocation(loc) {
+  evtLinkedLocation = loc;
+  document.getElementById('evt-loc-search').value = '';
+  document.getElementById('evt-loc-results').innerHTML = '';
+  document.getElementById('evt-loc-name').textContent = loc.name;
+  document.getElementById('evt-loc-meta').textContent = loc.city || '';
+  document.getElementById('evt-loc-selected').style.display = '';
+  // Pre-fill address from location name
+  if (!document.getElementById('evt-address').value) {
+    document.getElementById('evt-address').value = `${loc.name}${loc.city ? ', ' + loc.city : ''}`;
+  }
+}
+
+function evtClearLocation() {
+  evtLinkedLocation = null;
+  document.getElementById('evt-loc-selected').style.display = 'none';
+  document.getElementById('evt-loc-search').value = '';
+}
+
+function evtResetForm() {
+  evtLinkedLocation = null;
+  document.getElementById('evt-loc-selected').style.display = 'none';
+  document.getElementById('evt-loc-search').value = '';
+  document.getElementById('evt-loc-results').innerHTML = '';
+  ['evt-title','evt-address','evt-description','evt-start','evt-end',
+   'evt-price','evt-booking-url'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('evt-recurring').value = '';
+  document.getElementById('evt-recurring-until').value = '';
+  document.getElementById('evt-status').value = 'draft';
+  document.getElementById('evt-save-status').textContent = '';
+}
+
+// ── Save event ────────────────────────────────────────────────────────────────
+async function saveEvent() {
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+
+  const title = document.getElementById('evt-title').value.trim();
+  const start = document.getElementById('evt-start').value;
+  if (!title) return alert('Please enter an event title.');
+  if (!start)  return alert('Please set a start date.');
+
+  const btn = document.getElementById('evt-save-btn');
+  const statusEl = document.getElementById('evt-save-status');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const payload = {
+    title,
+    description:      document.getElementById('evt-description').value || null,
+    location_id:      evtLinkedLocation?.id || null,
+    address:          document.getElementById('evt-address').value || null,
+    start_date:       start,
+    end_date:         document.getElementById('evt-end').value || null,
+    recurring:        document.getElementById('evt-recurring').value || null,
+    recurring_until:  document.getElementById('evt-recurring-until').value || null,
+    price:            document.getElementById('evt-price').value || null,
+    booking_url:      document.getElementById('evt-booking-url').value || null,
+    status:           document.getElementById('evt-status').value,
+    source:           'manual',
+  };
+
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': writeKey,
+        'Authorization': `Bearer ${writeKey}`,
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    statusEl.textContent = '✓ Event saved!';
+    statusEl.style.color = '#2D6A4F';
+    setTimeout(() => evtResetForm(), 2000);
+  } catch(e) {
+    statusEl.textContent = '✗ ' + e.message;
+    statusEl.style.color = '#991B1B';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save event';
+  }
+}
+
+// ── AI extraction from venue website ─────────────────────────────────────────
+async function extractEventsFromWebsite(websiteOverride) {
+  const { anthropicKey } = getConfig();
+  if (!anthropicKey) return alert('Configure your Anthropic API key first.');
+
+  const website = websiteOverride || evtLinkedLocation?.website;
+  if (!website) return alert('Link a location with a website first, or use the venue queue.');
+
+  const btn = document.getElementById('evt-extract-btn');
+  const statusEl = document.getElementById('evt-extract-status');
+  btn.disabled = true;
+  btn.textContent = '✦ Extracting…';
+  statusEl.textContent = `Fetching ${website}…`;
+
+  const prompt = `You are helping curate a family-friendly events guide for the Netherlands.
+
+Fetch this venue's website and find upcoming events or activities for families and children.
+Website: ${website}
+
+Return ONLY a valid JSON array — no preamble, no markdown. Each object must have:
+{
+  "title": "",           // event name
+  "description": "",     // brief description, plain text only
+  "start_date": "",      // ISO 8601 format if date found, otherwise null
+  "end_date": "",        // ISO 8601 format if found, otherwise null
+  "price": "",           // e.g. "Free" or "€5" or null
+  "booking_url": "",     // direct URL to booking/more info or null
+  "recurring": ""        // "weekly", "monthly", "annual", or null
+}
+
+If no upcoming events are found, return an empty array [].
+Focus only on events suitable for families with children.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'API error');
+
+    const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    const first = text.indexOf('[');
+    const last  = text.lastIndexOf(']');
+    if (first === -1) { statusEl.textContent = 'No events found on this website.'; return; }
+
+    const events = JSON.parse(text.slice(first, last + 1));
+    if (!events.length) { statusEl.textContent = 'No upcoming family events found.'; return; }
+
+    // Pre-fill form with first event, show others as suggestions
+    const e0 = events[0];
+    if (e0.title)       document.getElementById('evt-title').value       = e0.title;
+    if (e0.description) document.getElementById('evt-description').value = e0.description;
+    if (e0.start_date)  document.getElementById('evt-start').value       = e0.start_date.slice(0, 16);
+    if (e0.end_date)    document.getElementById('evt-end').value         = e0.end_date.slice(0, 16);
+    if (e0.price)       document.getElementById('evt-price').value       = e0.price;
+    if (e0.booking_url) document.getElementById('evt-booking-url').value = e0.booking_url;
+    if (e0.recurring)   document.getElementById('evt-recurring').value   = e0.recurring;
+
+    statusEl.textContent = `✓ Found ${events.length} event${events.length > 1 ? 's' : ''}. Form pre-filled with first result.`;
+    statusEl.style.color = '#2D6A4F';
+
+    // Show remaining events as quick-add chips if more than 1
+    if (events.length > 1) {
+      const chips = events.slice(1).map((ev, i) => `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#F7F3ED;border-radius:8px;border:1.5px solid #D4CEC6;margin-top:6px;">
+          <div style="flex:1;font-size:12px;color:#1A1714;">${ev.title || 'Untitled'} ${ev.start_date ? '· ' + ev.start_date.slice(0,10) : ''}</div>
+          <button onclick="evtFillFromExtracted(${JSON.stringify(ev).replace(/"/g,'&quot;')})" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;flex-shrink:0;">Fill form</button>
+        </div>`).join('');
+      statusEl.innerHTML += `<div style="margin-top:8px;">${chips}</div>`;
+    }
+
+  } catch(e) {
+    statusEl.textContent = '✗ ' + e.message;
+    statusEl.style.color = '#991B1B';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ Extract from website';
+  }
+}
+
+function evtFillFromExtracted(ev) {
+  if (ev.title)       document.getElementById('evt-title').value       = ev.title;
+  if (ev.description) document.getElementById('evt-description').value = ev.description;
+  if (ev.start_date)  document.getElementById('evt-start').value       = ev.start_date.slice(0, 16);
+  if (ev.end_date)    document.getElementById('evt-end').value         = ev.end_date.slice(0, 16);
+  if (ev.price)       document.getElementById('evt-price').value       = ev.price;
+  if (ev.booking_url) document.getElementById('evt-booking-url').value = ev.booking_url;
+  if (ev.recurring)   document.getElementById('evt-recurring').value   = ev.recurring;
+}
+
+// ── Venue queue ───────────────────────────────────────────────────────────────
+async function loadEvtQueue() {
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  const listEl = document.getElementById('evt-queue-list');
+  if (!supabaseUrl || !supabaseKey) {
+    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Configure Supabase first.</div>';
+    return;
+  }
+  listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Loading…</div>';
+
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?events=eq.true&select=id,name,city,website&order=name.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    if (!rows.length) {
+      listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No locations with events = true found.</div>';
+      return;
+    }
+    listEl.innerHTML = rows.map(r => `
+      <div style="padding:14px 24px;border-bottom:1px solid #E8E3DC;display:flex;align-items:center;gap:12px;">
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;color:#1A1714;">${r.name}</div>
+          <div style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;">${r.city || ''} ${r.website ? '· ' + r.website.replace('https://','').split('/')[0] : ''}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          ${r.website ? `<button onclick="evtQueueExtract(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="btn btn-enrich" style="font-size:11px;padding:5px 12px;">✦ Extract events</button>` : '<span style="font-size:11px;color:#A09A94;">No website</span>'}
+          ${r.website ? `<a href="${r.website}" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 12px;text-decoration:none;">↗</a>` : ''}
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    listEl.innerHTML = `<div style="padding:24px;color:#991B1B;font-size:13px;">Error: ${e.message}</div>`;
+  }
+}
+
+function evtQueueExtract(loc) {
+  // Switch to new event form with this location pre-linked
+  setEvtSubMode('new');
+  evtSelectLocation(loc);
+  // Trigger extraction
+  setTimeout(() => extractEventsFromWebsite(loc.website), 300);
+}
+
+// ── Upcoming events list ──────────────────────────────────────────────────────
+async function loadUpcomingEvents() {
+  const { supabaseUrl, supabaseKey } = getConfig();
+  const listEl = document.getElementById('evt-upcoming-list');
+  if (!supabaseUrl || !supabaseKey) {
+    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Configure Supabase first.</div>';
+    return;
+  }
+  listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Loading…</div>';
+
+  const today = new Date().toISOString();
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/events?start_date=gte.${today}&order=start_date.asc&select=id,title,description,start_date,end_date,price,status,source,location_id,address,locations(name,city)`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+
+    if (!Array.isArray(rows) || !rows.length) {
+      listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No upcoming events.</div>';
+      return;
+    }
+
+    listEl.innerHTML = rows.map(r => {
+      const loc = r.locations || {};
+      const dateStr = r.start_date ? new Date(r.start_date).toLocaleDateString('nl-NL', { weekday:'short', day:'numeric', month:'short', year:'numeric' }) : '—';
+      const statusBadge = r.status === 'published'
+        ? '<span style="background:#D8EDDF;color:#2D6A4F;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Published</span>'
+        : '<span style="background:#F0EBE3;color:#A09A94;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Draft</span>';
+      return `
+        <div style="padding:14px 24px;border-bottom:1px solid #E8E3DC;display:flex;gap:14px;align-items:flex-start;">
+          <div style="min-width:90px;font-family:'DM Mono',monospace;font-size:11px;color:#A09A94;padding-top:2px;">${dateStr}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;">
+              <strong style="font-size:13px;">${r.title}</strong>
+              ${statusBadge}
+            </div>
+            <div style="font-size:11px;color:#A09A94;">${loc.name || r.address || ''} ${loc.city ? '· ' + loc.city : ''}</div>
+            ${r.price ? `<div style="font-size:11px;color:#4daabb;margin-top:2px;">${r.price}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button onclick="evtTogglePublish('${r.id}', '${r.status}')" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;">
+              ${r.status === 'published' ? 'Unpublish' : 'Publish'}
+            </button>
+            <button onclick="evtDelete('${r.id}')" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;color:#991B1B;">Delete</button>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    listEl.innerHTML = `<div style="padding:24px;color:#991B1B;font-size:13px;">Error: ${e.message}</div>`;
+  }
+}
+
+async function evtTogglePublish(id, currentStatus) {
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  const newStatus = currentStatus === 'published' ? 'draft' : 'published';
+  await fetch(`${supabaseUrl}/rest/v1/events?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'apikey': writeKey, 'Authorization': `Bearer ${writeKey}`, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ status: newStatus }),
+  });
+  loadUpcomingEvents();
+}
+
+async function evtDelete(id) {
+  if (!confirm('Delete this event?')) return;
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  await fetch(`${supabaseUrl}/rest/v1/events?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { 'apikey': writeKey, 'Authorization': `Bearer ${writeKey}` },
+  });
+  loadUpcomingEvents();
 }
 
 // ─── Batch title generator ───────────────────────────────────────────────────
