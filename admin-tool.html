@@ -741,13 +741,14 @@ header {
     <div style="display:flex;gap:0;margin-bottom:24px;border:1.5px solid #D4CEC6;border-radius:10px;overflow:hidden;width:fit-content;">
       <button id="sub-new-btn" onclick="setAddSubMode('new')" style="padding:9px 20px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;background:#4daabb;color:white;border:none;cursor:pointer;transition:all 0.15s;">＋ New location</button>
       <button id="sub-edit-btn" onclick="setAddSubMode('edit')" style="padding:9px 20px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;background:#E4DDD3;color:#1A1714;border:none;border-left:1.5px solid #D4CEC6;cursor:pointer;transition:all 0.15s;">✎ Edit existing</button>
+      <button id="sub-manual-btn" onclick="setAddSubMode('manual')" style="padding:9px 20px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;background:#E4DDD3;color:#1A1714;border:none;border-left:1.5px solid #D4CEC6;cursor:pointer;transition:all 0.15s;">✏ Manual entry</button>
     </div>
 
 ```
 <!-- New mode header -->
 <div id="add-new-header">
-  <div class="page-title">Add a location</div>
-  <p class="page-sub">Paste a Google Maps URL or Place ID to auto-fill details, then complete the manual fields.</p>
+  <div class="page-title" id="add-new-title">Add a location</div>
+  <p class="page-sub" id="add-new-sub">Paste a Google Maps URL or Place ID to auto-fill details, then complete the manual fields.</p>
 </div>
 
 <!-- Edit mode header + search -->
@@ -949,47 +950,6 @@ header {
 
 <!-- Results -->
 <div id="disc-results" style="margin-top:8px;"></div>
-
-<!-- Batch title generator -->
-<div class="form-section" style="margin-top:24px;">
-  <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
-    <div class="section-title">✦ Batch page title generator</div>
-  </div>
-  <div class="section-body">
-    <p style="font-size:13px;color:#6B6560;margin-bottom:16px;line-height:1.6;">Generates SEO page titles for all locations that don't have one yet. Uses Claude Haiku — approximately €0.03 for 300 locations.</p>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <button class="btn btn-enrich" onclick="startBatchTitles()" id="batch-title-btn">✦ Generate missing titles</button>
-      <button class="btn btn-secondary" onclick="previewBatchTitles()" id="batch-preview-btn">Preview locations without titles</button>
-    </div>
-    <div id="batch-title-progress" style="display:none;margin-top:16px;">
-      <div style="height:6px;background:#E4DDD3;border-radius:3px;overflow:hidden;margin-bottom:8px;">
-        <div id="batch-title-bar" style="height:100%;background:#4daabb;width:0%;transition:width 0.3s;border-radius:3px;"></div>
-      </div>
-      <div id="batch-title-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;"></div>
-    </div>
-    <div id="batch-title-results" style="margin-top:12px;max-height:320px;overflow-y:auto;"></div>
-  </div>
-</div>
-
-<!-- Bulk rating refresh -->
-<div class="form-section" style="margin-top:24px;">
-  <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
-    <div class="section-title">★ Bulk rating refresh</div>
-  </div>
-  <div class="section-body">
-    <p style="font-size:13px;color:#6B6560;margin-bottom:16px;line-height:1.6;">Refreshes <code>google_rating</code> and <code>google_rating_count</code> for all locations that have a Google Place ID. ~$0.017 per location.</p>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <button class="btn btn-enrich" onclick="startBulkRatingRefresh()" id="rating-refresh-btn">★ Refresh all ratings</button>
-      <span id="rating-refresh-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;"></span>
-    </div>
-    <div id="rating-refresh-progress" style="display:none;margin-top:16px;">
-      <div style="height:6px;background:#E4DDD3;border-radius:3px;overflow:hidden;margin-bottom:8px;">
-        <div id="rating-refresh-bar" style="height:100%;background:#4daabb;width:0%;transition:width 0.3s;border-radius:3px;"></div>
-      </div>
-      <div id="rating-refresh-log" style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;max-height:120px;overflow-y:auto;"></div>
-    </div>
-  </div>
-</div>
 ```
 
   </div>
@@ -1169,8 +1129,12 @@ header {
     <p style="font-size:13px;color:#6B6560;margin-bottom:16px;line-height:1.6;">
       Updates <strong>opening hours</strong>, <strong>opening status</strong>, and <strong>rating + review count</strong> for all locations with a Google Place ID. One API call per location (~$0.017 each).
     </p>
+    <!-- Category filter -->
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
-      <button class="btn btn-enrich" onclick="startGoogleRefresh()" id="google-refresh-btn">📡 Refresh all from Google</button>
+      <select id="refresh-sec-cat" style="font-size:13px;padding:8px 12px;border:1.5px solid #D4CEC6;border-radius:8px;background:white;max-width:260px;">
+        <option value="">All locations</option>
+      </select>
+      <button class="btn btn-enrich" onclick="startGoogleRefresh(document.getElementById('refresh-sec-cat').value || null)" id="google-refresh-btn">📡 Refresh from Google</button>
       <span id="google-refresh-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;"></span>
     </div>
     <div id="google-refresh-progress" style="display:none;margin-top:8px;">
@@ -1178,6 +1142,7 @@ header {
         <div id="google-refresh-bar" style="height:100%;background:#4daabb;width:0%;transition:width 0.3s;border-radius:3px;"></div>
       </div>
       <div id="google-refresh-log" style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;max-height:160px;overflow-y:auto;line-height:1.8;"></div>
+      <div id="google-refresh-changes"></div>
     </div>
   </div>
 </div>
@@ -1586,15 +1551,46 @@ function clearStatus() {
 let editLocationId = null; // UUID of location being edited, null = new mode
 
 function setAddSubMode(mode) {
-  const isEdit = mode === 'edit';
-  document.getElementById('sub-new-btn').style.background  = isEdit ? '#E4DDD3' : '#4daabb';
-  document.getElementById('sub-new-btn').style.color       = isEdit ? '#1A1714' : 'white';
-  document.getElementById('sub-edit-btn').style.background = isEdit ? '#4daabb' : '#E4DDD3';
-  document.getElementById('sub-edit-btn').style.color      = isEdit ? 'white'   : '#1A1714';
-  document.getElementById('add-new-header').style.display  = isEdit ? 'none' : '';
-  document.getElementById('add-edit-header').style.display = isEdit ? '' : 'none';
-  document.getElementById('lookup-bar-wrap').style.display = isEdit ? 'none' : '';
-  if (!isEdit) {
+  const isEdit   = mode === 'edit';
+  const isManual = mode === 'manual';
+  const isNew    = mode === 'new';
+
+  // Button states
+  [['sub-new-btn', isNew], ['sub-edit-btn', isEdit], ['sub-manual-btn', isManual]].forEach(([id, active]) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.style.background = active ? '#4daabb' : '#E4DDD3';
+    btn.style.color      = active ? 'white'   : '#1A1714';
+  });
+
+  // Show/hide sections
+  document.getElementById('add-new-header').style.display  = (isNew || isManual) ? '' : 'none';
+  document.getElementById('add-edit-header').style.display = isEdit   ? '' : 'none';
+  document.getElementById('lookup-bar-wrap').style.display = isNew    ? '' : 'none';
+
+  if (isManual) {
+    // Show form immediately with blank fields, update subtitle
+    document.getElementById('add-new-title').textContent = 'Manual entry';
+    document.getElementById('add-new-sub').textContent   = 'Fill in all fields manually — use this for places not yet on Google Maps.';
+    resetLocationForm();
+    // Show blank form
+    document.getElementById('location-form').style.display = 'block';
+    // Make auto-filled fields editable
+    ['f-address','f-lat','f-lon','f-place-id','f-maps-url'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.removeAttribute('readonly');
+    });
+    buildHoursRows();
+  } else {
+    // Restore readonly on auto-filled fields
+    ['f-address','f-lat','f-lon','f-place-id','f-maps-url'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('readonly', true);
+    });
+    if (isNew) {
+      document.getElementById('add-new-title').textContent = 'Add a location';
+      document.getElementById('add-new-sub').textContent   = 'Paste a Google Maps URL or Place ID to auto-fill details, then complete the manual fields.';
+    }
     clearEditMode();
   }
 }
@@ -2688,6 +2684,9 @@ function setMode(mode) {
   }
   if (isEvents) {
     loadUpcomingEvents();
+  }
+  if (isRefresh) {
+    populateRefreshSecCatDropdown();
   }
 }
 
@@ -4382,7 +4381,18 @@ function resetLocationForm() {
 
 // ─── Google bulk refresh ──────────────────────────────────────────────────────
 
-async function startGoogleRefresh() {
+function populateRefreshSecCatDropdown() {
+  const sel = document.getElementById('refresh-sec-cat');
+  if (!sel || sel.options.length > 1) return; // already populated
+  const allSecs = Object.values(SECONDARY_TAXONOMY).flat().sort();
+  allSecs.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    sel.appendChild(opt);
+  });
+}
+
+async function startGoogleRefresh(filterSecCat) {
   const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, googleKey } = getConfig();
   const writeKey = serviceKey || supabaseKey;
   if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
@@ -4393,23 +4403,26 @@ async function startGoogleRefresh() {
   const progressEl = document.getElementById('google-refresh-progress');
   const barEl    = document.getElementById('google-refresh-bar');
   const logEl    = document.getElementById('google-refresh-log');
+  const changesEl = document.getElementById('google-refresh-changes');
 
-  if (!confirm('This will call the Google Places API once per location to refresh opening hours, opening status, and ratings. Costs ~$0.017 per location. Continue?')) return;
+  if (!confirm(`This will call the Google Places API once per location${filterSecCat ? ' in the selected category' : ''} to refresh opening hours, status, and ratings (~$0.017/location). Continue?`)) return;
 
   btn.disabled = true;
   progressEl.style.display = 'block';
   logEl.innerHTML = '';
+  if (changesEl) changesEl.innerHTML = '';
 
   try {
-    const res = await fetch(
-      `${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,google_place_id&order=name.asc`,
-      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
-    );
+    let url = `${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,google_place_id,opening_status,opening_hours&order=name.asc`;
+    if (filterSecCat) url += `&secondary_categories=cs.{${encodeURIComponent(filterSecCat)}}`;
+
+    const res = await fetch(url, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
     const locations = await res.json();
-    if (!locations.length) { statusEl.textContent = 'No locations with a Place ID found.'; btn.disabled = false; return; }
+    if (!locations.length) { statusEl.textContent = 'No locations found for this filter.'; btn.disabled = false; return; }
 
     statusEl.textContent = `Refreshing ${locations.length} locations…`;
     let done = 0, errors = 0, updated = 0;
+    const changes = []; // track meaningful changes
 
     for (const loc of locations) {
       barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
@@ -4429,13 +4442,27 @@ async function startGoogleRefresh() {
           opening_status:      data.businessStatus ?? null,
         };
 
-        // Parse opening hours if available
+        // Detect status change
+        if (data.businessStatus && data.businessStatus !== loc.opening_status) {
+          changes.push({ name: loc.name, type: 'status', from: loc.opening_status || 'unknown', to: data.businessStatus });
+        }
+
+        // Parse + detect opening hours change
+        let newHours = null;
         if (data.regularOpeningHours?.weekdayDescriptions?.length) {
           const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-          patch.opening_hours = days.map((day, i) => ({
+          newHours = days.map((day, i) => ({
             day,
             hours: data.regularOpeningHours.weekdayDescriptions[i]?.replace(/^[^:]+:\s*/, '') || 'Closed'
           }));
+          patch.opening_hours = newHours;
+
+          // Compare with stored hours (simple string comparison)
+          const oldStr = JSON.stringify(loc.opening_hours || []);
+          const newStr = JSON.stringify(newHours);
+          if (oldStr !== newStr) {
+            changes.push({ name: loc.name, type: 'hours', from: null, to: newHours });
+          }
         }
 
         await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
@@ -4462,8 +4489,26 @@ async function startGoogleRefresh() {
       await new Promise(r => setTimeout(r, 150));
     }
 
-    statusEl.textContent = `✓ Done — ${updated} updated, ${errors} errors.`;
+    statusEl.textContent = `✓ Done — ${updated} updated, ${errors} errors, ${changes.length} change${changes.length !== 1 ? 's' : ''} detected.`;
     barEl.style.width = '100%';
+
+    // Show changes summary
+    if (changesEl && changes.length) {
+      changesEl.innerHTML = `
+        <div style="margin-top:16px;">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:#A09A94;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Changes detected (${changes.length})</div>
+          ${changes.map(c => `
+            <div style="padding:8px 12px;background:#fef9c3;border:1.5px solid #fde68a;border-radius:8px;margin-bottom:6px;font-size:12px;">
+              <strong>${c.name}</strong>
+              ${c.type === 'status'
+                ? ` — status changed: <span style="color:#991B1B;">${c.from}</span> → <span style="color:#2D6A4F;">${c.to}</span>`
+                : ` — opening hours updated`}
+            </div>`).join('')}
+        </div>`;
+    } else if (changesEl) {
+      changesEl.innerHTML = '<p style="font-size:12px;color:#2D6A4F;margin-top:12px;">✓ No changes to opening hours or status detected.</p>';
+    }
+
   } catch(e) {
     statusEl.textContent = `Error: ${e.message}`;
   } finally {
