@@ -719,10 +719,6 @@ header {
         <label>Supabase Table Name</label>
         <input type="text" id="cfg-supabase-table" placeholder="locations" oninput="saveConfig()" />
       </div>
-      <div class="field">
-        <label>Loops API Key</label>
-        <input type="password" id="cfg-loops-key" placeholder="loops_..." oninput="saveConfig()" />
-      </div>
     </div>
     <p class="text-muted" style="margin-top:14px;">Keys are saved in your browser only. Never shared anywhere.</p>
   </div>
@@ -736,7 +732,6 @@ header {
     <button class="mode-btn" id="mode-discover" onclick="setMode('discover')">🔍 Discover</button>
     <button class="mode-btn" id="mode-events" onclick="setMode('events')">🎉 Events</button>
     <button class="mode-btn" id="mode-refresh" onclick="setMode('refresh')">🔄 Refresh</button>
-    <button class="mode-btn" id="mode-newsletter" onclick="setMode('newsletter')">✉ Newsletter</button>
   </div>
 
   <!-- Add Location mode -->
@@ -1176,108 +1171,6 @@ header {
 
   </div>
 
-  <!-- Newsletter mode -->
-
-  <div id="newsletter-mode-ui" style="display:none;">
-    <div class="page-title">Newsletter</div>
-    <p class="page-sub">Build and send your weekly GoBebop email via Loops. Content auto-populates from your database.</p>
-
-```
-<!-- Step 1: Auto-populate -->
-<div class="form-section">
-  <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
-    <div class="section-title">1 · Load this week's content</div>
-    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadNewsletterContent()">↺ Reload</button>
-  </div>
-  <div class="section-body">
-    <div class="fields-grid">
-
-      <!-- Featured recommendation -->
-      <div class="field full">
-        <label>Featured recommendation <span style="color:#A09A94;font-weight:400;">(auto-loaded from active recommendation)</span></label>
-        <div id="nl-rec-preview" style="background:#E4DDD3;border:1.5px solid #D4CEC6;border-radius:8px;padding:10px 14px;font-size:13px;color:#6B6560;min-height:40px;">
-          Loading…
-        </div>
-      </div>
-
-      <!-- New locations -->
-      <div class="field full">
-        <label>New locations this week <span style="color:#A09A94;font-weight:400;">(added in last 7 days)</span></label>
-        <div id="nl-new-locations" style="background:#E4DDD3;border:1.5px solid #D4CEC6;border-radius:8px;padding:10px 14px;font-size:13px;color:#6B6560;min-height:40px;">
-          Loading…
-        </div>
-      </div>
-
-      <!-- Weekend weather -->
-      <div class="field full">
-        <label>Weekend weather ideas</label>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-          <select id="nl-weather-type" style="font-size:13px;padding:7px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;">
-            <option value="sunny">☀️ Sunny weekend</option>
-            <option value="rainy">🌧️ Rainy weekend</option>
-            <option value="mixed">⛅ Mixed weather</option>
-          </select>
-          <button class="btn btn-enrich" onclick="generateWeatherPicks()" id="nl-weather-btn" style="font-size:12px;padding:7px 14px;">✦ Generate picks</button>
-        </div>
-        <div id="nl-weather-picks" style="background:#E4DDD3;border:1.5px solid #D4CEC6;border-radius:8px;padding:10px 14px;font-size:13px;color:#6B6560;min-height:40px;">
-          Select weather type and click Generate.
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- Step 2: Write email -->
-<div class="form-section" style="margin-top:20px;">
-  <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
-    <div class="section-title">2 · Compose</div>
-    <button class="btn btn-enrich" onclick="generateNewsletterDraft()" id="nl-draft-btn" style="font-size:12px;padding:6px 14px;">✦ Generate draft</button>
-  </div>
-  <div class="section-body">
-    <div class="fields-grid">
-      <div class="field full">
-        <label>Subject line</label>
-        <input type="text" id="nl-subject" placeholder="e.g. Dit weekend in Amsterdam 🌧️ — GoBebop picks" />
-      </div>
-      <div class="field full">
-        <label>Preview text <span style="color:#A09A94;font-weight:400;">(shows in inbox under subject)</span></label>
-        <input type="text" id="nl-preview-text" placeholder="e.g. Rainy Saturday? Here's where to go with the kids." />
-      </div>
-      <div class="field full">
-        <label>Opening paragraph <span style="color:#A09A94;font-weight:400;">(warm intro, 2-3 sentences)</span></label>
-        <textarea id="nl-intro" style="min-height:80px;" placeholder="e.g. Het eerste echte lenteweekend is in zicht…"></textarea>
-      </div>
-      <div class="field full">
-        <label>Updates / closing note <span style="color:#A09A94;font-weight:400;">(optional — app news, personal note)</span></label>
-        <textarea id="nl-closing" style="min-height:60px;" placeholder="e.g. We've just added 12 new locations in Utrecht…"></textarea>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Step 3: Preview & send -->
-<div class="form-section" style="margin-top:20px;">
-  <div class="section-header">
-    <div class="section-title">3 · Preview &amp; send</div>
-  </div>
-  <div class="section-body">
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-      <button class="btn btn-secondary" onclick="previewNewsletter()">👁 Preview HTML</button>
-      <button class="btn btn-enrich" onclick="sendTestNewsletter()" id="nl-test-btn">✉ Send test to me</button>
-      <button class="btn btn-save" onclick="sendNewsletter()" id="nl-send-btn" style="flex:none;">🚀 Send to all subscribers</button>
-    </div>
-    <div id="nl-status" style="font-size:13px;font-family:'DM Mono',monospace;"></div>
-    <!-- HTML preview panel -->
-    <div id="nl-preview-panel" style="display:none;margin-top:16px;border:1.5px solid #D4CEC6;border-radius:8px;overflow:hidden;">
-      <iframe id="nl-preview-frame" style="width:100%;height:500px;border:none;"></iframe>
-    </div>
-  </div>
-</div>
-```
-
-  </div>
-
   <!-- Lookup bar -->
 
   <div id="lookup-bar-wrap">
@@ -1603,7 +1496,6 @@ function saveConfig() {
   localStorage.setItem('bebop_anthropic_key', document.getElementById('cfg-anthropic-key').value);
   localStorage.setItem('bebop_supabase_url', document.getElementById('cfg-supabase-url').value);
   localStorage.setItem('bebop_supabase_key', document.getElementById('cfg-supabase-key').value);
-  localStorage.setItem('bebop_loops_key', document.getElementById('cfg-loops-key').value);
   localStorage.setItem('bebop_supabase_service_key', document.getElementById('cfg-supabase-service-key').value);
   localStorage.setItem('bebop_supabase_table', document.getElementById('cfg-supabase-table').value);
 }
@@ -1613,7 +1505,6 @@ function loadConfig() {
   document.getElementById('cfg-anthropic-key').value = localStorage.getItem('bebop_anthropic_key') || '';
   document.getElementById('cfg-supabase-url').value = localStorage.getItem('bebop_supabase_url') || '';
   document.getElementById('cfg-supabase-key').value = localStorage.getItem('bebop_supabase_key') || '';
-  document.getElementById('cfg-loops-key').value = localStorage.getItem('bebop_loops_key') || '';
   document.getElementById('cfg-supabase-service-key').value = localStorage.getItem('bebop_supabase_service_key') || '';
   document.getElementById('cfg-supabase-table').value = localStorage.getItem('bebop_supabase_table') || 'locations';
 }
@@ -1624,7 +1515,6 @@ function getConfig() {
     anthropicKey: localStorage.getItem('bebop_anthropic_key') || '',
     supabaseUrl: localStorage.getItem('bebop_supabase_url') || '',
     supabaseKey: localStorage.getItem('bebop_supabase_key') || '',
-    loopsKey:    localStorage.getItem('bebop_loops_key') || '',
     serviceKey: localStorage.getItem('bebop_supabase_service_key') || '',
     supabaseTable: localStorage.getItem('bebop_supabase_table') || 'locations',
   };
@@ -2327,7 +2217,7 @@ ${website ? `- Website: ${website}` : ''}
 Return ONLY a valid JSON object with these exact keys:
 {
   "categories": [],         // array, pick 1-2 from: ["Active Play","Animals & Nature","Amusements & Attractions","Classes, Workshops, Camps","Culture & Learning","Restaurants & Cafes"]
-  "secondary_categories": [],  // array, pick 1-3 that apply from: ["Playground", "Indoor Playground", "Trampoline Park", "Skatepark", "Sports Field", "Swimming Pool", "Paddling Pool", "Water Park", "Climbing Centre", "Minigolf", "Bowling", "Ice Skating", "Cycling Track", "Nature Playground", "Adventure Park",  "Sensory Play Space", "Baby Spa", "Zoo", "Children's Farm", "Pick-Your-Own Farm", "Aquarium", "Butterfly House", "Wildlife Park", "Botanical Garden", "Nature Reserve", "Hiking Trail", "Gnome Trail", "Barefoot Path", "Pony Rides", "Theme Park", "Amusement Park", "Role-Play Village", "Immersive Experience", "Interactive Store", "Arcade", "Cinema", "Planetarium", "Ferris Wheel / Observation Tower", "Boat Trip", "Train Ride", "Plane Spotting", "Children's Museum", "Natural History Museum", "Science Museum", "Space Museum", "History Museum", "Art Museum", "Culture Museum", "Maritime Museum", "Railway Museum", "Aviation Museum", "Open Air Museum", "Film Museum", "Music Museum", "Library", "Bookshop", "Theatre", "Swimming Lessons", "Gymnastics Classes", "Dance Classes", "Martial Arts", "Music Lessons", "Art Classes", "Drama Classes", "Cooking Classes", "Yoga / Mindfulness", "Coding Classes", "Language Classes", "Sports Coaching", "Sensory Classes",  "Horse Riding", "Playgroup", "Kids Cafe", "Pancake House", "Restaurant", "Cafe", "Ice Cream Shop", "Bakery"]
+  "secondary_categories": [],  // array, pick 1-3 that apply from: ["Playground", "Indoor Playground", "Trampoline Park", "Skatepark", "Sports Field", "Swimming Pool", "Paddling Pool", "Water Park", "Climbing Centre", "Minigolf", "Bowling", "Ice Skating", "Cycling Track", "Nature Playground", "Adventure Park",  "Sensory Play Space", "Baby Spa", "Zoo", "Children's Farm", "Pick-Your-Own Farm", "Aquarium", "Butterfly House", "Wildlife Park", "Botanical Garden", "Nature Reserve", "Hiking Trail", "Gnome Trail", "Barefoot Path", "Pony Rides", "Theme Park", "Amusement Park", "Role-Play Village", "Immersive Experience", "Interactive Store", "Arcade", "Cinema", "Theatre", "Puppet Show", "Planetarium", "Ferris Wheel / Observation Tower", "Boat Trip", "Train Ride", "Plane Spotting", "Children's Museum", "Natural History Museum", "Science Museum", "Space Museum", "History Museum", "Art Museum", "Culture Museum", "Maritime Museum", "Railway Museum", "Aviation Museum", "Open Air Museum", "Film Museum", "Music Museum", "Library", "Bookshop", "Swimming Lessons", "Gymnastics Classes", "Dance Classes", "Martial Arts", "Music Lessons", "Art Classes", "Drama Classes", "Cooking Classes", "Yoga / Mindfulness", "Coding Classes", "Language Classes", "Sports Coaching", "Sensory Classes",  "Horse Riding", "Playgroup", "Kids Cafe", "Pancake House", "Restaurant", "Cafe", "Ice Cream Shop", "Bakery"]
   "secondary_category_lead": null, // string, the single most defining secondary — must be one of secondary_categories
   "indoor_outdoor": "",     // "Indoor", "Outdoor", or "Mixed" — null if unsure
   "ideal_age_min": null,    // youngest suitable age in years (integer), null if truly all ages. Age ranges are INCLUSIVE — a place with min age 2 should have age_baby: true.
@@ -2756,8 +2646,7 @@ function setMode(mode) {
   const isRecs     = mode === 'recs';
   const isDiscover = mode === 'discover';
   const isEvents   = mode === 'events';
-  const isRefresh     = mode === 'refresh';
-  const isNewsletter  = mode === 'newsletter';
+  const isRefresh  = mode === 'refresh';
 
   document.getElementById('mode-add').classList.toggle('active', isAdd);
   document.getElementById('mode-photos').classList.toggle('active', isPhoto);
@@ -2765,15 +2654,13 @@ function setMode(mode) {
   document.getElementById('mode-discover').classList.toggle('active', isDiscover);
   document.getElementById('mode-events').classList.toggle('active', isEvents);
   document.getElementById('mode-refresh').classList.toggle('active', isRefresh);
-  document.getElementById('mode-newsletter').classList.toggle('active', isNewsletter);
 
   document.getElementById('add-mode-ui').style.display      = isAdd      ? '' : 'none';
   document.getElementById('photo-mode-ui').style.display    = isPhoto    ? '' : 'none';
   document.getElementById('recs-mode-ui').style.display     = isRecs     ? '' : 'none';
   document.getElementById('discover-mode-ui').style.display = isDiscover ? '' : 'none';
   document.getElementById('events-mode-ui').style.display   = isEvents   ? '' : 'none';
-  document.getElementById('refresh-mode-ui').style.display     = isRefresh     ? '' : 'none';
-  document.getElementById('newsletter-mode-ui').style.display  = isNewsletter  ? '' : 'none';
+  document.getElementById('refresh-mode-ui').style.display  = isRefresh  ? '' : 'none';
   document.getElementById('lookup-bar-wrap').style.display  = isAdd      ? '' : 'none';
   document.getElementById('location-form').style.display    = isAdd      ? 'block' : 'none';
   document.getElementById('status').style.display = 'none';
@@ -2800,9 +2687,6 @@ function setMode(mode) {
   }
   if (isRefresh) {
     populateRefreshSecCatDropdown();
-  }
-  if (isNewsletter) {
-    loadNewsletterContent();
   }
 }
 
@@ -3301,8 +3185,8 @@ async function uploadPhotoMode() {
 const SECONDARY_TAXONOMY = {
   "Active Play": ["Playground","Indoor Playground","Trampoline Park","Skatepark","Sports Field","Swimming Pool","Paddling Pool","Water Park","Climbing Centre","Minigolf","Bowling","Ice Skating","Cycling Track","Nature Playground","Adventure Park","Sensory Play Space","Baby Spa","Construction Playground"],
   "Animals & Nature": ["Zoo","Children's Farm","Pick-Your-Own Farm","Aquarium","Butterfly House","Wildlife Park","Botanical Garden","Nature Reserve","Hiking Trail","Gnome Trail","Barefoot Path","Pony Rides"],
-  "Amusements & Attractions": ["Theme Park","Amusement Park","Role-Play Village","Immersive Experience","Interactive Store","Arcade","Cinema","Planetarium","Ferris Wheel / Observation Tower","Boat Trip","Train Ride","Plane Spotting"],
-  "Culture & Learning": ["Children's Museum","Natural History Museum","Science Museum","Space Museum","History Museum","Art Museum","Culture Museum","Maritime Museum","Railway Museum","Aviation Museum","Open Air Museum","Film Museum","Music Museum","Library","Bookshop","Concert Hall","Historic Site","Theatre"],
+  "Amusements & Attractions": ["Theme Park","Amusement Park","Role-Play Village","Immersive Experience","Interactive Store","Arcade","Cinema","Theatre","Puppet Show","Planetarium","Ferris Wheel / Observation Tower","Boat Trip","Train Ride","Plane Spotting"],
+  "Culture & Learning": ["Children's Museum","Natural History Museum","Science Museum","Space Museum","History Museum","Art Museum","Culture Museum","Maritime Museum","Railway Museum","Aviation Museum","Open Air Museum","Film Museum","Music Museum","Library","Bookshop","Concert Hall","Historic Site"],
   "Classes, Workshops, Camps": ["Swimming Lessons","Gymnastics Classes","Dance Classes","Martial Arts","Music Lessons","Art Classes","Drama Classes","Cooking Classes","Yoga / Mindfulness","Coding Classes","Language Classes","Sports Coaching","Sensory Classes","Horse Riding","Playgroup","Holiday Camp"],
   "Restaurants & Cafes": ["Kids Cafe","Pancake House","Restaurant","Cafe","Ice Cream Shop","Bakery"]
 };
@@ -4632,571 +4516,240 @@ async function startGoogleRefresh(filterSecCat) {
   }
 }
 
-// ─── Newsletter ──────────────────────────────────────────────────────────────
-
-let _nlData = {}; // cached newsletter data
-
-async function loadNewsletterContent() {
-  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
-  if (!supabaseUrl || !supabaseKey) return;
-
-  // Load active recommendation
-  try {
-    const recRes = await fetch(
-      `${supabaseUrl}/rest/v1/recommendations?active=eq.true&select=headline,body,locations(name,city,description)&limit=1`,
-      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
-    );
-    const recs = await recRes.json();
-    const recEl = document.getElementById('nl-rec-preview');
-    if (recs.length) {
-      const r = recs[0];
-      const loc = r.locations || {};
-      _nlData.recommendation = r;
-      recEl.innerHTML = `<strong>${loc.name || ''}</strong>${r.headline ? ' — ' + r.headline : ''}<br><span style="color:#A09A94;">${r.body || ''}</span>`;
-    } else {
-      recEl.textContent = 'No active recommendation found. Set one in the Recs tab.';
-    }
-  } catch(e) {}
-
-  // Load new locations (last 7 days)
-  try {
-    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const newRes = await fetch(
-      `${supabaseUrl}/rest/v1/${supabaseTable}?created_at=gte.${since}&select=name,city,secondary_category_lead&order=created_at.desc&limit=8`,
-      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
-    );
-    const newLocs = await newRes.json();
-    const newEl = document.getElementById('nl-new-locations');
-    _nlData.newLocations = newLocs;
-    if (newLocs.length) {
-      newEl.innerHTML = newLocs.map(l =>
-        `<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;background:#dff0f5;color:#4daabb;border-radius:20px;font-size:11px;font-weight:600;">${l.name}${l.city ? ', ' + l.city : ''}</span>`
-      ).join('');
-    } else {
-      newEl.textContent = 'No new locations added this week.';
-    }
-  } catch(e) {}
-}
-
-async function generateWeatherPicks() {
-  const { supabaseUrl, supabaseKey, supabaseTable, anthropicKey } = getConfig();
-  if (!anthropicKey) return alert('Add your Anthropic API key in config.');
-
-  const weatherType = document.getElementById('nl-weather-type').value;
-  const btn = document.getElementById('nl-weather-btn');
-  const picksEl = document.getElementById('nl-weather-picks');
-  btn.disabled = true;
-  btn.textContent = '✦ Generating…';
-  picksEl.textContent = 'Fetching locations…';
-
-  try {
-    // Fetch a sample of published locations to give AI context
-    const filter = weatherType === 'rainy'
-      ? `&indoor_outdoor=in.(Indoor,Mixed)`
-      : weatherType === 'sunny'
-        ? `&indoor_outdoor=in.(Outdoor,Mixed)`
-        : '';
-    const res = await fetch(
-      `${supabaseUrl}/rest/v1/${supabaseTable}?status=eq.published${filter}&select=name,city,secondary_category_lead,description,tier&order=tier.asc&limit=30`,
-      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
-    );
-    const locs = await res.json();
-
-    const prompt = `You are the editor of GoBebop, a family guide for Amsterdam and the Netherlands.
-
-It's a ${weatherType === 'rainy' ? 'rainy' : weatherType === 'sunny' ? 'sunny' : 'mixed'} weekend coming up. Pick 3 great suggestions for families from this list and write a short, engaging blurb (1-2 sentences each) for each pick.
-
-Available locations:
-${locs.map(l => '- ' + l.name + ' (' + (l.city || 'Amsterdam') + '): ' + (l.description || l.secondary_category_lead || '')).join('\n')}
-
-Return ONLY valid JSON — no preamble:
-[
-  { "name": "", "city": "", "reason": "" },
-  { "name": "", "city": "", "reason": "" },
-  { "name": "", "city": "", "reason": "" }
-]
-
-Reason should be 1-2 warm, specific sentences in English explaining why it's perfect for this weekend's weather. Be concrete, not generic.`;
-
-    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 600,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const aiData = await aiRes.json();
-    const text = aiData.content?.[0]?.text || '';
-    const first = text.indexOf('['), last = text.lastIndexOf(']');
-    const picks = JSON.parse(text.slice(first, last + 1));
-    _nlData.weatherPicks = picks;
-    picksEl.innerHTML = picks.map(p =>
-      `<div style="margin-bottom:8px;"><strong>${p.name}</strong>${p.city ? ', ' + p.city : ''} — <span style="color:#6B6560;">${p.reason}</span></div>`
-    ).join('');
-  } catch(e) {
-    picksEl.textContent = 'Error: ' + e.message;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '✦ Generate picks';
-  }
-}
-
-async function generateNewsletterDraft() {
-  const { anthropicKey } = getConfig();
-  if (!anthropicKey) return alert('Add your Anthropic API key in config.');
-
-  const btn = document.getElementById('nl-draft-btn');
-  btn.disabled = true;
-  btn.textContent = '✦ Generating…';
-
-  const rec = _nlData.recommendation;
-  const newLocs = _nlData.newLocations || [];
-  const weatherPicks = _nlData.weatherPicks || [];
-  const weatherType = document.getElementById('nl-weather-type').value;
-
-  const prompt = `Write a short, warm newsletter intro and subject line for GoBebop, a family guide for Amsterdam.
-
-This week's content:
-${rec ? `Featured: ${rec.locations?.name || ''} — ${rec.headline || ''}: ${rec.body || ''}` : 'No featured recommendation.'}
-New locations: ${newLocs.length ? newLocs.map(l => l.name).join(', ') : 'none'}
-Weather this weekend: ${weatherType}
-${weatherPicks.length ? 'Weekend picks: ' + weatherPicks.map(p => p.name).join(', ') : ''}
-
-Write:
-1. A subject line (catchy, includes a relevant emoji, references the weather or featured location)
-2. A preview text (1 sentence, shown under subject in inbox)
-3. An intro paragraph (2-3 sentences, warm and direct, in English, feels like a friend writing)
-
-Return ONLY valid JSON:
-{ "subject": "", "preview_text": "", "intro": "" }`;
-
-  try {
-    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 400,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const aiData = await aiRes.json();
-    const text = aiData.content?.[0]?.text || '';
-    const first = text.indexOf('{'), last = text.lastIndexOf('}');
-    const draft = JSON.parse(text.slice(first, last + 1));
-    if (draft.subject)      document.getElementById('nl-subject').value       = draft.subject;
-    if (draft.preview_text) document.getElementById('nl-preview-text').value  = draft.preview_text;
-    if (draft.intro)        document.getElementById('nl-intro').value          = draft.intro;
-  } catch(e) {
-    alert('Draft generation failed: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '✦ Generate draft';
-  }
-}
-
-function buildNewsletterHtml() {
-  const rec        = _nlData.recommendation;
-  const newLocs    = _nlData.newLocations || [];
-  const weatherPicks = _nlData.weatherPicks || [];
-  const weatherType  = document.getElementById('nl-weather-type').value;
-  const intro      = document.getElementById('nl-intro').value;
-  const closing    = document.getElementById('nl-closing').value;
-  const weatherIcon = weatherType === 'rainy' ? '🌧️' : weatherType === 'sunny' ? '☀️' : '⛅';
-
-  return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-  body { margin:0; padding:0; background:#f5f0eb; font-family:'Helvetica Neue',Arial,sans-serif; }
-  .wrap { max-width:600px; margin:0 auto; background:#ffffff; }
-  .header { background:#1A1714; padding:24px 32px; }
-  .header img { height:36px; }
-  .section { padding:28px 32px; border-bottom:1px solid #f0ebe3; }
-  .section:last-child { border-bottom:none; }
-  .label { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#4daabb; margin-bottom:10px; }
-  h2 { font-size:20px; color:#1A1714; margin:0 0 8px; font-weight:700; line-height:1.3; }
-  p { font-size:15px; color:#444; line-height:1.7; margin:0 0 12px; }
-  .loc-card { background:#f9f5f0; border-radius:8px; padding:14px 16px; margin-bottom:10px; }
-  .loc-name { font-weight:700; color:#1A1714; font-size:14px; }
-  .loc-reason { font-size:13px; color:#666; margin-top:4px; line-height:1.5; }
-  .new-pill { display:inline-block; background:#dff0f5; color:#4daabb; border-radius:20px; padding:3px 10px; font-size:12px; font-weight:600; margin:2px 3px 2px 0; }
-  .cta { display:inline-block; background:#4daabb; color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:700; font-size:14px; }
-  .footer { background:#f5f0eb; padding:20px 32px; text-align:center; font-size:12px; color:#aaa; }
-</style></head>
-
-<body><div class="wrap">
-  <div class="header">
-    <img src="https://gobebop.app/gobebop-logo.png" alt="GoBebop" />
-  </div>
-
-${intro ? `<div class="section"><p>${intro.replace(/\n/g, '<br>')}</p></div>` : ‘’}
-
-${rec ? `<div class="section"> <div class="label">⭐ This week's pick</div> <h2>${rec.locations?.name || ''}</h2> ${rec.headline ? `<p style="color:#4daabb;font-weight:600;font-size:14px;margin-bottom:8px;">${rec.headline}</p>` : ‘’}
-<p>${rec.body || ‘’}</p>
-<a href="https://gobebop.app" class="cta">View on GoBebop →</a>
-
-  </div>` : ''}
-
-${weatherPicks.length ? `<div class="section"> <div class="label">${weatherIcon} This weekend</div> ${weatherPicks.map(p => `<div class="loc-card">
-<div class="loc-name">${p.name}${p.city ? ’ · ’ + p.city : ‘’}</div>
-<div class="loc-reason">${p.reason}</div>
-</div>`).join(’’)}
-
-  </div>` : ''}
-
-${newLocs.length ? `<div class="section"> <div class="label">🆕 Just added</div> <p style="font-size:13px;color:#666;">${newLocs.map(l => `<span class="new-pill">${l.name}</span>`).join(’’)}</p>
-
-  </div>` : ''}
-
-${closing ? `<div class="section"><p>${closing.replace(/\n/g, '<br>')}</p></div>` : ‘’}
-
-  <div class="footer">
-    You're receiving this because you subscribed at gobebop.app.<br>
-    <a href="{{unsubscribeUrl}}" style="color:#aaa;">Unsubscribe</a>
-  </div>
-</div></body></html>`;
-}
-
-function previewNewsletter() {
-const html  = buildNewsletterHtml();
-const panel = document.getElementById(‘nl-preview-panel’);
-const frame = document.getElementById(‘nl-preview-frame’);
-panel.style.display = ‘’;
-frame.srcdoc = html;
-panel.scrollIntoView({ behavior: ‘smooth’ });
-}
-
-async function sendTestNewsletter() {
-const { loopsKey } = getConfig();
-if (!loopsKey) return alert(‘Add your Loops API key in config first.’);
-const email = prompt(‘Send test to which email address?’);
-if (!email) return;
-await _sendViaLoops(email, true);
-}
-
-async function sendNewsletter() {
-const { loopsKey } = getConfig();
-if (!loopsKey) return alert(‘Add your Loops API key in config first.’);
-if (!confirm(‘Send this newsletter to ALL subscribers? This cannot be undone.’)) return;
-await _sendViaLoops(null, false);
-}
-
-async function _sendViaLoops(testEmail, isTest) {
-const { loopsKey } = getConfig();
-const subject     = document.getElementById(‘nl-subject’).value.trim();
-const previewText = document.getElementById(‘nl-preview-text’).value.trim();
-const statusEl    = document.getElementById(‘nl-status’);
-
-if (!subject) return alert(‘Please add a subject line.’);
-
-const btn = document.getElementById(isTest ? ‘nl-test-btn’ : ‘nl-send-btn’);
-btn.disabled = true;
-statusEl.textContent = isTest ? ‘Sending test…’ : ‘Sending…’;
-statusEl.style.color = ‘#A09A94’;
-
-const htmlBody = buildNewsletterHtml();
-
-try {
-// Loops transactional email API for test, campaign API for full send
-let res;
-if (isTest) {
-res = await fetch(‘https://app.loops.so/api/v1/transactional’, {
-method: ‘POST’,
-headers: {
-‘Content-Type’: ‘application/json’,
-‘Authorization’: `Bearer ${loopsKey}`,
-},
-body: JSON.stringify({
-transactionalId: ‘newsletter_test’, // you’ll create this in Loops
-email: testEmail,
-dataVariables: {
-subject,
-previewText,
-htmlBody,
-}
-}),
-});
-} else {
-// For full sends, use Loops campaign API
-res = await fetch(‘https://app.loops.so/api/v1/campaigns/send’, {
-method: ‘POST’,
-headers: {
-‘Content-Type’: ‘application/json’,
-‘Authorization’: `Bearer ${loopsKey}`,
-},
-body: JSON.stringify({
-name: `GoBebop Newsletter — ${new Date().toLocaleDateString('nl-NL')}`,
-subject,
-previewText,
-html: htmlBody,
-audienceFilter: { subscribed: true },
-}),
-});
-}
-
-```
-const data = await res.json().catch(() => ({}));
-if (res.ok) {
-  statusEl.textContent = isTest ? `✓ Test sent to ${testEmail}` : '✓ Newsletter sent to all subscribers!';
-  statusEl.style.color = '#2D6A4F';
-} else {
-  throw new Error(data.message || data.error || `HTTP ${res.status}`);
-}
-```
-
-} catch(e) {
-statusEl.textContent = ’✗ ’ + e.message;
-statusEl.style.color = ‘#991B1B’;
-} finally {
-btn.disabled = false;
-}
-}
-
 // ─── Batch title generator ───────────────────────────────────────────────────
 
 async function previewBatchTitles() {
-const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
-if (!supabaseUrl || !supabaseKey) return alert(‘Configure Supabase first.’);
-const resultsEl = document.getElementById(‘batch-title-results’);
-resultsEl.innerHTML = ‘<p style="font-size:12px;color:#A09A94;">Loading…</p>’;
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+  const resultsEl = document.getElementById('batch-title-results');
+  resultsEl.innerHTML = '<p style="font-size:12px;color:#A09A94;">Loading…</p>';
 
-try {
-const res = await fetch(
-`${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category&order=name.asc`,
-{ headers: { ‘apikey’: supabaseKey, ‘Authorization’: `Bearer ${supabaseKey}` } }
-);
-const rows = await res.json();
-if (!rows.length) {
-resultsEl.innerHTML = ‘<p style="font-size:13px;color:#2D6A4F;">✓ All locations have a page title!</p>’;
-return;
-}
-resultsEl.innerHTML = `<p style="font-size:12px;color:#A09A94;margin-bottom:8px;">${rows.length} locations without a page title:</p> <div style="display:flex;flex-direction:column;gap:4px;"> ${rows.map(r =>`
-<div style="font-size:12px;padding:6px 10px;background:#F7F3ED;border-radius:6px;display:flex;gap:8px;">
-<span style="font-weight:600;color:#1A1714;">${r.name}</span>
-<span style="color:#A09A94;">${r.city || ‘’}</span>
-</div>`).join('')} </div>`;
-} catch(e) {
-resultsEl.innerHTML = `<p style="font-size:12px;color:#991B1B;">Error: ${e.message}</p>`;
-}
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category&order=name.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    if (!rows.length) {
+      resultsEl.innerHTML = '<p style="font-size:13px;color:#2D6A4F;">✓ All locations have a page title!</p>';
+      return;
+    }
+    resultsEl.innerHTML = `
+      <p style="font-size:12px;color:#A09A94;margin-bottom:8px;">${rows.length} locations without a page title:</p>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        ${rows.map(r => `
+          <div style="font-size:12px;padding:6px 10px;background:#F7F3ED;border-radius:6px;display:flex;gap:8px;">
+            <span style="font-weight:600;color:#1A1714;">${r.name}</span>
+            <span style="color:#A09A94;">${r.city || ''}</span>
+          </div>`).join('')}
+      </div>`;
+  } catch(e) {
+    resultsEl.innerHTML = `<p style="font-size:12px;color:#991B1B;">Error: ${e.message}</p>`;
+  }
 }
 
 async function startBatchTitles() {
-const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, anthropicKey } = getConfig();
-const writeKey = serviceKey || supabaseKey;
-if (!supabaseUrl || !supabaseKey) return alert(‘Configure Supabase first.’);
-if (!anthropicKey) return alert(‘Configure your Anthropic API key first.’);
+  const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, anthropicKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+  if (!anthropicKey) return alert('Configure your Anthropic API key first.');
 
-const btn = document.getElementById(‘batch-title-btn’);
-const progressEl = document.getElementById(‘batch-title-progress’);
-const barEl = document.getElementById(‘batch-title-bar’);
-const statusEl = document.getElementById(‘batch-title-status’);
-const resultsEl = document.getElementById(‘batch-title-results’);
+  const btn = document.getElementById('batch-title-btn');
+  const progressEl = document.getElementById('batch-title-progress');
+  const barEl = document.getElementById('batch-title-bar');
+  const statusEl = document.getElementById('batch-title-status');
+  const resultsEl = document.getElementById('batch-title-results');
 
-if (!confirm(‘This will generate page titles for all locations currently missing one. Continue?’)) return;
+  if (!confirm('This will generate page titles for all locations currently missing one. Continue?')) return;
 
-btn.disabled = true;
-progressEl.style.display = ‘block’;
-resultsEl.innerHTML = ‘’;
-
-try {
-// Fetch all locations without a page title
-const res = await fetch(
-`${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category&order=name.asc`,
-{ headers: { ‘apikey’: supabaseKey, ‘Authorization’: `Bearer ${supabaseKey}` } }
-);
-const locations = await res.json();
-
-```
-if (!locations.length) {
-  statusEl.textContent = '✓ All locations already have titles.';
-  btn.disabled = false;
-  return;
-}
-
-statusEl.textContent = `Found ${locations.length} locations. Starting…`;
-const log = [];
-let done = 0, errors = 0;
-
-for (const loc of locations) {
-  statusEl.textContent = `Generating: ${loc.name} (${done + 1}/${locations.length})`;
-  barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
+  btn.disabled = true;
+  progressEl.style.display = 'block';
+  resultsEl.innerHTML = '';
 
   try {
-    const secLead = loc.secondary_category_lead || (loc.primary_category || [])[0] || '';
-    const prompt = `Generate a concise, SEO-friendly page title for a family-friendly location listing on GoBebop, a Dutch family guide.
-```
+    // Fetch all locations without a page title
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category&order=name.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const locations = await res.json();
+
+    if (!locations.length) {
+      statusEl.textContent = '✓ All locations already have titles.';
+      btn.disabled = false;
+      return;
+    }
+
+    statusEl.textContent = `Found ${locations.length} locations. Starting…`;
+    const log = [];
+    let done = 0, errors = 0;
+
+    for (const loc of locations) {
+      statusEl.textContent = `Generating: ${loc.name} (${done + 1}/${locations.length})`;
+      barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
+
+      try {
+        const secLead = loc.secondary_category_lead || (loc.primary_category || [])[0] || '';
+        const prompt = `Generate a concise, SEO-friendly page title for a family-friendly location listing on GoBebop, a Dutch family guide.
 
 Location: ${loc.name}
-City: ${loc.city || ‘Netherlands’}
+City: ${loc.city || 'Netherlands'}
 Category: ${secLead}
 
 Rules:
-
 - Lead with what Dutch parents actually search for — the activity or venue type, not the brand name
-- Include the Dutch term where natural (e.g. “kinderboerderij”, “speeltuin”, “pannenkoekenrestaurant”)
-- Format: “[Searchable type] in [city] — [Location name]” OR “[Location name] — [Dutch type] & [key detail] in [city]”
-- Be specific: “Gratis Outdoor Speeltuin” beats “Playground”
+- Include the Dutch term where natural (e.g. "kinderboerderij", "speeltuin", "pannenkoekenrestaurant")
+- Format: "[Searchable type] in [city] — [Location name]" OR "[Location name] — [Dutch type] & [key detail] in [city]"
+- Be specific: "Gratis Outdoor Speeltuin" beats "Playground"
 - Max 70 characters total
 - Plain text only, no quotes, no markdown
 - Return only the title, nothing else`;
-  
-  ```
-    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 100,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const aiData = await aiRes.json();
-    const title = aiData.content?.[0]?.text?.trim().replace(/^["']|["']$/g, '');
-  
-    if (title) {
-      // Save to DB
-      await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': writeKey,
-          'Authorization': `Bearer ${writeKey}`,
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({ page_title: title }),
-      });
-      log.push({ name: loc.name, title, ok: true });
-    } else {
-      throw new Error('Empty response');
+
+        const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': anthropicKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 100,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+        const aiData = await aiRes.json();
+        const title = aiData.content?.[0]?.text?.trim().replace(/^["']|["']$/g, '');
+
+        if (title) {
+          // Save to DB
+          await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': writeKey,
+              'Authorization': `Bearer ${writeKey}`,
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify({ page_title: title }),
+          });
+          log.push({ name: loc.name, title, ok: true });
+        } else {
+          throw new Error('Empty response');
+        }
+      } catch(e) {
+        errors++;
+        log.push({ name: loc.name, title: `Error: ${e.message}`, ok: false });
+      }
+
+      done++;
+      // Small delay to avoid rate limiting
+      await new Promise(r => setTimeout(r, 300));
     }
+
+    statusEl.textContent = `✓ Done — ${done - errors} titles generated, ${errors} errors.`;
+    barEl.style.width = '100%';
+
+    // Show results
+    resultsEl.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;">
+        ${log.map(l => `
+          <div style="font-size:12px;padding:6px 10px;background:${l.ok ? '#F7F3ED' : '#FEE2E2'};border-radius:6px;">
+            <span style="font-weight:600;color:#1A1714;">${l.name}</span>
+            <span style="color:${l.ok ? '#6B6560' : '#991B1B'};margin-left:6px;">${l.title}</span>
+          </div>`).join('')}
+      </div>`;
+
   } catch(e) {
-    errors++;
-    log.push({ name: loc.name, title: `Error: ${e.message}`, ok: false });
-  }
-  
-  done++;
-  // Small delay to avoid rate limiting
-  await new Promise(r => setTimeout(r, 300));
-  ```
-  
-  }
-  
-  statusEl.textContent = `✓ Done — ${done - errors} titles generated, ${errors} errors.`;
-  barEl.style.width = ‘100%’;
-  
-  // Show results
-  resultsEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;"> ${log.map(l =>`
-  <div style="font-size:12px;padding:6px 10px;background:${l.ok ? '#F7F3ED' : '#FEE2E2'};border-radius:6px;">
-  <span style="font-weight:600;color:#1A1714;">${l.name}</span>
-  <span style="color:${l.ok ? '#6B6560' : '#991B1B'};margin-left:6px;">${l.title}</span>
-  </div>`).join('')} </div>`;
-  
-  } catch(e) {
-  statusEl.textContent = `Error: ${e.message}`;
+    statusEl.textContent = `Error: ${e.message}`;
   } finally {
-  btn.disabled = false;
+    btn.disabled = false;
   }
-  }
+}
 
 // ─── Bulk rating refresh ─────────────────────────────────────────────────────
 
 async function startBulkRatingRefresh() {
-const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, googleKey } = getConfig();
-const writeKey = serviceKey || supabaseKey;
-if (!supabaseUrl || !supabaseKey) return alert(‘Configure Supabase first.’);
-if (!googleKey) return alert(‘Configure your Google Places API key first.’);
+  const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, googleKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+  if (!googleKey) return alert('Configure your Google Places API key first.');
 
-const btn       = document.getElementById(‘rating-refresh-btn’);
-const statusEl  = document.getElementById(‘rating-refresh-status’);
-const progressEl = document.getElementById(‘rating-refresh-progress’);
-const barEl     = document.getElementById(‘rating-refresh-bar’);
-const logEl     = document.getElementById(‘rating-refresh-log’);
+  const btn       = document.getElementById('rating-refresh-btn');
+  const statusEl  = document.getElementById('rating-refresh-status');
+  const progressEl = document.getElementById('rating-refresh-progress');
+  const barEl     = document.getElementById('rating-refresh-bar');
+  const logEl     = document.getElementById('rating-refresh-log');
 
-if (!confirm(‘This will call the Google Places API once per location to refresh ratings. Costs ~$0.017 per location. Continue?’)) return;
+  if (!confirm('This will call the Google Places API once per location to refresh ratings. Costs ~$0.017 per location. Continue?')) return;
 
-btn.disabled = true;
-progressEl.style.display = ‘block’;
-logEl.innerHTML = ‘’;
+  btn.disabled = true;
+  progressEl.style.display = 'block';
+  logEl.innerHTML = '';
 
-try {
-// Fetch all locations with a google_place_id
-const res = await fetch(
-`${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,google_place_id&order=name.asc`,
-{ headers: { ‘apikey’: supabaseKey, ‘Authorization’: `Bearer ${supabaseKey}` } }
-);
-const locations = await res.json();
-if (!locations.length) { statusEl.textContent = ‘No locations with a Place ID found.’; btn.disabled = false; return; }
-
-```
-statusEl.textContent = `Refreshing ${locations.length} locations…`;
-let done = 0, errors = 0, updated = 0;
-
-for (const loc of locations) {
-  barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
   try {
-    const placeRes = await fetch(`https://places.googleapis.com/v1/places/${loc.google_place_id}`, {
-      headers: {
-        'X-Goog-Api-Key': googleKey,
-        'X-Goog-FieldMask': 'rating,userRatingCount',
-      }
-    });
-    if (!placeRes.ok) throw new Error(`HTTP ${placeRes.status}`);
-    const data = await placeRes.json();
+    // Fetch all locations with a google_place_id
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,google_place_id&order=name.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const locations = await res.json();
+    if (!locations.length) { statusEl.textContent = 'No locations with a Place ID found.'; btn.disabled = false; return; }
 
-    if (data.rating !== undefined) {
-      await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': writeKey,
-          'Authorization': `Bearer ${writeKey}`,
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({
-          google_rating: data.rating || null,
-          google_rating_count: data.userRatingCount || null,
-        }),
-      });
-      updated++;
-      logEl.innerHTML = `✓ ${loc.name}: ★ ${data.rating} (${data.userRatingCount || 0})
-```
+    statusEl.textContent = `Refreshing ${locations.length} locations…`;
+    let done = 0, errors = 0, updated = 0;
 
-`+ logEl.innerHTML; } else { logEl.innerHTML =`— ${loc.name}: no rating
-`+ logEl.innerHTML; } } catch(e) { errors++; logEl.innerHTML =`✗ ${loc.name}: ${e.message}
+    for (const loc of locations) {
+      barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
+      try {
+        const placeRes = await fetch(`https://places.googleapis.com/v1/places/${loc.google_place_id}`, {
+          headers: {
+            'X-Goog-Api-Key': googleKey,
+            'X-Goog-FieldMask': 'rating,userRatingCount',
+          }
+        });
+        if (!placeRes.ok) throw new Error(`HTTP ${placeRes.status}`);
+        const data = await placeRes.json();
+
+        if (data.rating !== undefined) {
+          await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': writeKey,
+              'Authorization': `Bearer ${writeKey}`,
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify({
+              google_rating: data.rating || null,
+              google_rating_count: data.userRatingCount || null,
+            }),
+          });
+          updated++;
+          logEl.innerHTML = `✓ ${loc.name}: ★ ${data.rating} (${data.userRatingCount || 0})
 ` + logEl.innerHTML;
-}
-done++;
-// Delay to avoid hitting rate limits
-await new Promise(r => setTimeout(r, 150));
-}
+        } else {
+          logEl.innerHTML = `— ${loc.name}: no rating
+` + logEl.innerHTML;
+        }
+      } catch(e) {
+        errors++;
+        logEl.innerHTML = `✗ ${loc.name}: ${e.message}
+` + logEl.innerHTML;
+      }
+      done++;
+      // Delay to avoid hitting rate limits
+      await new Promise(r => setTimeout(r, 150));
+    }
 
-```
-statusEl.textContent = `✓ Done — ${updated} updated, ${errors} errors.`;
-barEl.style.width = '100%';
-```
-
-} catch(e) {
-statusEl.textContent = `Error: ${e.message}`;
-} finally {
-btn.disabled = false;
-}
+    statusEl.textContent = `✓ Done — ${updated} updated, ${errors} errors.`;
+    barEl.style.width = '100%';
+  } catch(e) {
+    statusEl.textContent = `Error: ${e.message}`;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ─── Places Autocomplete ─────────────────────────────────────────────────────
@@ -5204,76 +4757,73 @@ btn.disabled = false;
 let autocompleteTimeout = null;
 
 function initPlacesAutocomplete() {
-const input = document.getElementById(‘place-autocomplete’);
-if (!input) return;
-input.addEventListener(‘input’, () => {
-clearTimeout(autocompleteTimeout);
-const q = input.value.trim();
-if (q.length < 3) {
-document.getElementById(‘autocomplete-results’).innerHTML = ‘’;
-return;
-}
-autocompleteTimeout = setTimeout(() => searchPlacesAutocomplete(q), 300);
-});
+  const input = document.getElementById('place-autocomplete');
+  if (!input) return;
+  input.addEventListener('input', () => {
+    clearTimeout(autocompleteTimeout);
+    const q = input.value.trim();
+    if (q.length < 3) {
+      document.getElementById('autocomplete-results').innerHTML = '';
+      return;
+    }
+    autocompleteTimeout = setTimeout(() => searchPlacesAutocomplete(q), 300);
+  });
 }
 
 async function searchPlacesAutocomplete(query) {
-const { googleKey } = getConfig();
-if (!googleKey) return;
-const resultsEl = document.getElementById(‘autocomplete-results’);
+  const { googleKey } = getConfig();
+  if (!googleKey) return;
+  const resultsEl = document.getElementById('autocomplete-results');
 
-try {
-const res = await fetch(‘https://places.googleapis.com/v1/places:searchText’, {
-method: ‘POST’,
-headers: {
-‘Content-Type’: ‘application/json’,
-‘X-Goog-Api-Key’: googleKey,
-‘X-Goog-FieldMask’: ‘places.id,places.displayName,places.formattedAddress’,
-},
-body: JSON.stringify({
-textQuery: query,
-locationBias: {
-circle: { center: { latitude: 52.3676, longitude: 4.9041 }, radius: 50000 }
-},
-maxResultCount: 5,
-}),
-});
-const data = await res.json();
-if (!res.ok) {
-console.error(‘Places API error:’, JSON.stringify(data));
-throw new Error(data.error?.message || `HTTP ${res.status}`);
-}
-const places = data.places || [];
+  try {
+    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': googleKey,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress',
+      },
+      body: JSON.stringify({
+        textQuery: query,
+        locationBias: {
+          circle: { center: { latitude: 52.3676, longitude: 4.9041 }, radius: 50000 }
+        },
+        maxResultCount: 5,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      console.error('Places API error:', JSON.stringify(data));
+      throw new Error(data.error?.message || `HTTP ${res.status}`);
+    }
+    const places = data.places || [];
 
-```
-if (!places.length) {
-  resultsEl.innerHTML = '<div style="font-size:12px;color:#A09A94;padding:6px 0;">No results found</div>';
-  return;
-}
+    if (!places.length) {
+      resultsEl.innerHTML = '<div style="font-size:12px;color:#A09A94;padding:6px 0;">No results found</div>';
+      return;
+    }
 
-resultsEl.innerHTML = places.map(p => `
-  <div onclick="selectAutocompletePlace('${p.id}', this)"
-    style="padding:10px 14px;border-radius:8px;border:1.5px solid #D4CEC6;background:#FFFFFF;cursor:pointer;transition:border-color 0.15s;"
-    onmouseover="this.style.borderColor='#4daabb'" onmouseout="this.style.borderColor='#D4CEC6'">
-    <div style="font-size:13px;font-weight:600;color:#1A1714;">${p.displayName?.text || ''}</div>
-    <div style="font-size:11px;color:#A09A94;margin-top:2px;font-family:'DM Mono',monospace;">${p.formattedAddress || ''}</div>
-  </div>
-`).join('');
-```
-
-} catch(e) {
-resultsEl.innerHTML = `<div style="font-size:12px;color:#991B1B;padding:6px 0;">Search failed: ${e.message}</div>`;
-}
+    resultsEl.innerHTML = places.map(p => `
+      <div onclick="selectAutocompletePlace('${p.id}', this)"
+        style="padding:10px 14px;border-radius:8px;border:1.5px solid #D4CEC6;background:#FFFFFF;cursor:pointer;transition:border-color 0.15s;"
+        onmouseover="this.style.borderColor='#4daabb'" onmouseout="this.style.borderColor='#D4CEC6'">
+        <div style="font-size:13px;font-weight:600;color:#1A1714;">${p.displayName?.text || ''}</div>
+        <div style="font-size:11px;color:#A09A94;margin-top:2px;font-family:'DM Mono',monospace;">${p.formattedAddress || ''}</div>
+      </div>
+    `).join('');
+  } catch(e) {
+    resultsEl.innerHTML = `<div style="font-size:12px;color:#991B1B;padding:6px 0;">Search failed: ${e.message}</div>`;
+  }
 }
 
 async function selectAutocompletePlace(placeId, el) {
-// Clear autocomplete UI
-document.getElementById(‘place-autocomplete’).value = el.querySelector(‘div’).textContent;
-document.getElementById(‘autocomplete-results’).innerHTML = ‘’;
+  // Clear autocomplete UI
+  document.getElementById('place-autocomplete').value = el.querySelector('div').textContent;
+  document.getElementById('autocomplete-results').innerHTML = '';
 
-// Put place ID in the field and trigger lookup
-document.getElementById(‘maps-url’).value = placeId;
-await lookupPlace();
+  // Put place ID in the field and trigger lookup
+  document.getElementById('maps-url').value = placeId;
+  await lookupPlace();
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
@@ -5282,9 +4832,9 @@ loadConfig();
 initPlacesAutocomplete();
 
 // Open config on first load if no API key set
-if (!localStorage.getItem(‘bebop_google_key’)) {
-document.getElementById(‘config-panel’).classList.add(‘visible’);
-document.getElementById(‘config-toggle’).classList.add(‘open’);
+if (!localStorage.getItem('bebop_google_key')) {
+  document.getElementById('config-panel').classList.add('visible');
+  document.getElementById('config-toggle').classList.add('open');
 }
 </script>
 
