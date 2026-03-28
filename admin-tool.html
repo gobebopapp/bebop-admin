@@ -4707,8 +4707,7 @@ async function generateWeatherPicks() {
 It's a ${weatherType === 'rainy' ? 'rainy' : weatherType === 'sunny' ? 'sunny' : 'mixed'} weekend coming up. Pick 3 great suggestions for families from this list and write a short, engaging blurb (1-2 sentences each) for each pick.
 
 Available locations:
-${locs.map(l => `- ${l.name} (${l.city || 'Amsterdam'}): ${l.description || l.secondary_category_lead || ''}`).join('
-')}
+${locs.map(l => '- ' + l.name + ' (' + (l.city || 'Amsterdam') + '): ' + (l.description || l.secondary_category_lead || '')).join('\n')}
 
 Return ONLY valid JSON — no preamble:
 [
@@ -4842,7 +4841,7 @@ function buildNewsletterHtml() {
     <img src="https://gobebop.app/gobebop-logo.png" alt="GoBebop" />
   </div>
 
-${intro ? `<div class="section"><p>${intro.replace(/ /g, '<br>')}</p></div>` : ‘’}
+${intro ? `<div class="section"><p>${intro.replace(/\n/g, '<br>')}</p></div>` : ‘’}
 
 ${rec ? `<div class="section"> <div class="label">⭐ This week's pick</div> <h2>${rec.locations?.name || ''}</h2> ${rec.headline ? `<p style="color:#4daabb;font-weight:600;font-size:14px;margin-bottom:8px;">${rec.headline}</p>` : ‘’}
 <p>${rec.body || ‘’}</p>
@@ -4861,7 +4860,7 @@ ${newLocs.length ? `<div class="section"> <div class="label">🆕 Just added</di
 
   </div>` : ''}
 
-${closing ? `<div class="section"><p>${closing.replace(/ /g, '<br>')}</p></div>` : ‘’}
+${closing ? `<div class="section"><p>${closing.replace(/\n/g, '<br>')}</p></div>` : ‘’}
 
   <div class="footer">
     You're receiving this because you subscribed at gobebop.app.<br>
