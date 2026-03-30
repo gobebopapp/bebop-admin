@@ -2217,7 +2217,7 @@ ${website ? `- Website: ${website}` : ''}
 Return ONLY a valid JSON object with these exact keys:
 {
   "categories": [],         // array, pick 1-2 from: ["Active Play","Animals & Nature","Amusements & Attractions","Classes, Workshops, Camps","Culture & Learning","Restaurants & Cafes"]
-  "secondary_categories": [],  // array, pick 1-3 that apply from: ["Playground", "Indoor Playground", "Trampoline Park", "Skatepark", "Sports Field", "Swimming Pool", "Paddling Pool", "Water Park", "Climbing Centre", "Minigolf", "Bowling", "Ice Skating", "Cycling Track", "Nature Playground", "Adventure Park",  "Sensory Play Space", "Baby Spa", "Zoo", "Children's Farm", "Pick-Your-Own Farm", "Aquarium", "Butterfly House", "Wildlife Park", "Botanical Garden", "Nature Reserve", "Hiking Trail", "Gnome Trail", "Barefoot Path", "Pony Rides", "Theme Park", "Amusement Park", "Role-Play Village", "Immersive Experience", "Interactive Store", "Arcade", "Cinema", "Theatre", "Puppet Show", "Planetarium", "Ferris Wheel / Observation Tower", "Boat Trip", "Train Ride", "Plane Spotting", "Children's Museum", "Natural History Museum", "Science Museum", "Space Museum", "History Museum", "Art Museum", "Culture Museum", "Maritime Museum", "Railway Museum", "Aviation Museum", "Open Air Museum", "Film Museum", "Music Museum", "Library", "Bookshop", "Swimming Lessons", "Gymnastics Classes", "Dance Classes", "Martial Arts", "Music Lessons", "Art Classes", "Drama Classes", "Cooking Classes", "Yoga / Mindfulness", "Coding Classes", "Language Classes", "Sports Coaching", "Sensory Classes",  "Horse Riding", "Playgroup", "Kids Cafe", "Pancake House", "Restaurant", "Cafe", "Ice Cream Shop", "Bakery"]
+  "secondary_categories": [],  // array, pick 1-3 that apply from: ["Playground", "Indoor Playground", "Trampoline Park", "Skatepark", "Sports Field", "Swimming Pool", "Paddling Pool", "Water Park", "Climbing Centre", "Minigolf", "Bowling", "Ice Skating", "Cycling Track", "Nature Playground", "Adventure Park",  "Sensory Play Space", "Baby Spa", "Zoo", "Children's Farm", "Pick-Your-Own Farm", "Aquarium", "Butterfly House", "Wildlife Park", "Botanical Garden", "Nature Reserve", "Hiking Trail", "Gnome Trail", "Barefoot Path", "Pony Rides", "Theme Park", "Amusement Park", "Role-Play Village", "Immersive Experience", "Interactive Store", "Arcade", "Cinema", "Planetarium", "Ferris Wheel / Observation Tower", "Boat Trip", "Train Ride", "Plane Spotting", "Children's Museum", "Natural History Museum", "Science Museum", "Space Museum", "History Museum", "Art Museum", "Culture Museum", "Maritime Museum", "Railway Museum", "Aviation Museum", "Open Air Museum", "Film Museum", "Music Museum", "Library", "Bookshop", "Theatre", "Swimming Lessons", "Gymnastics Classes", "Dance Classes", "Martial Arts", "Music Lessons", "Art Classes", "Drama Classes", "Cooking Classes", "Yoga / Mindfulness", "Coding Classes", "Language Classes", "Sports Coaching", "Sensory Classes",  "Horse Riding", "Playgroup", "Kids Cafe", "Pancake House", "Restaurant", "Cafe", "Ice Cream Shop", "Bakery"]
   "secondary_category_lead": null, // string, the single most defining secondary — must be one of secondary_categories
   "indoor_outdoor": "",     // "Indoor", "Outdoor", or "Mixed" — null if unsure
   "ideal_age_min": null,    // youngest suitable age in years (integer), null if truly all ages. Age ranges are INCLUSIVE — a place with min age 2 should have age_baby: true.
@@ -2646,7 +2646,7 @@ function setMode(mode) {
   const isRecs     = mode === 'recs';
   const isDiscover = mode === 'discover';
   const isEvents   = mode === 'events';
-  const isRefresh  = mode === 'refresh';
+  const isRefresh     = mode === 'refresh';
 
   document.getElementById('mode-add').classList.toggle('active', isAdd);
   document.getElementById('mode-photos').classList.toggle('active', isPhoto);
@@ -2660,7 +2660,7 @@ function setMode(mode) {
   document.getElementById('recs-mode-ui').style.display     = isRecs     ? '' : 'none';
   document.getElementById('discover-mode-ui').style.display = isDiscover ? '' : 'none';
   document.getElementById('events-mode-ui').style.display   = isEvents   ? '' : 'none';
-  document.getElementById('refresh-mode-ui').style.display  = isRefresh  ? '' : 'none';
+  document.getElementById('refresh-mode-ui').style.display     = isRefresh     ? '' : 'none';
   document.getElementById('lookup-bar-wrap').style.display  = isAdd      ? '' : 'none';
   document.getElementById('location-form').style.display    = isAdd      ? 'block' : 'none';
   document.getElementById('status').style.display = 'none';
@@ -3185,8 +3185,8 @@ async function uploadPhotoMode() {
 const SECONDARY_TAXONOMY = {
   "Active Play": ["Playground","Indoor Playground","Trampoline Park","Skatepark","Sports Field","Swimming Pool","Paddling Pool","Water Park","Climbing Centre","Minigolf","Bowling","Ice Skating","Cycling Track","Nature Playground","Adventure Park","Sensory Play Space","Baby Spa","Construction Playground"],
   "Animals & Nature": ["Zoo","Children's Farm","Pick-Your-Own Farm","Aquarium","Butterfly House","Wildlife Park","Botanical Garden","Nature Reserve","Hiking Trail","Gnome Trail","Barefoot Path","Pony Rides"],
-  "Amusements & Attractions": ["Theme Park","Amusement Park","Role-Play Village","Immersive Experience","Interactive Store","Arcade","Cinema","Theatre","Puppet Show","Planetarium","Ferris Wheel / Observation Tower","Boat Trip","Train Ride","Plane Spotting"],
-  "Culture & Learning": ["Children's Museum","Natural History Museum","Science Museum","Space Museum","History Museum","Art Museum","Culture Museum","Maritime Museum","Railway Museum","Aviation Museum","Open Air Museum","Film Museum","Music Museum","Library","Bookshop","Concert Hall","Historic Site"],
+  "Amusements & Attractions": ["Theme Park","Amusement Park","Role-Play Village","Immersive Experience","Interactive Store","Arcade","Cinema","Planetarium","Ferris Wheel / Observation Tower","Boat Trip","Train Ride","Plane Spotting"],
+  "Culture & Learning": ["Children's Museum","Natural History Museum","Science Museum","Space Museum","History Museum","Art Museum","Culture Museum","Maritime Museum","Railway Museum","Aviation Museum","Open Air Museum","Film Museum","Music Museum","Library","Bookshop","Concert Hall","Historic Site","Theatre"],
   "Classes, Workshops, Camps": ["Swimming Lessons","Gymnastics Classes","Dance Classes","Martial Arts","Music Lessons","Art Classes","Drama Classes","Cooking Classes","Yoga / Mindfulness","Coding Classes","Language Classes","Sports Coaching","Sensory Classes","Horse Riding","Playgroup","Holiday Camp"],
   "Restaurants & Cafes": ["Kids Cafe","Pancake House","Restaurant","Cafe","Ice Cream Shop","Bakery"]
 };
@@ -3838,18 +3838,19 @@ async function generatePageTitle() {
   btn.disabled = true;
   btn.textContent = '✦ Generating…';
 
-  const prompt = `Generate a concise, SEO-friendly page title for a family-friendly location listing on GoBebop, a Dutch family guide.
+  const prompt = `Create a high-CTR, SEO-friendly page title (max 60 characters) for a family location listing.
 
-Location: ${name}
-City: ${city || 'Amsterdam'}
-Category: ${secLead || cats || 'family venue'}
+Location: \${name}
+City: \${city || 'Amsterdam'}
+Category: \${secLead || cats || 'family venue'}
+Description: \${document.getElementById('f-description')?.value || ''}
+
+Goal: Convert the description into a pitch and/or reason to go. Identify one specific relief point for a parent (e.g. nice coffee, fencing, age-appropriate, weatherproof, free entry). Use the description to write a memorable TLDR — not a generic label.
 
 Rules:
-- Lead with what Dutch parents actually search for — the activity or venue type, not the brand name
-- Include the Dutch term where natural (e.g. "kinderboerderij", "speeltuin", "pannenkoekenrestaurant")
-- Format: "[Searchable type] in [city] — [Location name]" OR "[Location name] — [Dutch type] & [key detail] in [city]"
-- Be specific: "Gratis Outdoor Speeltuin" beats "Playground", "Pannenkoekenrestaurant" beats "Restaurant"
-- Max 70 characters total
+- Format: "[Location name] — [punchy mini-description]"
+- Max 60 characters total
+- Avoid generic words like "fun", "great", "nice", "amazing"
 - Plain text only, no quotes, no markdown
 - Return only the title, nothing else`;
 
@@ -4233,7 +4234,9 @@ function renderQueueRows(rows, coveredIds, monthName) {
       <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
         <button onclick="evtQueueOpen(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="btn btn-secondary" style="font-size:11px;padding:5px 12px;">＋ New</button>
         ${agendaUrl ? `<button onclick="evtQueueExtract(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="btn btn-enrich" style="font-size:11px;padding:5px 12px;">✦ Extract</button>` : ''}
-        ${agendaUrl ? `<a href="${agendaUrl}" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 12px;text-decoration:none;">Agenda</a>` : ''}
+        ${agendaUrl
+          ? `<a href="${agendaUrl}" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 12px;text-decoration:none;${r.agenda_url ? '' : 'opacity:0.45;border-style:dashed;'}">Agenda${r.agenda_url ? '' : ' *'}</a>`
+          : ''}
       </div>
     </div>`;
   }).join('');
@@ -4526,7 +4529,7 @@ async function previewBatchTitles() {
 
   try {
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category&order=name.asc`,
+      `${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category,description&order=name.asc`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
     const rows = await res.json();
@@ -4569,7 +4572,7 @@ async function startBatchTitles() {
   try {
     // Fetch all locations without a page title
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category&order=name.asc`,
+      `${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category,description&order=name.asc`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
     const locations = await res.json();
@@ -4590,18 +4593,19 @@ async function startBatchTitles() {
 
       try {
         const secLead = loc.secondary_category_lead || (loc.primary_category || [])[0] || '';
-        const prompt = `Generate a concise, SEO-friendly page title for a family-friendly location listing on GoBebop, a Dutch family guide.
+        const prompt = `Create a high-CTR, SEO-friendly page title (max 60 characters) for a family location listing.
 
-Location: ${loc.name}
-City: ${loc.city || 'Netherlands'}
-Category: ${secLead}
+Location: \${loc.name}
+City: \${loc.city || 'Netherlands'}
+Category: \${secLead}
+Description: \${loc.description || ''}
+
+Goal: Convert the description into a pitch and/or reason to go. Identify one specific relief point for a parent (e.g. nice coffee, fencing, age-appropriate, weatherproof, free entry). Use the description to write a memorable TLDR — not a generic label.
 
 Rules:
-- Lead with what Dutch parents actually search for — the activity or venue type, not the brand name
-- Include the Dutch term where natural (e.g. "kinderboerderij", "speeltuin", "pannenkoekenrestaurant")
-- Format: "[Searchable type] in [city] — [Location name]" OR "[Location name] — [Dutch type] & [key detail] in [city]"
-- Be specific: "Gratis Outdoor Speeltuin" beats "Playground"
-- Max 70 characters total
+- Format: "[Location name] — [punchy mini-description]"
+- Max 60 characters total
+- Avoid generic words like "fun", "great", "nice", "amazing"
 - Plain text only, no quotes, no markdown
 - Return only the title, nothing else`;
 
