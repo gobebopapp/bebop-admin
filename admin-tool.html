@@ -4173,25 +4173,25 @@ async function loadEvtQueue() {
       return;
     }
 
-    // Fetch covered location IDs for current month using plain date comparison
+    // Fetch all upcoming events and build a map of location_id → [months covered]
     const now = new Date();
-    const y = now.getFullYear(), m = now.getMonth() + 1;
-    const monthStartStr = `${y}-${String(m).padStart(2,'0')}-01`;
-    const lastDay = new Date(y, m, 0).getDate();
-    const monthEndStr   = `${y}-${String(m).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}T23:59:59`;
-    const monthName = now.toLocaleDateString('en-GB', { month: 'long' });
-
-    let coveredIds = new Set();
+    // Coverage map: { location_id: Set of 'YYYY-MM' strings }
+    let coverageMap = {};
     try {
+      const todayStr = now.toISOString().slice(0, 10);
       const evtRes = await fetch(
-        `${supabaseUrl}/rest/v1/events?start_date=gte.${monthStartStr}&start_date=lte.${monthEndStr}&location_id=not.is.null&select=location_id`,
+        `${supabaseUrl}/rest/v1/events?start_date=gte.${todayStr}&location_id=not.is.null&select=location_id,start_date&order=start_date.asc&limit=500`,
         { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
       );
       const evtRows = await evtRes.json();
-      console.log('[Queue] Coverage query range:', monthStartStr, '→', monthEndStr);
-      console.log('[Queue] Events found for month:', Array.isArray(evtRows) ? evtRows.length : evtRows);
-      if (Array.isArray(evtRows)) coveredIds = new Set(evtRows.map(e => e.location_id).filter(Boolean));
-      console.log('[Queue] Covered location IDs:', [...coveredIds]);
+      if (Array.isArray(evtRows)) {
+        evtRows.forEach(e => {
+          if (!e.location_id || !e.start_date) return;
+          const monthKey = e.start_date.slice(0, 7); // 'YYYY-MM'
+          if (!coverageMap[e.location_id]) coverageMap[e.location_id] = new Set();
+          coverageMap[e.location_id].add(monthKey);
+        });
+      }
     } catch(e) { console.error('covered fetch error:', e); }
 
     // Render filter bar
@@ -4220,10 +4220,9 @@ async function loadEvtQueue() {
 
     // Store rows for filtering
     listEl._rows = rows;
-    listEl._coveredIds = coveredIds;
-    listEl._monthName = monthName;
+    listEl._coverageMap = coverageMap;
 
-    renderQueueRows(rows, coveredIds, monthName);
+    renderQueueRows(rows, coverageMap);
 
   } catch(e) {
     listEl.innerHTML = `<div style="padding:24px;color:#991B1B;font-size:13px;">Error: ${e.message}</div>`;
@@ -4239,10 +4238,10 @@ function applyQueueFilters() {
   if (tier) rows = rows.filter(r => String(r.tier) === tier);
   if (city) rows = rows.filter(r => r.city === city);
   if (cat)  rows = rows.filter(r => (r.primary_category || []).includes(cat));
-  renderQueueRows(rows, listEl._coveredIds, listEl._monthName);
+  renderQueueRows(rows, listEl._coverageMap);
 }
 
-function renderQueueRows(rows, coveredIds, monthName) {
+function renderQueueRows(rows, coverageMap) {
   const container = document.getElementById('evt-queue-rows');
   if (!container) return;
   const countEl = document.getElementById('qf-count');
@@ -4254,7 +4253,17 @@ function renderQueueRows(rows, coveredIds, monthName) {
   }
 
   const tierLabel = t => t ? `<span style="background:#dff0f5;color:#4daabb;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Tier ${t}</span>` : '';
-  const coveredBadge = id => coveredIds.has(id) ? `<span style="background:#D8EDDF;color:#2D6A4F;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">✓ ${monthName}</span>` : '';
+  const monthLabel = ym => {
+    const [y, m] = ym.split('-');
+    return new Date(parseInt(y), parseInt(m)-1, 1).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+  };
+  const coveredBadge = id => {
+    const months = coverageMap[id];
+    if (!months || !months.size) return '';
+    return [...months].sort().map(ym =>
+      `<span style="background:#D8EDDF;color:#2D6A4F;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">✓ ${monthLabel(ym)}</span>`
+    ).join(' ');
+  };
 
   container.innerHTML = rows.map(r => {
     const agendaUrl = r.agenda_url || r.website;
