@@ -1055,6 +1055,39 @@ header {
         </div>
 
         <div class="field">
+          <label>Event type</label>
+          <select id="evt-type">
+            <option value="">— none —</option>
+            <option value="Performance / Show">Performance / Show</option>
+            <option value="Screening">Screening</option>
+            <option value="Storytelling / Reading">Storytelling / Reading</option>
+            <option value="Workshop / Hands-on">Workshop / Hands-on</option>
+            <option value="Arts & Crafts">Arts &amp; Crafts</option>
+            <option value="Music">Music</option>
+            <option value="Outdoor activity">Outdoor activity</option>
+            <option value="Festival / Fair">Festival / Fair</option>
+            <option value="Tour / Walk">Tour / Walk</option>
+            <option value="Sports / Movement">Sports / Movement</option>
+            <option value="Exhibition">Exhibition</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Occasion</label>
+          <select id="evt-occasion">
+            <option value="">— none —</option>
+            <option value="Easter">Easter</option>
+            <option value="Koningsdag">Koningsdag</option>
+            <option value="Zomervakantie">Zomervakantie</option>
+            <option value="Halloween">Halloween</option>
+            <option value="Sinterklaas">Sinterklaas</option>
+            <option value="Kerstvakantie">Kerstvakantie</option>
+            <option value="Meivakantie">Meivakantie</option>
+            <option value="Herfstvakantie">Herfstvakantie</option>
+          </select>
+        </div>
+
+        <div class="field">
           <label>Status</label>
           <select id="evt-status">
             <option value="draft">Draft</option>
@@ -3948,6 +3981,8 @@ function evtResetForm() {
   });
   document.getElementById('evt-recurring').value = '';
   document.getElementById('evt-recurring-until').value = '';
+  document.getElementById('evt-type').value = '';
+  document.getElementById('evt-occasion').value = '';
   document.getElementById('evt-status').value = 'draft';
   document.getElementById('evt-save-status').textContent = '';
 }
@@ -3982,6 +4017,8 @@ async function saveEvent() {
     age_min:          document.getElementById('evt-age-min').value !== '' ? parseInt(document.getElementById('evt-age-min').value) : null,
     age_max:          document.getElementById('evt-age-max').value !== '' ? parseInt(document.getElementById('evt-age-max').value) : null,
     status:           document.getElementById('evt-status').value,
+    event_type:       document.getElementById('evt-type').value || null,
+    occasion:         document.getElementById('evt-occasion').value || null,
     source:           'manual',
   };
 
@@ -4151,7 +4188,10 @@ async function loadEvtQueue() {
         { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
       );
       const evtRows = await evtRes.json();
+      console.log('[Queue] Coverage query range:', monthStartStr, '→', monthEndStr);
+      console.log('[Queue] Events found for month:', Array.isArray(evtRows) ? evtRows.length : evtRows);
       if (Array.isArray(evtRows)) coveredIds = new Set(evtRows.map(e => e.location_id).filter(Boolean));
+      console.log('[Queue] Covered location IDs:', [...coveredIds]);
     } catch(e) { console.error('covered fetch error:', e); }
 
     // Render filter bar
@@ -4278,7 +4318,7 @@ async function loadUpcomingEvents() {
   const today = new Date().toISOString();
   try {
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/events?start_date=gte.${today}&order=start_date.asc&select=id,title,description,start_date,end_date,price,status,source,location_id,address,locations(name,city)`,
+      `${supabaseUrl}/rest/v1/events?start_date=gte.${today}&order=start_date.asc&select=id,title,description,start_date,end_date,price,status,source,event_type,occasion,location_id,address,locations(name,city)`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
     const rows = await res.json();
@@ -4294,13 +4334,15 @@ async function loadUpcomingEvents() {
       const statusBadge = r.status === 'published'
         ? '<span style="background:#D8EDDF;color:#2D6A4F;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Published</span>'
         : '<span style="background:#F0EBE3;color:#A09A94;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Draft</span>';
+      const typeBadge = r.event_type ? `<span style="background:#F0EBE3;color:#6B6560;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">${r.event_type}</span>` : '';
+      const occasionBadge = r.occasion ? `<span style="background:#fef9c3;color:#854d0e;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">${r.occasion}</span>` : '';
       return `
         <div style="padding:14px 24px;border-bottom:1px solid #E8E3DC;display:flex;gap:14px;align-items:flex-start;">
           <div style="min-width:90px;font-family:'DM Mono',monospace;font-size:11px;color:#A09A94;padding-top:2px;">${dateStr}</div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;">
               <strong style="font-size:13px;">${r.title}</strong>
-              ${statusBadge}
+              ${statusBadge}${typeBadge}${occasionBadge}
             </div>
             <div style="font-size:11px;color:#A09A94;">${loc.name || r.address || ''} ${loc.city ? '· ' + loc.city : ''}</div>
             ${r.price ? `<div style="font-size:11px;color:#4daabb;margin-top:2px;">${r.price}</div>` : ''}
