@@ -1061,6 +1061,7 @@ header {
             <option value="Performance / Show">Performance / Show</option>
             <option value="Screening">Screening</option>
             <option value="Storytelling / Reading">Storytelling / Reading</option>
+            <option value="Talk / Presentation">Talk / Presentation</option>
             <option value="Workshop / Hands-on">Workshop / Hands-on</option>
             <option value="Arts & Crafts">Arts &amp; Crafts</option>
             <option value="Music">Music</option>
@@ -1069,6 +1070,17 @@ header {
             <option value="Tour / Walk">Tour / Walk</option>
             <option value="Sports / Movement">Sports / Movement</option>
             <option value="Exhibition">Exhibition</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Language</label>
+          <select id="evt-language">
+            <option value="">— not specified —</option>
+            <option value="Dutch">Dutch</option>
+            <option value="English">English</option>
+            <option value="Bilingual">Bilingual (NL/EN)</option>
+            <option value="Other">Other</option>
           </select>
         </div>
 
@@ -1166,6 +1178,7 @@ header {
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
       <select id="refresh-sec-cat" style="font-size:13px;padding:8px 12px;border:1.5px solid #D4CEC6;border-radius:8px;background:white;max-width:260px;">
         <option value="">All locations</option>
+        <option value="__closed__">⚠ Closed Temporarily only</option>
       </select>
       <button class="btn btn-enrich" onclick="startGoogleRefresh(document.getElementById('refresh-sec-cat').value || null)" id="google-refresh-btn">📡 Refresh from Google</button>
       <span id="google-refresh-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;"></span>
@@ -1188,7 +1201,8 @@ header {
   <div class="section-body">
     <p style="font-size:13px;color:#6B6560;margin-bottom:16px;line-height:1.6;">Generates SEO page titles for all locations that don't have one yet. Uses Claude Haiku — approximately €0.03 for 300 locations.</p>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <button class="btn btn-enrich" onclick="startBatchTitles()" id="batch-title-btn">✦ Generate missing titles</button>
+      <button class="btn btn-enrich" onclick="startBatchTitles(false)" id="batch-title-btn">✦ Generate missing titles</button>
+      <button class="btn btn-enrich" onclick="startBatchTitles(true)" id="batch-title-all-btn" style="background:#6B6560;">✦ Regenerate all titles</button>
       <button class="btn btn-secondary" onclick="previewBatchTitles()" id="batch-preview-btn">Preview locations without titles</button>
     </div>
     <div id="batch-title-progress" style="display:none;margin-top:16px;">
@@ -3871,12 +3885,13 @@ async function generatePageTitle() {
   btn.disabled = true;
   btn.textContent = '✦ Generating…';
 
+  const descVal = document.getElementById('f-description')?.value || '';
   const prompt = `Create a high-CTR, SEO-friendly page title (max 60 characters) for a family location listing.
 
-Location: \${name}
-City: \${city || 'Amsterdam'}
-Category: \${secLead || cats || 'family venue'}
-Description: \${document.getElementById('f-description')?.value || ''}
+Location: ${name}
+City: ${city || 'Amsterdam'}
+Category: ${secLead || cats || 'family venue'}
+Description: ${descVal}
 
 Goal: Convert the description into a pitch and/or reason to go. Identify one specific relief point for a parent (e.g. nice coffee, fencing, age-appropriate, weatherproof, free entry). Use the description to write a memorable TLDR — not a generic label.
 
@@ -3983,6 +3998,7 @@ function evtResetForm() {
   document.getElementById('evt-recurring-until').value = '';
   document.getElementById('evt-type').value = '';
   document.getElementById('evt-occasion').value = '';
+  document.getElementById('evt-language').value = '';
   document.getElementById('evt-status').value = 'draft';
   document.getElementById('evt-save-status').textContent = '';
 }
@@ -4019,6 +4035,7 @@ async function saveEvent() {
     status:           document.getElementById('evt-status').value,
     event_type:       document.getElementById('evt-type').value || null,
     occasion:         document.getElementById('evt-occasion').value || null,
+    language:         document.getElementById('evt-language').value || null,
     source:           'manual',
   };
 
@@ -4468,7 +4485,11 @@ async function startGoogleRefresh(filterSecCat) {
 
   try {
     let url = `${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,google_place_id,opening_status,opening_hours&order=name.asc`;
-    if (filterSecCat) url += `&secondary_categories=cs.{${encodeURIComponent(filterSecCat)}}`;
+    if (filterSecCat === '__closed__') {
+      url += `&opening_status=eq.CLOSED_TEMPORARILY`;
+    } else if (filterSecCat) {
+      url += `&secondary_categories=cs.{${encodeURIComponent(filterSecCat)}}`;
+    }
 
     const res = await fetch(url, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
     const locations = await res.json();
@@ -4580,7 +4601,7 @@ async function previewBatchTitles() {
 
   try {
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category,description&order=name.asc`,
+      `${supabaseUrl}/rest/v1/${supabaseTable}?${regenerateAll ? '' : 'page_title=is.null&'}select=id,name,city,secondary_category_lead,primary_category,description&order=name.asc`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
     const rows = await res.json();
@@ -4602,19 +4623,19 @@ async function previewBatchTitles() {
   }
 }
 
-async function startBatchTitles() {
+async function startBatchTitles(regenerateAll = false) {
   const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, anthropicKey } = getConfig();
   const writeKey = serviceKey || supabaseKey;
   if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
   if (!anthropicKey) return alert('Configure your Anthropic API key first.');
 
-  const btn = document.getElementById('batch-title-btn');
+  const btn = document.getElementById(regenerateAll ? 'batch-title-all-btn' : 'batch-title-btn');
   const progressEl = document.getElementById('batch-title-progress');
   const barEl = document.getElementById('batch-title-bar');
   const statusEl = document.getElementById('batch-title-status');
   const resultsEl = document.getElementById('batch-title-results');
 
-  if (!confirm('This will generate page titles for all locations currently missing one. Continue?')) return;
+  if (!confirm(regenerateAll ? 'This will regenerate page titles for ALL locations, overwriting existing ones. Continue?' : 'This will generate page titles for all locations currently missing one. Continue?')) return;
 
   btn.disabled = true;
   progressEl.style.display = 'block';
@@ -4623,7 +4644,7 @@ async function startBatchTitles() {
   try {
     // Fetch all locations without a page title
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/${supabaseTable}?page_title=is.null&select=id,name,city,secondary_category_lead,primary_category,description&order=name.asc`,
+      `${supabaseUrl}/rest/v1/${supabaseTable}?${regenerateAll ? '' : 'page_title=is.null&'}select=id,name,city,secondary_category_lead,primary_category,description&order=name.asc`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
     const locations = await res.json();
@@ -4644,12 +4665,16 @@ async function startBatchTitles() {
 
       try {
         const secLead = loc.secondary_category_lead || (loc.primary_category || [])[0] || '';
+        const locName = loc.name || '';
+        const locCity = loc.city || 'Netherlands';
+        const locCat  = secLead || '';
+        const locDesc = loc.description || '';
         const prompt = `Create a high-CTR, SEO-friendly page title (max 60 characters) for a family location listing.
 
-Location: \${loc.name}
-City: \${loc.city || 'Netherlands'}
-Category: \${secLead}
-Description: \${loc.description || ''}
+Location: ${locName}
+City: ${locCity}
+Category: ${locCat}
+Description: ${locDesc}
 
 Goal: Convert the description into a pitch and/or reason to go. Identify one specific relief point for a parent (e.g. nice coffee, fencing, age-appropriate, weatherproof, free entry). Use the description to write a memorable TLDR — not a generic label.
 
