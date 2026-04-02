@@ -4761,7 +4761,7 @@ return;
 }
 
 // 2. Try WordPress Events Calendar REST API
-const wpBase = agendaUrl.match(/^(https?://[^/]+)/)?.[1];
+const wpBase = agendaUrl.match(/^(https?:\/\/[^\/]+)/)?.[1];
 if (wpBase) {
 detEl.innerHTML = ‘<div style="font-size:13px;color:#A09A94;">Testing WordPress Events Calendar API…</div>’;
 const wpUrl = wpBase + ‘/wp-json/tribe/events/v1/events?per_page=20&start_date=’ + new Date().toISOString().slice(0,10);
@@ -4797,7 +4797,7 @@ detEl.innerHTML = ‘<span style="color:#2D6A4F;font-weight:600;">✓ iCal feed 
 // Save working feed URL to DB for future use
 const events = parseIcal(text);
 const upcoming = events.filter(e => e.start && new Date(e.start) >= new Date());
-renderImportEvents(upcoming.slice(0, 30).map(e => ({ …e, location_id: loc.id })));
+renderImportEvents(upcoming.slice(0, 30).map(e => ({ ...e, location_id: loc.id })));
 return;
 }
 } catch(e) {}
