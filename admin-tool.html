@@ -601,6 +601,15 @@ header {
   .recent-item { padding: 12px 14px; }
 }
 
+/* ── Import modal ── */
+#import-modal.open { display:flex !important; }
+.import-event-card { padding:14px 24px;border-bottom:1px solid #E8E3DC;display:flex;gap:12px;align-items:flex-start; }
+.import-event-card:last-child { border-bottom:none; }
+.import-event-card input[type=checkbox] { margin-top:3px;flex-shrink:0;width:16px;height:16px;cursor:pointer; }
+.import-event-card .ev-title { font-size:13px;font-weight:600;color:#1A1714; }
+.import-event-card .ev-meta { font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;margin-top:3px; }
+.import-event-card .ev-desc { font-size:12px;color:#6B6560;margin-top:4px;line-height:1.5; }
+
 /* ── Lightbox ── */
 #photo-lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:9999; align-items:center; justify-content:center; padding:20px; }
 #photo-lightbox.open { display:flex; }
@@ -4299,7 +4308,8 @@ function renderQueueRows(rows, coverageMap) {
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
         <button onclick="evtQueueOpen(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="btn btn-secondary" style="font-size:11px;padding:5px 12px;">＋ New</button>
-        ${agendaUrl ? `<button onclick="evtQueueExtract(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="btn btn-enrich" style="font-size:11px;padding:5px 12px;">✦ Extract</button>` : ''}
+        ${agendaUrl ? `<button onclick="openImportModal(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="btn btn-primary" style="font-size:11px;padding:5px 12px;background:#2D6A4F;border-color:#2D6A4F;">⬇ Import</button>` : ''}
+        ${agendaUrl ? `<button onclick="evtQueueExtract(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="btn btn-enrich" style="font-size:11px;padding:5px 12px;">✦ AI</button>` : ''}
         ${agendaUrl
           ? `<a href="${agendaUrl}" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 12px;text-decoration:none;${r.agenda_url ? '' : 'opacity:0.45;border-style:dashed;'}">Agenda${r.agenda_url ? '' : ' *'}</a>`
           : ''}
@@ -4589,6 +4599,266 @@ async function startGoogleRefresh(filterSecCat) {
   } finally {
     btn.disabled = false;
   }
+}
+
+// ─── Event Import (iCal / WordPress API / OBA) ───────────────────────────────
+
+let _importLoc = null;       // current location being imported for
+let _importEvents = [];      // parsed events awaiting selection
+
+function openImportModal(loc) {
+  _importLoc = loc;
+  _importEvents = [];
+  document.getElementById('import-modal').classList.add('open');
+  document.getElementById('import-modal-title').textContent = 'Import events — ' + loc.name;
+  const agendaUrl = loc.agenda_url || loc.website || '';
+  document.getElementById('import-modal-url').textContent = agendaUrl;
+  document.getElementById('import-detection').innerHTML = '<div style="font-size:13px;color:#A09A94;">🔍 Detecting feed type…</div>';
+  document.getElementById('import-events-list').innerHTML = '';
+  document.getElementById('import-save-btn').style.display = 'none';
+  document.getElementById('import-save-status').textContent = '';
+  detectAndFetch(loc, agendaUrl);
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').classList.remove('open');
+  _importLoc = null;
+  _importEvents = [];
+}
+
+// ── Detection & routing ───────────────────────────────────────────────────────
+async function detectAndFetch(loc, agendaUrl) {
+  const detEl = document.getElementById('import-detection');
+
+  // 1. OBA — recognised by domain
+  if (agendaUrl.includes('oba.nl/nl/agenda')) {
+    detEl.innerHTML = '<span style="color:#2D6A4F;font-weight:600;">✓ OBA platform detected</span> — fetching via HTML parser';
+    await fetchOBAEvents(loc, agendaUrl);
+    return;
+  }
+
+  // 2. Try WordPress Events Calendar REST API
+  const wpBase = agendaUrl.match(/^(https?:\/\/[^/]+)/)?.[1];
+  if (wpBase) {
+    detEl.innerHTML = '<div style="font-size:13px;color:#A09A94;">Testing WordPress Events Calendar API…</div>';
+    const wpUrl = wpBase + '/wp-json/tribe/events/v1/events?per_page=20&start_date=' + new Date().toISOString().slice(0,10);
+    try {
+      const res = await fetch(wpUrl, { signal: AbortSignal.timeout(6000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.events && data.events.length >= 0) {
+          detEl.innerHTML = '<span style="color:#2D6A4F;font-weight:600;">✓ WordPress Events Calendar API found</span> — ' + data.events.length + ' upcoming events';
+          renderImportEvents(parseWordPressEvents(data.events, loc));
+          return;
+        }
+      }
+    } catch(e) {}
+  }
+
+  // 3. Try iCal feed — common paths
+  const icalCandidates = [
+    agendaUrl + (agendaUrl.includes('?') ? '&' : '?') + 'ical=1',
+    agendaUrl.replace(/\/$/, '') + '/feed/ical/',
+    agendaUrl.replace(/\/$/, '') + '.ics',
+    wpBase + '/events.ics',
+    wpBase + '/?ical=1',
+  ].filter((v, i, a) => a.indexOf(v) === i);
+
+  for (const candidate of icalCandidates) {
+    detEl.innerHTML = '<div style="font-size:13px;color:#A09A94;">Testing iCal: <code style="font-size:11px;">' + candidate.replace(wpBase,'') + '</code>…</div>';
+    try {
+      const res = await fetch(candidate, { signal: AbortSignal.timeout(6000) });
+      const text = await res.text();
+      if (text.trim().startsWith('BEGIN:VCALENDAR')) {
+        detEl.innerHTML = '<span style="color:#2D6A4F;font-weight:600;">✓ iCal feed found</span> — <code style="font-size:11px;">' + candidate + '</code>';
+        // Save working feed URL to DB for future use
+        const events = parseIcal(text);
+        const upcoming = events.filter(e => e.start && new Date(e.start) >= new Date());
+        renderImportEvents(upcoming.slice(0, 30).map(e => ({ ...e, location_id: loc.id })));
+        return;
+      }
+    } catch(e) {}
+  }
+
+  // 4. Nothing found
+  detEl.innerHTML = '<span style="color:#991B1B;">✗ No automatic feed found.</span> Try the AI Extract button or check manually.';
+}
+
+// ── iCal parser ───────────────────────────────────────────────────────────────
+function parseIcal(text) {
+  const events = [];
+  const blocks = text.split('BEGIN:VEVENT');
+  for (let i = 1; i < blocks.length; i++) {
+    const block = blocks[i];
+    const get = (key) => {
+      const m = block.match(new RegExp(key + '[^:]*:([^\r\n]+)'));
+      return m ? m[1].trim().replace(/\n/g, '\n').replace(/\,/g, ',') : null;
+    };
+    const parseIcalDate = (val) => {
+      if (!val) return null;
+      // YYYYMMDDTHHMMSSZ or YYYYMMDD
+      const clean = val.replace('Z','').replace('T',' ');
+      const y = clean.slice(0,4), mo = clean.slice(4,6), d = clean.slice(6,8);
+      const h = clean.slice(9,11)||'00', mi = clean.slice(11,13)||'00';
+      return y + '-' + mo + '-' + d + 'T' + h + ':' + mi;
+    };
+    const title = get('SUMMARY');
+    if (!title) continue;
+    events.push({
+      title,
+      description: (get('DESCRIPTION') || '').slice(0, 300),
+      start: parseIcalDate(get('DTSTART')),
+      end:   parseIcalDate(get('DTEND')),
+      url:   get('URL'),
+      location_id: null,
+    });
+  }
+  return events;
+}
+
+// ── WordPress Events Calendar parser ─────────────────────────────────────────
+function parseWordPressEvents(wpEvents, loc) {
+  return wpEvents.map(e => ({
+    title:       e.title?.rendered || e.title || '',
+    description: (e.description?.replace(/<[^>]+>/g,'') || '').slice(0,300),
+    start:       e.start_date || null,
+    end:         e.end_date   || null,
+    url:         e.url        || null,
+    price:       e.cost       || null,
+    location_id: loc.id,
+  })).filter(e => e.title && e.start && new Date(e.start) >= new Date());
+}
+
+// ── OBA HTML parser ───────────────────────────────────────────────────────────
+async function fetchOBAEvents(loc, agendaUrl) {
+  const detEl = document.getElementById('import-detection');
+  try {
+    const res = await fetch(agendaUrl, { signal: AbortSignal.timeout(10000) });
+    const html = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    const events = [];
+    // OBA renders events as <a> links with date, title, time, location info
+    const links = doc.querySelectorAll('a[href*="/nl/agenda/"]');
+    links.forEach(a => {
+      const href = a.href || a.getAttribute('href') || '';
+      if (!href.includes('/nl/agenda/') || href === agendaUrl) return;
+      // Get title — usually the largest text
+      const title = a.querySelector('h2,h3,strong,[class*="title"]')?.textContent?.trim()
+        || a.textContent.trim().split('\n')[0].trim();
+      if (!title || title.length < 3) return;
+      // Look for date text
+      const dateText = a.textContent.match(/(maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)[\s\S]*?\d{4}/i)?.[0] || '';
+      const timeMatch = a.textContent.match(/(\d{2}:\d{2})/);
+      events.push({
+        title: title.slice(0, 150),
+        description: '',
+        start: null, // OBA dates need Dutch parsing — leave for manual fix
+        end: null,
+        url: href.startsWith('http') ? href : 'https://oba.nl' + href,
+        raw_date: dateText,
+        raw_time: timeMatch?.[1] || null,
+        location_id: loc.id,
+      });
+    });
+
+    const unique = events.filter((e, i, a) => a.findIndex(x => x.title === e.title) === i);
+    if (unique.length) {
+      detEl.innerHTML = '<span style="color:#2D6A4F;font-weight:600;">✓ OBA events parsed</span> — ' + unique.length + ' found. Dates need manual setting (Dutch calendar format).';
+      renderImportEvents(unique.slice(0, 30));
+    } else {
+      detEl.innerHTML = '<span style="color:#991B1B;">OBA page loaded but no events parsed.</span> The page may be JS-rendered. Use the Agenda link to check manually.';
+    }
+  } catch(e) {
+    detEl.innerHTML = '<span style="color:#991B1B;">Failed to fetch OBA page: ' + e.message + '</span>';
+  }
+}
+
+// ── Render events in modal ────────────────────────────────────────────────────
+function renderImportEvents(events) {
+  _importEvents = events;
+  const container = document.getElementById('import-events-list');
+  const saveBtn = document.getElementById('import-save-btn');
+
+  if (!events.length) {
+    container.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No upcoming events found.</div>';
+    return;
+  }
+
+  saveBtn.style.display = '';
+
+  container.innerHTML = events.map((e, i) => {
+    const dateStr = e.start
+      ? new Date(e.start).toLocaleDateString('nl-NL', {weekday:'short', day:'numeric', month:'short', year:'numeric'}) + (e.start.includes('T') ? ' ' + e.start.slice(11,16) : '')
+      : (e.raw_date ? e.raw_date.slice(0,40) + (e.raw_time ? ' ' + e.raw_time : '') : 'Date unknown — set manually');
+    return `
+      <div class="import-event-card">
+        <input type="checkbox" id="imp-chk-${i}" checked data-idx="${i}" />
+        <div style="flex:1;min-width:0;">
+          <div class="ev-title">${e.title}</div>
+          <div class="ev-meta">${dateStr}${e.url ? ' · <a href="' + e.url + '" target="_blank" style="color:#4daabb;">link ↗</a>' : ''}</div>
+          ${e.description ? '<div class="ev-desc">' + e.description.slice(0,120) + (e.description.length > 120 ? '…' : '') + '</div>' : ''}
+          ${!e.start ? '<div style="font-size:11px;color:#E8541A;margin-top:3px;">⚠ No date — set it after import</div>' : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Save selected events ──────────────────────────────────────────────────────
+async function importSelectedEvents() {
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+
+  const checkboxes = document.querySelectorAll('#import-events-list input[type=checkbox]:checked');
+  if (!checkboxes.length) return alert('Select at least one event to import.');
+
+  const btn = document.getElementById('import-save-btn');
+  const statusEl = document.getElementById('import-save-status');
+  btn.disabled = true;
+  statusEl.textContent = 'Saving…';
+
+  let saved = 0, errors = 0;
+  for (const chk of checkboxes) {
+    const idx = parseInt(chk.dataset.idx);
+    const e = _importEvents[idx];
+    if (!e) continue;
+
+    const payload = {
+      title:       e.title,
+      description: e.description || null,
+      location_id: _importLoc?.id || null,
+      address:     _importLoc ? (_importLoc.name + (_importLoc.city ? ', ' + _importLoc.city : '')) : null,
+      start_date:  e.start || null,
+      end_date:    e.end   || null,
+      booking_url: e.url   || null,
+      price:       e.price || null,
+      status:      'draft',
+      source:      'import',
+    };
+
+    try {
+      const res = await fetch(`${supabaseUrl}/rest/v1/events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': writeKey,
+          'Authorization': `Bearer ${writeKey}`,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) saved++;
+      else errors++;
+    } catch(e) { errors++; }
+  }
+
+  statusEl.textContent = `✓ ${saved} imported as draft${errors ? ', ' + errors + ' errors' : ''}. Review in Upcoming tab.`;
+  statusEl.style.color = errors ? '#991B1B' : '#2D6A4F';
+  btn.disabled = false;
+  // Refresh coverage map
+  setTimeout(() => loadEvtQueue(), 1500);
 }
 
 // ─── Batch title generator ───────────────────────────────────────────────────
@@ -4917,6 +5187,33 @@ if (!localStorage.getItem('bebop_google_key')) {
   document.getElementById('config-toggle').classList.add('open');
 }
 </script>
+
+  <!-- Event Import Modal -->
+
+  <div id="import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:white;border-radius:12px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="padding:20px 24px;border-bottom:1px solid #E8E3DC;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:#1A1714;" id="import-modal-title">Import events</div>
+          <div style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;margin-top:2px;" id="import-modal-url"></div>
+        </div>
+        <button onclick="closeImportModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#A09A94;line-height:1;">✕</button>
+      </div>
+      <!-- Detection status -->
+      <div style="padding:16px 24px;border-bottom:1px solid #E8E3DC;" id="import-detection">
+        <div style="font-size:13px;color:#A09A94;">Detecting feed type…</div>
+      </div>
+      <!-- Events list -->
+      <div id="import-events-list" style="padding:0;"></div>
+      <!-- Footer -->
+      <div style="padding:14px 24px;border-top:1px solid #E8E3DC;display:flex;gap:10px;align-items:center;">
+        <button class="btn btn-save" onclick="importSelectedEvents()" id="import-save-btn" style="display:none;">
+          ⬇ Save selected events
+        </button>
+        <span id="import-save-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;"></span>
+      </div>
+    </div>
+  </div>
 
   <!-- Lightbox -->
 
