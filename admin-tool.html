@@ -4375,7 +4375,6 @@ async function loadUpcomingEvents() {
       const rid = r.id;
       return `
         <div id="evt-row-${rid}" style="border-bottom:1px solid #E8E3DC;">
-          <!-- Summary row -->
           <div style="padding:12px 24px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;" onclick="evtToggleExpand('${rid}')">
             <div style="min-width:110px;font-family:'DM Mono',monospace;font-size:11px;color:#A09A94;padding-top:2px;">${fmtDate(r.start_date)}</div>
             <div style="flex:1;min-width:0;">
@@ -4387,7 +4386,6 @@ async function loadUpcomingEvents() {
             </div>
             <span style="font-size:11px;color:#A09A94;flex-shrink:0;padding-top:2px;">▾ Edit</span>
           </div>
-          <!-- Expanded edit panel -->
           <div id="evt-expand-${rid}" style="display:none;padding:0 24px 16px;background:#FAFAF8;border-top:1px solid #E8E3DC;">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;">
               <div class="field full" style="grid-column:1/-1;">
@@ -4761,7 +4759,7 @@ return;
 }
 
 // 2. Try WordPress Events Calendar REST API
-const wpBase = agendaUrl.match(/^(https?:\/\/[^\/]+)/)?.[1];
+const wpBase = agendaUrl.match(/^(https?://[^/]+)/)?.[1];
 if (wpBase) {
 detEl.innerHTML = ‘<div style="font-size:13px;color:#A09A94;">Testing WordPress Events Calendar API…</div>’;
 const wpUrl = wpBase + ‘/wp-json/tribe/events/v1/events?per_page=20&start_date=’ + new Date().toISOString().slice(0,10);
@@ -4797,7 +4795,7 @@ detEl.innerHTML = ‘<span style="color:#2D6A4F;font-weight:600;">✓ iCal feed 
 // Save working feed URL to DB for future use
 const events = parseIcal(text);
 const upcoming = events.filter(e => e.start && new Date(e.start) >= new Date());
-renderImportEvents(upcoming.slice(0, 30).map(e => ({ ...e, location_id: loc.id })));
+renderImportEvents(upcoming.slice(0, 30).map(e => ({ …e, location_id: loc.id })));
 return;
 }
 } catch(e) {}
