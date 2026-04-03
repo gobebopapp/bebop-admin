@@ -4351,10 +4351,10 @@ async function loadUpcomingEvents() {
   }
   listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">Loading…</div>';
 
-  const today = new Date().toISOString().slice(0,10);
+  const today = new Date().toISOString();
   try {
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/events?start_date=gte.${today}&order=start_date.asc&select=id,title,description,start_date,end_date,price,status,source,event_type,occasion,language,recurring,booking_url,age_min,age_max,location_id,address,locations(name,city)`,
+      `${supabaseUrl}/rest/v1/events?start_date=gte.${today}&order=start_date.asc&select=id,title,description,start_date,end_date,price,status,source,event_type,occasion,location_id,address,locations(name,city)`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
     const rows = await res.json();
@@ -4366,360 +4366,239 @@ async function loadUpcomingEvents() {
 
     listEl.innerHTML = rows.map(r => {
       const loc = r.locations || {};
-      const fmtDate = d => d ? d.slice(0,16).replace('T',' ') : '';
+      const dateStr = r.start_date ? new Date(r.start_date).toLocaleDateString('nl-NL', { weekday:'short', day:'numeric', month:'short', year:'numeric' }) : '—';
       const statusBadge = r.status === 'published'
         ? '<span style="background:#D8EDDF;color:#2D6A4F;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Published</span>'
         : '<span style="background:#F0EBE3;color:#A09A94;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">Draft</span>';
       const typeBadge = r.event_type ? `<span style="background:#F0EBE3;color:#6B6560;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">${r.event_type}</span>` : '';
       const occasionBadge = r.occasion ? `<span style="background:#fef9c3;color:#854d0e;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;">${r.occasion}</span>` : '';
-      const rid = r.id;
       return `
-        <div id="evt-row-${rid}" style="border-bottom:1px solid #E8E3DC;">
-          <div style="padding:12px 24px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;" onclick="evtToggleExpand('${rid}')">
-            <div style="min-width:110px;font-family:'DM Mono',monospace;font-size:11px;color:#A09A94;padding-top:2px;">${fmtDate(r.start_date)}</div>
-            <div style="flex:1;min-width:0;">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;">
-                <strong style="font-size:13px;color:#1A1714;">${r.title}</strong>
-                ${statusBadge}${typeBadge}${occasionBadge}
-              </div>
-              <div style="font-size:11px;color:#A09A94;">${loc.name || r.address || ''}${loc.city ? ' · ' + loc.city : ''}${r.language ? ' · ' + r.language : ''}</div>
+        <div style="padding:14px 24px;border-bottom:1px solid #E8E3DC;display:flex;gap:14px;align-items:flex-start;">
+          <div style="min-width:90px;font-family:'DM Mono',monospace;font-size:11px;color:#A09A94;padding-top:2px;">${dateStr}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;">
+              <strong style="font-size:13px;">${r.title}</strong>
+              ${statusBadge}${typeBadge}${occasionBadge}
             </div>
-            <span style="font-size:11px;color:#A09A94;flex-shrink:0;padding-top:2px;">▾ Edit</span>
+            <div style="font-size:11px;color:#A09A94;">${loc.name || r.address || ''} ${loc.city ? '· ' + loc.city : ''}</div>
+            ${r.price ? `<div style="font-size:11px;color:#4daabb;margin-top:2px;">${r.price}</div>` : ''}
           </div>
-          <div id="evt-expand-${rid}" style="display:none;padding:0 24px 16px;background:#FAFAF8;border-top:1px solid #E8E3DC;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;">
-              <div class="field full" style="grid-column:1/-1;">
-                <label style="font-size:11px;font-weight:600;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Title</label>
-                <input type="text" id="ef-title-${rid}" value="${(r.title||'').replace(/"/g,'&quot;')}" style="width:100%;font-size:13px;padding:7px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;" />
-              </div>
-              <div class="field">
-                <label style="font-size:11px;font-weight:600;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Start</label>
-                <input type="datetime-local" id="ef-start-${rid}" value="${fmtDate(r.start_date)}" step="900" style="font-size:13px;padding:7px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;width:100%;" />
-              </div>
-              <div class="field">
-                <label style="font-size:11px;font-weight:600;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">End</label>
-                <input type="datetime-local" id="ef-end-${rid}" value="${fmtDate(r.end_date)}" step="900" style="font-size:13px;padding:7px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;width:100%;" />
-              </div>
-              <div class="field full" style="grid-column:1/-1;">
-                <label style="font-size:11px;font-weight:600;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Description</label>
-                <textarea id="ef-desc-${rid}" style="width:100%;font-size:13px;padding:7px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;min-height:70px;">${r.description||''}</textarea>
-
-```
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button onclick="evtTogglePublish('${r.id}', '${r.status}')" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;">
+              ${r.status === 'published' ? 'Unpublish' : 'Publish'}
+            </button>
+            <button onclick="evtDelete('${r.id}')" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;color:#991B1B;">Delete</button>
           </div>
-          <div class="field">
-            <label style="font-size:11px;font-weight:600;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Price</label>
-            <input type="text" id="ef-price-${rid}" value="${(r.price||'').replace(/"/g,'&quot;')}" style="font-size:13px;padding:7px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;width:100%;" />
-          </div>
-          <div class="field">
-            <label style="font-size:11px;font-weight:600;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Booking URL</label>
-            <input type="text" id="ef-url-${rid}" value="${(r.booking_url||'').replace(/"/g,'&quot;')}" style="font-size:13px;padding:7px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;width:100%;" />
-          </div>
-          <div class="field">
-            <label style="font-size:11px;font-weight:600;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Event type</label>
-            <select id="ef-type-${rid}" style="font-size:13px;padding:7px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;width:100%;">
-              <option value="">— none —</option>
-              ${['Performance / Show','Screening','Storytelling / Reading','Talk / Presentation','Workshop / Hands-on','Arts & Crafts','Music','Outdoor activity','Festival / Fair','Tour / Walk','Sports / Movement','Exhibition'].map(t => '<option value="' + t + '" ' + (r.event_type===t?'selected':'') + '>' + t + '</option>').join('')}
-            </select>
-          </div>
-          <div class="field">
-            <label style="font-size:11px;font-weight:600;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Language</label>
-            <select id="ef-lang-${rid}" style="font-size:13px;padding:7px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;width:100%;">
-              <option value="">— not specified —</option>
-              ${['Dutch','English','Bilingual'].map(l => '<option value="' + l + '" ' + (r.language===l?'selected':'') + '>' + l + '</option>').join('')}
-            </select>
-          </div>
-          <div class="field">
-            <label style="font-size:11px;font-weight:600;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Occasion</label>
-            <select id="ef-occasion-${rid}" style="font-size:13px;padding:7px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;width:100%;">
-              <option value="">— none —</option>
-              ${['Easter','Koningsdag','Zomervakantie','Halloween','Sinterklaas','Kerstvakantie','Meivakantie','Herfstvakantie'].map(o => '<option value="' + o + '" ' + (r.occasion===o?'selected':'') + '>' + o + '</option>').join('')}
-            </select>
-          </div>
-          <div class="field">
-            <label style="font-size:11px;font-weight:600;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Age range</label>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <input type="number" id="ef-agemin-${rid}" value="${r.age_min??''}" min="0" max="18" placeholder="0" style="width:60px;font-size:13px;padding:7px 8px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;" />
-              <span style="font-size:12px;color:#A09A94;">to</span>
-              <input type="number" id="ef-agemax-${rid}" value="${r.age_max??''}" min="0" max="18" placeholder="12" style="width:60px;font-size:13px;padding:7px 8px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;" />
-            </div>
-          </div>
-          <div class="field">
-            <label style="font-size:11px;font-weight:600;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Status</label>
-            <select id="ef-status-${rid}" style="font-size:13px;padding:7px 10px;border:1.5px solid #D4CEC6;border-radius:6px;background:white;width:100%;">
-              <option value="draft" ${r.status==='draft'?'selected':''}>Draft</option>
-              <option value="published" ${r.status==='published'?'selected':''}>Published</option>
-            </select>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:14px;align-items:center;">
-          <button class="btn btn-save" onclick="evtSaveEdit('${rid}')" style="font-size:12px;padding:8px 16px;">Save changes</button>
-          <button class="btn btn-secondary" onclick="evtDelete('${rid}')" style="font-size:12px;padding:8px 16px;color:#991B1B;">Delete</button>
-          <span id="ef-status-msg-${rid}" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;"></span>
-        </div>
-      </div>
-    </div>`;
-}).join('');
-```
-
-} catch(e) {
-listEl.innerHTML = `<div style="padding:24px;color:#991B1B;font-size:13px;">Error: ${e.message}</div>`;
-}
-}
-
-function evtToggleExpand(id) {
-const panel = document.getElementById(‘evt-expand-’ + id);
-const arrow = panel.previousElementSibling.querySelector(‘span:last-child’);
-const open = panel.style.display === ‘none’;
-panel.style.display = open ? ‘’ : ‘none’;
-if (arrow) arrow.textContent = open ? ‘▴ Close’ : ‘▾ Edit’;
-}
-
-async function evtSaveEdit(id) {
-const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
-const writeKey = serviceKey || supabaseKey;
-const msgEl = document.getElementById(‘ef-status-msg-’ + id);
-msgEl.textContent = ‘Saving…’;
-
-const g = suffix => document.getElementById(‘ef-’ + suffix + ‘-’ + id)?.value ?? null;
-const patch = {
-title:       g(‘title’) || null,
-description: g(‘desc’)  || null,
-start_date:  g(‘start’) || null,
-end_date:    g(‘end’)   || null,
-price:       g(‘price’) || null,
-booking_url: g(‘url’)   || null,
-event_type:  g(‘type’)  || null,
-language:    g(‘lang’)  || null,
-occasion:    g(‘occasion’) || null,
-status:      g(‘status’) || ‘draft’,
-age_min:     g(‘agemin’) !== ‘’ && g(‘agemin’) !== null ? parseInt(g(‘agemin’)) : null,
-age_max:     g(‘agemax’) !== ‘’ && g(‘agemax’) !== null ? parseInt(g(‘agemax’)) : null,
-};
-
-try {
-const res = await fetch(`${supabaseUrl}/rest/v1/events?id=eq.${id}`, {
-method: ‘PATCH’,
-headers: { ‘Content-Type’: ‘application/json’, ‘apikey’: writeKey, ‘Authorization’: `Bearer ${writeKey}`, ‘Prefer’: ‘return=minimal’ },
-body: JSON.stringify(patch),
-});
-if (res.ok) {
-msgEl.style.color = ‘#2D6A4F’;
-msgEl.textContent = ‘✓ Saved’;
-setTimeout(() => loadUpcomingEvents(), 800);
-} else {
-throw new Error(’HTTP ’ + res.status);
-}
-} catch(e) {
-msgEl.style.color = ‘#991B1B’;
-msgEl.textContent = ’✗ ’ + e.message;
-}
+        </div>`;
+    }).join('');
+  } catch(e) {
+    listEl.innerHTML = `<div style="padding:24px;color:#991B1B;font-size:13px;">Error: ${e.message}</div>`;
+  }
 }
 
 async function evtTogglePublish(id, currentStatus) {
-const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
-const writeKey = serviceKey || supabaseKey;
-const newStatus = currentStatus === ‘published’ ? ‘draft’ : ‘published’;
-await fetch(`${supabaseUrl}/rest/v1/events?id=eq.${id}`, {
-method: ‘PATCH’,
-headers: { ‘Content-Type’: ‘application/json’, ‘apikey’: writeKey, ‘Authorization’: `Bearer ${writeKey}`, ‘Prefer’: ‘return=minimal’ },
-body: JSON.stringify({ status: newStatus }),
-});
-loadUpcomingEvents();
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  const newStatus = currentStatus === 'published' ? 'draft' : 'published';
+  await fetch(`${supabaseUrl}/rest/v1/events?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'apikey': writeKey, 'Authorization': `Bearer ${writeKey}`, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ status: newStatus }),
+  });
+  loadUpcomingEvents();
 }
 
 async function evtDelete(id) {
-if (!confirm(‘Delete this event?’)) return;
-const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
-const writeKey = serviceKey || supabaseKey;
-await fetch(`${supabaseUrl}/rest/v1/events?id=eq.${id}`, {
-method: ‘DELETE’,
-headers: { ‘apikey’: writeKey, ‘Authorization’: `Bearer ${writeKey}` },
-});
-loadUpcomingEvents();
+  if (!confirm('Delete this event?')) return;
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  await fetch(`${supabaseUrl}/rest/v1/events?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { 'apikey': writeKey, 'Authorization': `Bearer ${writeKey}` },
+  });
+  loadUpcomingEvents();
 }
 
 // ─── toggleAgendaUrl ─────────────────────────────────────────────────────────
 
 function toggleAgendaUrl() {
-const eventsState = pillState[‘events’];
-const wrap = document.getElementById(‘agenda-url-wrap’);
-if (!wrap) return;
-wrap.style.display = (eventsState === true) ? ‘’ : ‘none’;
+  const eventsState = pillState['events'];
+  const wrap = document.getElementById('agenda-url-wrap');
+  if (!wrap) return;
+  wrap.style.display = (eventsState === true) ? '' : 'none';
 }
 
 // ─── resetLocationForm ────────────────────────────────────────────────────────
 
 function resetLocationForm() {
-// Clear autocomplete
-document.getElementById(‘place-autocomplete’).value = ‘’;
-document.getElementById(‘autocomplete-results’).innerHTML = ‘’;
-// Clear Place ID input
-document.getElementById(‘maps-url’).value = ‘’;
-// Clear name and auto-filled fields
-[‘f-name’,‘f-address’,‘f-city’,‘f-province’,‘f-lat’,‘f-lon’,‘f-place-id’,‘f-maps-url’,‘f-website’].forEach(id => {
-const el = document.getElementById(id);
-if (el) el.value = ‘’;
-});
-const mapsLink = document.getElementById(‘maps-url-link’);
-if (mapsLink) mapsLink.href = ‘#’;
-// Clear hours
-document.querySelectorAll(’.hours-input’).forEach(el => el.value = ‘’);
-// Clear rating display
-const ratingEl = document.getElementById(‘f-rating-display’);
-if (ratingEl) {
-ratingEl.innerHTML = ‘<span style="color:#A09A94;font-style:italic;">Populated after lookup</span>’;
-ratingEl.dataset.rating = ‘’;
-ratingEl.dataset.count = ‘’;
-}
-// Clear manual fields
-clearManualFields();
-// Hide form
-document.getElementById(‘location-form’).style.display = ‘none’;
-currentPlaceData = null;
-clearStatus();
+  // Clear autocomplete
+  document.getElementById('place-autocomplete').value = '';
+  document.getElementById('autocomplete-results').innerHTML = '';
+  // Clear Place ID input
+  document.getElementById('maps-url').value = '';
+  // Clear name and auto-filled fields
+  ['f-name','f-address','f-city','f-province','f-lat','f-lon','f-place-id','f-maps-url','f-website'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const mapsLink = document.getElementById('maps-url-link');
+  if (mapsLink) mapsLink.href = '#';
+  // Clear hours
+  document.querySelectorAll('.hours-input').forEach(el => el.value = '');
+  // Clear rating display
+  const ratingEl = document.getElementById('f-rating-display');
+  if (ratingEl) {
+    ratingEl.innerHTML = '<span style="color:#A09A94;font-style:italic;">Populated after lookup</span>';
+    ratingEl.dataset.rating = '';
+    ratingEl.dataset.count = '';
+  }
+  // Clear manual fields
+  clearManualFields();
+  // Hide form
+  document.getElementById('location-form').style.display = 'none';
+  currentPlaceData = null;
+  clearStatus();
 }
 
 // ─── Google bulk refresh ──────────────────────────────────────────────────────
 
 function populateRefreshSecCatDropdown() {
-const sel = document.getElementById(‘refresh-sec-cat’);
-if (!sel || sel.options.length > 1) return; // already populated
-const allSecs = Object.values(SECONDARY_TAXONOMY).flat().sort();
-allSecs.forEach(s => {
-const opt = document.createElement(‘option’);
-opt.value = s; opt.textContent = s;
-sel.appendChild(opt);
-});
+  const sel = document.getElementById('refresh-sec-cat');
+  if (!sel || sel.options.length > 1) return; // already populated
+  const allSecs = Object.values(SECONDARY_TAXONOMY).flat().sort();
+  allSecs.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    sel.appendChild(opt);
+  });
 }
 
 async function startGoogleRefresh(filterSecCat) {
-const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, googleKey } = getConfig();
-const writeKey = serviceKey || supabaseKey;
-if (!supabaseUrl || !supabaseKey) return alert(‘Configure Supabase first.’);
-if (!googleKey) return alert(‘Configure your Google Places API key first.’);
+  const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, googleKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+  if (!googleKey) return alert('Configure your Google Places API key first.');
 
-const btn      = document.getElementById(‘google-refresh-btn’);
-const statusEl = document.getElementById(‘google-refresh-status’);
-const progressEl = document.getElementById(‘google-refresh-progress’);
-const barEl    = document.getElementById(‘google-refresh-bar’);
-const logEl    = document.getElementById(‘google-refresh-log’);
-const changesEl = document.getElementById(‘google-refresh-changes’);
+  const btn      = document.getElementById('google-refresh-btn');
+  const statusEl = document.getElementById('google-refresh-status');
+  const progressEl = document.getElementById('google-refresh-progress');
+  const barEl    = document.getElementById('google-refresh-bar');
+  const logEl    = document.getElementById('google-refresh-log');
+  const changesEl = document.getElementById('google-refresh-changes');
 
-if (!confirm(`This will call the Google Places API once per location${filterSecCat ? ' in the selected category' : ''} to refresh opening hours, status, and ratings (~$0.017/location). Continue?`)) return;
+  if (!confirm(`This will call the Google Places API once per location${filterSecCat ? ' in the selected category' : ''} to refresh opening hours, status, and ratings (~$0.017/location). Continue?`)) return;
 
-btn.disabled = true;
-progressEl.style.display = ‘block’;
-logEl.innerHTML = ‘’;
-if (changesEl) changesEl.innerHTML = ‘’;
+  btn.disabled = true;
+  progressEl.style.display = 'block';
+  logEl.innerHTML = '';
+  if (changesEl) changesEl.innerHTML = '';
 
-try {
-let url = `${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,google_place_id,opening_status,opening_hours&order=name.asc`;
-if (filterSecCat === ‘**closed**’) {
-url += `&opening_status=eq.CLOSED_TEMPORARILY`;
-} else if (filterSecCat) {
-url += `&secondary_categories=cs.{${encodeURIComponent(filterSecCat)}}`;
-}
-
-```
-const res = await fetch(url, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
-const locations = await res.json();
-if (!locations.length) { statusEl.textContent = 'No locations found for this filter.'; btn.disabled = false; return; }
-
-statusEl.textContent = `Refreshing ${locations.length} locations…`;
-let done = 0, errors = 0, updated = 0;
-const changes = []; // track meaningful changes
-
-for (const loc of locations) {
-  barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
   try {
-    const placeRes = await fetch(`https://places.googleapis.com/v1/places/${loc.google_place_id}`, {
-      headers: {
-        'X-Goog-Api-Key': googleKey,
-        'X-Goog-FieldMask': 'rating,userRatingCount,businessStatus,regularOpeningHours',
-      }
-    });
-    if (!placeRes.ok) throw new Error(`HTTP ${placeRes.status}`);
-    const data = await placeRes.json();
-
-    const patch = {
-      google_rating:       data.rating ?? null,
-      google_rating_count: data.userRatingCount ?? null,
-      opening_status:      data.businessStatus ?? null,
-    };
-
-    // Detect status change
-    if (data.businessStatus && data.businessStatus !== loc.opening_status) {
-      changes.push({ name: loc.name, type: 'status', from: loc.opening_status || 'unknown', to: data.businessStatus });
+    let url = `${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,google_place_id,opening_status,opening_hours&order=name.asc`;
+    if (filterSecCat === '__closed__') {
+      url += `&opening_status=eq.CLOSED_TEMPORARILY`;
+    } else if (filterSecCat) {
+      url += `&secondary_categories=cs.{${encodeURIComponent(filterSecCat)}}`;
     }
 
-    // Parse + detect opening hours change
-    let newHours = null;
-    if (data.regularOpeningHours?.weekdayDescriptions?.length) {
-      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-      newHours = days.map((day, i) => ({
-        day,
-        hours: data.regularOpeningHours.weekdayDescriptions[i]?.replace(/^[^:]+:\s*/, '') || 'Closed'
-      }));
-      patch.opening_hours = newHours;
+    const res = await fetch(url, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
+    const locations = await res.json();
+    if (!locations.length) { statusEl.textContent = 'No locations found for this filter.'; btn.disabled = false; return; }
 
-      // Compare with stored hours (simple string comparison)
-      const oldStr = JSON.stringify(loc.opening_hours || []);
-      const newStr = JSON.stringify(newHours);
-      if (oldStr !== newStr) {
-        changes.push({ name: loc.name, type: 'hours', from: null, to: newHours });
-      }
-    }
+    statusEl.textContent = `Refreshing ${locations.length} locations…`;
+    let done = 0, errors = 0, updated = 0;
+    const changes = []; // track meaningful changes
 
-    await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': writeKey,
-        'Authorization': `Bearer ${writeKey}`,
-        'Prefer': 'return=minimal',
-      },
-      body: JSON.stringify(patch),
-    });
+    for (const loc of locations) {
+      barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
+      try {
+        const placeRes = await fetch(`https://places.googleapis.com/v1/places/${loc.google_place_id}`, {
+          headers: {
+            'X-Goog-Api-Key': googleKey,
+            'X-Goog-FieldMask': 'rating,userRatingCount,businessStatus,regularOpeningHours',
+          }
+        });
+        if (!placeRes.ok) throw new Error(`HTTP ${placeRes.status}`);
+        const data = await placeRes.json();
 
-    updated++;
-    const ratingStr = data.rating ? `★ ${data.rating}` : 'no rating';
-    logEl.innerHTML = `✓ ${loc.name} — ${ratingStr} · ${data.businessStatus || '?'}
-```
+        const patch = {
+          google_rating:       data.rating ?? null,
+          google_rating_count: data.userRatingCount ?? null,
+          opening_status:      data.businessStatus ?? null,
+        };
 
-`+ logEl.innerHTML; } catch(e) { errors++; logEl.innerHTML =`✗ ${loc.name}: ${e.message}
+        // Detect status change
+        if (data.businessStatus && data.businessStatus !== loc.opening_status) {
+          changes.push({ name: loc.name, type: 'status', from: loc.opening_status || 'unknown', to: data.businessStatus });
+        }
+
+        // Parse + detect opening hours change
+        let newHours = null;
+        if (data.regularOpeningHours?.weekdayDescriptions?.length) {
+          const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+          newHours = days.map((day, i) => ({
+            day,
+            hours: data.regularOpeningHours.weekdayDescriptions[i]?.replace(/^[^:]+:\s*/, '') || 'Closed'
+          }));
+          patch.opening_hours = newHours;
+
+          // Compare with stored hours (simple string comparison)
+          const oldStr = JSON.stringify(loc.opening_hours || []);
+          const newStr = JSON.stringify(newHours);
+          if (oldStr !== newStr) {
+            changes.push({ name: loc.name, type: 'hours', from: null, to: newHours });
+          }
+        }
+
+        await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': writeKey,
+            'Authorization': `Bearer ${writeKey}`,
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify(patch),
+        });
+
+        updated++;
+        const ratingStr = data.rating ? `★ ${data.rating}` : 'no rating';
+        logEl.innerHTML = `✓ ${loc.name} — ${ratingStr} · ${data.businessStatus || '?'}
 ` + logEl.innerHTML;
-}
-done++;
-await new Promise(r => setTimeout(r, 150));
-}
+      } catch(e) {
+        errors++;
+        logEl.innerHTML = `✗ ${loc.name}: ${e.message}
+` + logEl.innerHTML;
+      }
+      done++;
+      await new Promise(r => setTimeout(r, 150));
+    }
 
-```
-statusEl.textContent = `✓ Done — ${updated} updated, ${errors} errors, ${changes.length} change${changes.length !== 1 ? 's' : ''} detected.`;
-barEl.style.width = '100%';
+    statusEl.textContent = `✓ Done — ${updated} updated, ${errors} errors, ${changes.length} change${changes.length !== 1 ? 's' : ''} detected.`;
+    barEl.style.width = '100%';
 
-// Show changes summary
-if (changesEl && changes.length) {
-  changesEl.innerHTML = `
-    <div style="margin-top:16px;">
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#A09A94;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Changes detected (${changes.length})</div>
-      ${changes.map(c => `
-        <div style="padding:8px 12px;background:#fef9c3;border:1.5px solid #fde68a;border-radius:8px;margin-bottom:6px;font-size:12px;">
-          <strong>${c.name}</strong>
-          ${c.type === 'status'
-            ? ` — status changed: <span style="color:#991B1B;">${c.from}</span> → <span style="color:#2D6A4F;">${c.to}</span>`
-            : ` — opening hours updated`}
-        </div>`).join('')}
-    </div>`;
-} else if (changesEl) {
-  changesEl.innerHTML = '<p style="font-size:12px;color:#2D6A4F;margin-top:12px;">✓ No changes to opening hours or status detected.</p>';
-}
-```
+    // Show changes summary
+    if (changesEl && changes.length) {
+      changesEl.innerHTML = `
+        <div style="margin-top:16px;">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:#A09A94;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Changes detected (${changes.length})</div>
+          ${changes.map(c => `
+            <div style="padding:8px 12px;background:#fef9c3;border:1.5px solid #fde68a;border-radius:8px;margin-bottom:6px;font-size:12px;">
+              <strong>${c.name}</strong>
+              ${c.type === 'status'
+                ? ` — status changed: <span style="color:#991B1B;">${c.from}</span> → <span style="color:#2D6A4F;">${c.to}</span>`
+                : ` — opening hours updated`}
+            </div>`).join('')}
+        </div>`;
+    } else if (changesEl) {
+      changesEl.innerHTML = '<p style="font-size:12px;color:#2D6A4F;margin-top:12px;">✓ No changes to opening hours or status detected.</p>';
+    }
 
-} catch(e) {
-statusEl.textContent = `Error: ${e.message}`;
-} finally {
-btn.disabled = false;
-}
+  } catch(e) {
+    statusEl.textContent = `Error: ${e.message}`;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ─── Event Import (iCal / WordPress API / OBA) ───────────────────────────────
@@ -4728,334 +4607,339 @@ let _importLoc = null;       // current location being imported for
 let _importEvents = [];      // parsed events awaiting selection
 
 function openImportModal(loc) {
-_importLoc = loc;
-_importEvents = [];
-document.getElementById(‘import-modal’).classList.add(‘open’);
-document.getElementById(‘import-modal-title’).textContent = ’Import events — ’ + loc.name;
-const agendaUrl = loc.agenda_url || loc.website || ‘’;
-document.getElementById(‘import-modal-url’).textContent = agendaUrl;
-document.getElementById(‘import-detection’).innerHTML = ‘<div style="font-size:13px;color:#A09A94;">🔍 Detecting feed type…</div>’;
-document.getElementById(‘import-events-list’).innerHTML = ‘’;
-document.getElementById(‘import-save-btn’).style.display = ‘none’;
-document.getElementById(‘import-save-status’).textContent = ‘’;
-detectAndFetch(loc, agendaUrl);
+  _importLoc = loc;
+  _importEvents = [];
+  document.getElementById('import-modal').classList.add('open');
+  document.getElementById('import-modal-title').textContent = 'Import events — ' + loc.name;
+  const agendaUrl = loc.agenda_url || loc.website || '';
+  document.getElementById('import-modal-url').textContent = agendaUrl;
+  document.getElementById('import-detection').innerHTML = '<div style="font-size:13px;color:#A09A94;">🔍 Detecting feed type…</div>';
+  document.getElementById('import-events-list').innerHTML = '';
+  document.getElementById('import-save-btn').style.display = 'none';
+  document.getElementById('import-save-status').textContent = '';
+  detectAndFetch(loc, agendaUrl);
 }
 
 function closeImportModal() {
-document.getElementById(‘import-modal’).classList.remove(‘open’);
-_importLoc = null;
-_importEvents = [];
+  document.getElementById('import-modal').classList.remove('open');
+  _importLoc = null;
+  _importEvents = [];
 }
 
 // ── Detection & routing ───────────────────────────────────────────────────────
 async function detectAndFetch(loc, agendaUrl) {
-const detEl = document.getElementById(‘import-detection’);
+  const detEl = document.getElementById('import-detection');
 
-// 1. OBA — recognised by domain
-if (agendaUrl.includes(‘oba.nl/nl/agenda’)) {
-detEl.innerHTML = ‘<span style="color:#2D6A4F;font-weight:600;">✓ OBA platform detected</span> — fetching via HTML parser’;
-await fetchOBAEvents(loc, agendaUrl);
-return;
-}
+  // 1. OBA — recognised by domain
+  if (agendaUrl.includes('oba.nl/nl/agenda')) {
+    detEl.innerHTML = '<span style="color:#2D6A4F;font-weight:600;">✓ OBA platform detected</span> — fetching via HTML parser';
+    await fetchOBAEvents(loc, agendaUrl);
+    return;
+  }
 
-// 2. Try WordPress Events Calendar REST API
-const wpBase = agendaUrl.match(/^(https?://[^/]+)/)?.[1];
-if (wpBase) {
-detEl.innerHTML = ‘<div style="font-size:13px;color:#A09A94;">Testing WordPress Events Calendar API…</div>’;
-const wpUrl = wpBase + ‘/wp-json/tribe/events/v1/events?per_page=20&start_date=’ + new Date().toISOString().slice(0,10);
-try {
-const res = await fetch(wpUrl, { signal: AbortSignal.timeout(6000) });
-if (res.ok) {
-const data = await res.json();
-if (data.events && data.events.length >= 0) {
-detEl.innerHTML = ‘<span style="color:#2D6A4F;font-weight:600;">✓ WordPress Events Calendar API found</span> — ’ + data.events.length + ’ upcoming events’;
-renderImportEvents(parseWordPressEvents(data.events, loc));
-return;
-}
-}
-} catch(e) {}
-}
+  // 2. Try WordPress Events Calendar REST API
+  const wpBase = agendaUrl.match(/^(https?:\/\/[^/]+)/)?.[1];
+  if (wpBase) {
+    detEl.innerHTML = '<div style="font-size:13px;color:#A09A94;">Testing WordPress Events Calendar API…</div>';
+    const wpUrl = wpBase + '/wp-json/tribe/events/v1/events?per_page=20&start_date=' + new Date().toISOString().slice(0,10);
+    try {
+      const res = await fetch(wpUrl, { signal: AbortSignal.timeout(6000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.events && data.events.length >= 0) {
+          detEl.innerHTML = '<span style="color:#2D6A4F;font-weight:600;">✓ WordPress Events Calendar API found</span> — ' + data.events.length + ' upcoming events';
+          renderImportEvents(parseWordPressEvents(data.events, loc));
+          return;
+        }
+      }
+    } catch(e) {}
+  }
 
-// 3. Try iCal feed — common paths
-const icalCandidates = [
-agendaUrl + (agendaUrl.includes(’?’) ? ‘&’ : ‘?’) + ‘ical=1’,
-agendaUrl.replace(//$/, ‘’) + ‘/feed/ical/’,
-agendaUrl.replace(//$/, ‘’) + ‘.ics’,
-wpBase + ‘/events.ics’,
-wpBase + ‘/?ical=1’,
-].filter((v, i, a) => a.indexOf(v) === i);
+  // 3. Try iCal feed — common paths
+  const icalCandidates = [
+    agendaUrl + (agendaUrl.includes('?') ? '&' : '?') + 'ical=1',
+    agendaUrl.replace(/\/$/, '') + '/feed/ical/',
+    agendaUrl.replace(/\/$/, '') + '.ics',
+    wpBase + '/events.ics',
+    wpBase + '/?ical=1',
+  ].filter((v, i, a) => a.indexOf(v) === i);
 
-for (const candidate of icalCandidates) {
-detEl.innerHTML = ‘<div style="font-size:13px;color:#A09A94;">Testing iCal: <code style="font-size:11px;">’ + candidate.replace(wpBase,’’) + ‘</code>…</div>’;
-try {
-const res = await fetch(candidate, { signal: AbortSignal.timeout(6000) });
-const text = await res.text();
-if (text.trim().startsWith(‘BEGIN:VCALENDAR’)) {
-detEl.innerHTML = ‘<span style="color:#2D6A4F;font-weight:600;">✓ iCal feed found</span> — <code style="font-size:11px;">’ + candidate + ‘</code>’;
-// Save working feed URL to DB for future use
-const events = parseIcal(text);
-const upcoming = events.filter(e => e.start && new Date(e.start) >= new Date());
-renderImportEvents(upcoming.slice(0, 30).map(e => ({ …e, location_id: loc.id })));
-return;
-}
-} catch(e) {}
-}
+  for (const candidate of icalCandidates) {
+    detEl.innerHTML = '<div style="font-size:13px;color:#A09A94;">Testing iCal: <code style="font-size:11px;">' + candidate.replace(wpBase,'') + '</code>…</div>';
+    try {
+      const res = await fetch(candidate, { signal: AbortSignal.timeout(6000) });
+      const text = await res.text();
+      if (text.trim().startsWith('BEGIN:VCALENDAR')) {
+        detEl.innerHTML = '<span style="color:#2D6A4F;font-weight:600;">✓ iCal feed found</span> — <code style="font-size:11px;">' + candidate + '</code>';
+        // Save working feed URL to DB for future use
+        const events = parseIcal(text);
+        const upcoming = events.filter(e => e.start && new Date(e.start) >= new Date());
+        renderImportEvents(upcoming.slice(0, 30).map(e => ({ ...e, location_id: loc.id })));
+        return;
+      }
+    } catch(e) {}
+  }
 
-// 4. Nothing found
-detEl.innerHTML = ‘<span style="color:#991B1B;">✗ No automatic feed found.</span> Try the AI Extract button or check manually.’;
+  // 4. Nothing found
+  detEl.innerHTML = '<span style="color:#991B1B;">✗ No automatic feed found.</span> Try the AI Extract button or check manually.';
 }
 
 // ── iCal parser ───────────────────────────────────────────────────────────────
 function parseIcal(text) {
-const events = [];
-const blocks = text.split(‘BEGIN:VEVENT’);
-for (let i = 1; i < blocks.length; i++) {
-const block = blocks[i];
-const get = (key) => {
-const m = block.match(new RegExp(key + ‘[^:]*:([^\r\n]+)’));
-return m ? m[1].trim().replace(/\n/g, ‘\n’).replace(/,/g, ‘,’) : null;
-};
-const parseIcalDate = (val) => {
-if (!val) return null;
-// YYYYMMDDTHHMMSSZ or YYYYMMDD
-const clean = val.replace(‘Z’,’’).replace(‘T’,’ ’);
-const y = clean.slice(0,4), mo = clean.slice(4,6), d = clean.slice(6,8);
-const h = clean.slice(9,11)||‘00’, mi = clean.slice(11,13)||‘00’;
-return y + ‘-’ + mo + ‘-’ + d + ‘T’ + h + ‘:’ + mi;
-};
-const title = get(‘SUMMARY’);
-if (!title) continue;
-events.push({
-title,
-description: (get(‘DESCRIPTION’) || ‘’).slice(0, 300),
-start: parseIcalDate(get(‘DTSTART’)),
-end:   parseIcalDate(get(‘DTEND’)),
-url:   get(‘URL’),
-location_id: null,
-});
-}
-return events;
+  const events = [];
+  const blocks = text.split('BEGIN:VEVENT');
+  for (let i = 1; i < blocks.length; i++) {
+    const block = blocks[i];
+    const get = (key) => {
+      const m = block.match(new RegExp(key + '[^:]*:([^\r\n]+)'));
+      return m ? m[1].trim().replace(/\n/g, '\n').replace(/\,/g, ',') : null;
+    };
+    const parseIcalDate = (val) => {
+      if (!val) return null;
+      // YYYYMMDDTHHMMSSZ or YYYYMMDD
+      const clean = val.replace('Z','').replace('T',' ');
+      const y = clean.slice(0,4), mo = clean.slice(4,6), d = clean.slice(6,8);
+      const h = clean.slice(9,11)||'00', mi = clean.slice(11,13)||'00';
+      return y + '-' + mo + '-' + d + 'T' + h + ':' + mi;
+    };
+    const title = get('SUMMARY');
+    if (!title) continue;
+    events.push({
+      title,
+      description: (get('DESCRIPTION') || '').slice(0, 300),
+      start: parseIcalDate(get('DTSTART')),
+      end:   parseIcalDate(get('DTEND')),
+      url:   get('URL'),
+      location_id: null,
+    });
+  }
+  return events;
 }
 
 // ── WordPress Events Calendar parser ─────────────────────────────────────────
 function parseWordPressEvents(wpEvents, loc) {
-return wpEvents.map(e => ({
-title:       e.title?.rendered || e.title || ‘’,
-description: (e.description?.replace(/<[^>]+>/g,’’) || ‘’).slice(0,300),
-start:       e.start_date || null,
-end:         e.end_date   || null,
-url:         e.url        || null,
-price:       e.cost       || null,
-location_id: loc.id,
-})).filter(e => e.title && e.start && new Date(e.start) >= new Date());
+  return wpEvents.map(e => ({
+    title:       e.title?.rendered || e.title || '',
+    description: (e.description?.replace(/<[^>]+>/g,'') || '').slice(0,300),
+    start:       e.start_date || null,
+    end:         e.end_date   || null,
+    url:         e.url        || null,
+    price:       e.cost       || null,
+    location_id: loc.id,
+  })).filter(e => e.title && e.start && new Date(e.start) >= new Date());
 }
 
 // ── OBA HTML parser ───────────────────────────────────────────────────────────
 async function fetchOBAEvents(loc, agendaUrl) {
-const detEl = document.getElementById(‘import-detection’);
-try {
-const res = await fetch(agendaUrl, { signal: AbortSignal.timeout(10000) });
-const html = await res.text();
-const parser = new DOMParser();
-const doc = parser.parseFromString(html, ‘text/html’);
+  const detEl = document.getElementById('import-detection');
+  try {
+    const res = await fetch(agendaUrl, { signal: AbortSignal.timeout(10000) });
+    const html = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
 
-```
-const events = [];
-// OBA renders events as <a> links with date, title, time, location info
-const links = doc.querySelectorAll('a[href*="/nl/agenda/"]');
-links.forEach(a => {
-  const href = a.href || a.getAttribute('href') || '';
-  if (!href.includes('/nl/agenda/') || href === agendaUrl) return;
-  // Get title — usually the largest text
-  const title = a.querySelector('h2,h3,strong,[class*="title"]')?.textContent?.trim()
-    || a.textContent.trim().split('\n')[0].trim();
-  if (!title || title.length < 3) return;
-  // Look for date text
-  const dateText = a.textContent.match(/(maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)[\s\S]*?\d{4}/i)?.[0] || '';
-  const timeMatch = a.textContent.match(/(\d{2}:\d{2})/);
-  events.push({
-    title: title.slice(0, 150),
-    description: '',
-    start: null, // OBA dates need Dutch parsing — leave for manual fix
-    end: null,
-    url: href.startsWith('http') ? href : 'https://oba.nl' + href,
-    raw_date: dateText,
-    raw_time: timeMatch?.[1] || null,
-    location_id: loc.id,
-  });
-});
+    const events = [];
+    // OBA renders events as <a> links with date, title, time, location info
+    const links = doc.querySelectorAll('a[href*="/nl/agenda/"]');
+    links.forEach(a => {
+      const href = a.href || a.getAttribute('href') || '';
+      if (!href.includes('/nl/agenda/') || href === agendaUrl) return;
+      // Get title — usually the largest text
+      const title = a.querySelector('h2,h3,strong,[class*="title"]')?.textContent?.trim()
+        || a.textContent.trim().split('\n')[0].trim();
+      if (!title || title.length < 3) return;
+      // Look for date text
+      const dateText = a.textContent.match(/(maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)[\s\S]*?\d{4}/i)?.[0] || '';
+      const timeMatch = a.textContent.match(/(\d{2}:\d{2})/);
+      events.push({
+        title: title.slice(0, 150),
+        description: '',
+        start: null, // OBA dates need Dutch parsing — leave for manual fix
+        end: null,
+        url: href.startsWith('http') ? href : 'https://oba.nl' + href,
+        raw_date: dateText,
+        raw_time: timeMatch?.[1] || null,
+        location_id: loc.id,
+      });
+    });
 
-const unique = events.filter((e, i, a) => a.findIndex(x => x.title === e.title) === i);
-if (unique.length) {
-  detEl.innerHTML = '<span style="color:#2D6A4F;font-weight:600;">✓ OBA events parsed</span> — ' + unique.length + ' found. Dates need manual setting (Dutch calendar format).';
-  renderImportEvents(unique.slice(0, 30));
-} else {
-  detEl.innerHTML = '<span style="color:#991B1B;">OBA page loaded but no events parsed.</span> The page may be JS-rendered. Use the Agenda link to check manually.';
-}
-```
-
-} catch(e) {
-detEl.innerHTML = ’<span style="color:#991B1B;">Failed to fetch OBA page: ’ + e.message + ‘</span>’;
-}
+    const unique = events.filter((e, i, a) => a.findIndex(x => x.title === e.title) === i);
+    if (unique.length) {
+      detEl.innerHTML = '<span style="color:#2D6A4F;font-weight:600;">✓ OBA events parsed</span> — ' + unique.length + ' found. Dates need manual setting (Dutch calendar format).';
+      renderImportEvents(unique.slice(0, 30));
+    } else {
+      detEl.innerHTML = '<span style="color:#991B1B;">OBA page loaded but no events parsed.</span> The page may be JS-rendered. Use the Agenda link to check manually.';
+    }
+  } catch(e) {
+    detEl.innerHTML = '<span style="color:#991B1B;">Failed to fetch OBA page: ' + e.message + '</span>';
+  }
 }
 
 // ── Render events in modal ────────────────────────────────────────────────────
 function renderImportEvents(events) {
-_importEvents = events;
-const container = document.getElementById(‘import-events-list’);
-const saveBtn = document.getElementById(‘import-save-btn’);
+  _importEvents = events;
+  const container = document.getElementById('import-events-list');
+  const saveBtn = document.getElementById('import-save-btn');
 
-if (!events.length) {
-container.innerHTML = ‘<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No upcoming events found.</div>’;
-return;
-}
+  if (!events.length) {
+    container.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No upcoming events found.</div>';
+    return;
+  }
 
-saveBtn.style.display = ‘’;
+  saveBtn.style.display = '';
 
-container.innerHTML = events.map((e, i) => {
-const dateStr = e.start
-? new Date(e.start).toLocaleDateString(‘nl-NL’, {weekday:‘short’, day:‘numeric’, month:‘short’, year:‘numeric’}) + (e.start.includes(‘T’) ? ’ ’ + e.start.slice(11,16) : ‘’)
-: (e.raw_date ? e.raw_date.slice(0,40) + (e.raw_time ? ’ ’ + e.raw_time : ‘’) : ‘Date unknown — set manually’);
-return ` <div class="import-event-card"> <input type="checkbox" id="imp-chk-${i}" checked data-idx="${i}" /> <div style="flex:1;min-width:0;"> <div class="ev-title">${e.title}</div> <div class="ev-meta">${dateStr}${e.url ? ' · <a href="' + e.url + '" target="_blank" style="color:#4daabb;">link ↗</a>' : ''}</div> ${e.description ? '<div class="ev-desc">' + e.description.slice(0,120) + (e.description.length > 120 ? '…' : '') + '</div>' : ''} ${!e.start ? '<div style="font-size:11px;color:#E8541A;margin-top:3px;">⚠ No date — set it after import</div>' : ''} </div> </div>`;
-}).join(’’);
+  container.innerHTML = events.map((e, i) => {
+    const dateStr = e.start
+      ? new Date(e.start).toLocaleDateString('nl-NL', {weekday:'short', day:'numeric', month:'short', year:'numeric'}) + (e.start.includes('T') ? ' ' + e.start.slice(11,16) : '')
+      : (e.raw_date ? e.raw_date.slice(0,40) + (e.raw_time ? ' ' + e.raw_time : '') : 'Date unknown — set manually');
+    return `
+      <div class="import-event-card">
+        <input type="checkbox" id="imp-chk-${i}" checked data-idx="${i}" />
+        <div style="flex:1;min-width:0;">
+          <div class="ev-title">${e.title}</div>
+          <div class="ev-meta">${dateStr}${e.url ? ' · <a href="' + e.url + '" target="_blank" style="color:#4daabb;">link ↗</a>' : ''}</div>
+          ${e.description ? '<div class="ev-desc">' + e.description.slice(0,120) + (e.description.length > 120 ? '…' : '') + '</div>' : ''}
+          ${!e.start ? '<div style="font-size:11px;color:#E8541A;margin-top:3px;">⚠ No date — set it after import</div>' : ''}
+        </div>
+      </div>`;
+  }).join('');
 }
 
 // ── Save selected events ──────────────────────────────────────────────────────
 async function importSelectedEvents() {
-const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
-const writeKey = serviceKey || supabaseKey;
-if (!supabaseUrl || !supabaseKey) return alert(‘Configure Supabase first.’);
+  const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
 
-const checkboxes = document.querySelectorAll(’#import-events-list input[type=checkbox]:checked’);
-if (!checkboxes.length) return alert(‘Select at least one event to import.’);
+  const checkboxes = document.querySelectorAll('#import-events-list input[type=checkbox]:checked');
+  if (!checkboxes.length) return alert('Select at least one event to import.');
 
-const btn = document.getElementById(‘import-save-btn’);
-const statusEl = document.getElementById(‘import-save-status’);
-btn.disabled = true;
-statusEl.textContent = ‘Saving…’;
+  const btn = document.getElementById('import-save-btn');
+  const statusEl = document.getElementById('import-save-status');
+  btn.disabled = true;
+  statusEl.textContent = 'Saving…';
 
-let saved = 0, errors = 0;
-for (const chk of checkboxes) {
-const idx = parseInt(chk.dataset.idx);
-const e = _importEvents[idx];
-if (!e) continue;
+  let saved = 0, errors = 0;
+  for (const chk of checkboxes) {
+    const idx = parseInt(chk.dataset.idx);
+    const e = _importEvents[idx];
+    if (!e) continue;
 
-```
-const payload = {
-  title:       e.title,
-  description: e.description || null,
-  location_id: _importLoc?.id || null,
-  address:     _importLoc ? (_importLoc.name + (_importLoc.city ? ', ' + _importLoc.city : '')) : null,
-  start_date:  e.start || null,
-  end_date:    e.end   || null,
-  booking_url: e.url   || null,
-  price:       e.price || null,
-  status:      'draft',
-  source:      'import',
-};
+    const payload = {
+      title:       e.title,
+      description: e.description || null,
+      location_id: _importLoc?.id || null,
+      address:     _importLoc ? (_importLoc.name + (_importLoc.city ? ', ' + _importLoc.city : '')) : null,
+      start_date:  e.start || null,
+      end_date:    e.end   || null,
+      booking_url: e.url   || null,
+      price:       e.price || null,
+      status:      'draft',
+      source:      'import',
+    };
 
-try {
-  const res = await fetch(`${supabaseUrl}/rest/v1/events`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': writeKey,
-      'Authorization': `Bearer ${writeKey}`,
-      'Prefer': 'return=minimal',
-    },
-    body: JSON.stringify(payload),
-  });
-  if (res.ok) saved++;
-  else errors++;
-} catch(e) { errors++; }
-```
+    try {
+      const res = await fetch(`${supabaseUrl}/rest/v1/events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': writeKey,
+          'Authorization': `Bearer ${writeKey}`,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) saved++;
+      else errors++;
+    } catch(e) { errors++; }
+  }
 
-}
-
-statusEl.textContent = `✓ ${saved} imported as draft${errors ? ', ' + errors + ' errors' : ''}. Review in Upcoming tab.`;
-statusEl.style.color = errors ? ‘#991B1B’ : ‘#2D6A4F’;
-btn.disabled = false;
-// Refresh coverage map
-setTimeout(() => loadEvtQueue(), 1500);
+  statusEl.textContent = `✓ ${saved} imported as draft${errors ? ', ' + errors + ' errors' : ''}. Review in Upcoming tab.`;
+  statusEl.style.color = errors ? '#991B1B' : '#2D6A4F';
+  btn.disabled = false;
+  // Refresh coverage map
+  setTimeout(() => loadEvtQueue(), 1500);
 }
 
 // ─── Batch title generator ───────────────────────────────────────────────────
 
 async function previewBatchTitles() {
-const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
-if (!supabaseUrl || !supabaseKey) return alert(‘Configure Supabase first.’);
-const resultsEl = document.getElementById(‘batch-title-results’);
-resultsEl.innerHTML = ‘<p style="font-size:12px;color:#A09A94;">Loading…</p>’;
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+  const resultsEl = document.getElementById('batch-title-results');
+  resultsEl.innerHTML = '<p style="font-size:12px;color:#A09A94;">Loading…</p>';
 
-try {
-const res = await fetch(
-`${supabaseUrl}/rest/v1/${supabaseTable}?${regenerateAll ? '' : 'page_title=is.null&'}select=id,name,city,secondary_category_lead,primary_category,description&order=name.asc`,
-{ headers: { ‘apikey’: supabaseKey, ‘Authorization’: `Bearer ${supabaseKey}` } }
-);
-const rows = await res.json();
-if (!rows.length) {
-resultsEl.innerHTML = ‘<p style="font-size:13px;color:#2D6A4F;">✓ All locations have a page title!</p>’;
-return;
-}
-resultsEl.innerHTML = `<p style="font-size:12px;color:#A09A94;margin-bottom:8px;">${rows.length} locations without a page title:</p> <div style="display:flex;flex-direction:column;gap:4px;"> ${rows.map(r =>`
-<div style="font-size:12px;padding:6px 10px;background:#F7F3ED;border-radius:6px;display:flex;gap:8px;">
-<span style="font-weight:600;color:#1A1714;">${r.name}</span>
-<span style="color:#A09A94;">${r.city || ‘’}</span>
-</div>`).join('')} </div>`;
-} catch(e) {
-resultsEl.innerHTML = `<p style="font-size:12px;color:#991B1B;">Error: ${e.message}</p>`;
-}
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?${regenerateAll ? '' : 'page_title=is.null&'}select=id,name,city,secondary_category_lead,primary_category,description&order=name.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    if (!rows.length) {
+      resultsEl.innerHTML = '<p style="font-size:13px;color:#2D6A4F;">✓ All locations have a page title!</p>';
+      return;
+    }
+    resultsEl.innerHTML = `
+      <p style="font-size:12px;color:#A09A94;margin-bottom:8px;">${rows.length} locations without a page title:</p>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        ${rows.map(r => `
+          <div style="font-size:12px;padding:6px 10px;background:#F7F3ED;border-radius:6px;display:flex;gap:8px;">
+            <span style="font-weight:600;color:#1A1714;">${r.name}</span>
+            <span style="color:#A09A94;">${r.city || ''}</span>
+          </div>`).join('')}
+      </div>`;
+  } catch(e) {
+    resultsEl.innerHTML = `<p style="font-size:12px;color:#991B1B;">Error: ${e.message}</p>`;
+  }
 }
 
 async function startBatchTitles(regenerateAll = false) {
-const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, anthropicKey } = getConfig();
-const writeKey = serviceKey || supabaseKey;
-if (!supabaseUrl || !supabaseKey) return alert(‘Configure Supabase first.’);
-if (!anthropicKey) return alert(‘Configure your Anthropic API key first.’);
+  const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, anthropicKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+  if (!anthropicKey) return alert('Configure your Anthropic API key first.');
 
-const btn = document.getElementById(regenerateAll ? ‘batch-title-all-btn’ : ‘batch-title-btn’);
-const progressEl = document.getElementById(‘batch-title-progress’);
-const barEl = document.getElementById(‘batch-title-bar’);
-const statusEl = document.getElementById(‘batch-title-status’);
-const resultsEl = document.getElementById(‘batch-title-results’);
+  const btn = document.getElementById(regenerateAll ? 'batch-title-all-btn' : 'batch-title-btn');
+  const progressEl = document.getElementById('batch-title-progress');
+  const barEl = document.getElementById('batch-title-bar');
+  const statusEl = document.getElementById('batch-title-status');
+  const resultsEl = document.getElementById('batch-title-results');
 
-if (!confirm(regenerateAll ? ‘This will regenerate page titles for ALL locations, overwriting existing ones. Continue?’ : ‘This will generate page titles for all locations currently missing one. Continue?’)) return;
+  if (!confirm(regenerateAll ? 'This will regenerate page titles for ALL locations, overwriting existing ones. Continue?' : 'This will generate page titles for all locations currently missing one. Continue?')) return;
 
-btn.disabled = true;
-progressEl.style.display = ‘block’;
-resultsEl.innerHTML = ‘’;
-
-try {
-// Fetch all locations without a page title
-const res = await fetch(
-`${supabaseUrl}/rest/v1/${supabaseTable}?${regenerateAll ? '' : 'page_title=is.null&'}select=id,name,city,secondary_category_lead,primary_category,description&order=name.asc`,
-{ headers: { ‘apikey’: supabaseKey, ‘Authorization’: `Bearer ${supabaseKey}` } }
-);
-const locations = await res.json();
-
-```
-if (!locations.length) {
-  statusEl.textContent = '✓ All locations already have titles.';
-  btn.disabled = false;
-  return;
-}
-
-statusEl.textContent = `Found ${locations.length} locations. Starting…`;
-const log = [];
-let done = 0, errors = 0;
-
-for (const loc of locations) {
-  statusEl.textContent = `Generating: ${loc.name} (${done + 1}/${locations.length})`;
-  barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
+  btn.disabled = true;
+  progressEl.style.display = 'block';
+  resultsEl.innerHTML = '';
 
   try {
-    const secLead = loc.secondary_category_lead || (loc.primary_category || [])[0] || '';
-    const locName = loc.name || '';
-    const locCity = loc.city || 'Netherlands';
-    const locCat  = secLead || '';
-    const locDesc = loc.description || '';
-    const prompt = `Create a high-CTR, SEO-friendly page title (max 60 characters) for a family location listing.
-```
+    // Fetch all locations without a page title
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?${regenerateAll ? '' : 'page_title=is.null&'}select=id,name,city,secondary_category_lead,primary_category,description&order=name.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const locations = await res.json();
+
+    if (!locations.length) {
+      statusEl.textContent = '✓ All locations already have titles.';
+      btn.disabled = false;
+      return;
+    }
+
+    statusEl.textContent = `Found ${locations.length} locations. Starting…`;
+    const log = [];
+    let done = 0, errors = 0;
+
+    for (const loc of locations) {
+      statusEl.textContent = `Generating: ${loc.name} (${done + 1}/${locations.length})`;
+      barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
+
+      try {
+        const secLead = loc.secondary_category_lead || (loc.primary_category || [])[0] || '';
+        const locName = loc.name || '';
+        const locCity = loc.city || 'Netherlands';
+        const locCat  = secLead || '';
+        const locDesc = loc.description || '';
+        const prompt = `Create a high-CTR, SEO-friendly page title (max 60 characters) for a family location listing.
 
 Location: ${locName}
 City: ${locCity}
@@ -5065,158 +4949,157 @@ Description: ${locDesc}
 Goal: Convert the description into a pitch and/or reason to go. Identify one specific relief point for a parent (e.g. nice coffee, fencing, age-appropriate, weatherproof, free entry). Use the description to write a memorable TLDR — not a generic label.
 
 Rules:
-
-- Format: “[Location name] — [punchy mini-description]”
+- Format: "[Location name] — [punchy mini-description]"
 - Max 60 characters total
-- Avoid generic words like “fun”, “great”, “nice”, “amazing”
+- Avoid generic words like "fun", "great", "nice", "amazing"
 - Plain text only, no quotes, no markdown
 - Return only the title, nothing else`;
-  
-  ```
-    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 100,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const aiData = await aiRes.json();
-    const title = aiData.content?.[0]?.text?.trim().replace(/^["']|["']$/g, '');
-  
-    if (title) {
-      // Save to DB
-      await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': writeKey,
-          'Authorization': `Bearer ${writeKey}`,
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({ page_title: title }),
-      });
-      log.push({ name: loc.name, title, ok: true });
-    } else {
-      throw new Error('Empty response');
+
+        const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': anthropicKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 100,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+        const aiData = await aiRes.json();
+        const title = aiData.content?.[0]?.text?.trim().replace(/^["']|["']$/g, '');
+
+        if (title) {
+          // Save to DB
+          await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': writeKey,
+              'Authorization': `Bearer ${writeKey}`,
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify({ page_title: title }),
+          });
+          log.push({ name: loc.name, title, ok: true });
+        } else {
+          throw new Error('Empty response');
+        }
+      } catch(e) {
+        errors++;
+        log.push({ name: loc.name, title: `Error: ${e.message}`, ok: false });
+      }
+
+      done++;
+      // Small delay to avoid rate limiting
+      await new Promise(r => setTimeout(r, 300));
     }
+
+    statusEl.textContent = `✓ Done — ${done - errors} titles generated, ${errors} errors.`;
+    barEl.style.width = '100%';
+
+    // Show results
+    resultsEl.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;">
+        ${log.map(l => `
+          <div style="font-size:12px;padding:6px 10px;background:${l.ok ? '#F7F3ED' : '#FEE2E2'};border-radius:6px;">
+            <span style="font-weight:600;color:#1A1714;">${l.name}</span>
+            <span style="color:${l.ok ? '#6B6560' : '#991B1B'};margin-left:6px;">${l.title}</span>
+          </div>`).join('')}
+      </div>`;
+
   } catch(e) {
-    errors++;
-    log.push({ name: loc.name, title: `Error: ${e.message}`, ok: false });
-  }
-  
-  done++;
-  // Small delay to avoid rate limiting
-  await new Promise(r => setTimeout(r, 300));
-  ```
-  
-  }
-  
-  statusEl.textContent = `✓ Done — ${done - errors} titles generated, ${errors} errors.`;
-  barEl.style.width = ‘100%’;
-  
-  // Show results
-  resultsEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;"> ${log.map(l =>`
-  <div style="font-size:12px;padding:6px 10px;background:${l.ok ? '#F7F3ED' : '#FEE2E2'};border-radius:6px;">
-  <span style="font-weight:600;color:#1A1714;">${l.name}</span>
-  <span style="color:${l.ok ? '#6B6560' : '#991B1B'};margin-left:6px;">${l.title}</span>
-  </div>`).join('')} </div>`;
-  
-  } catch(e) {
-  statusEl.textContent = `Error: ${e.message}`;
+    statusEl.textContent = `Error: ${e.message}`;
   } finally {
-  btn.disabled = false;
+    btn.disabled = false;
   }
-  }
+}
 
 // ─── Bulk rating refresh ─────────────────────────────────────────────────────
 
 async function startBulkRatingRefresh() {
-const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, googleKey } = getConfig();
-const writeKey = serviceKey || supabaseKey;
-if (!supabaseUrl || !supabaseKey) return alert(‘Configure Supabase first.’);
-if (!googleKey) return alert(‘Configure your Google Places API key first.’);
+  const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, googleKey } = getConfig();
+  const writeKey = serviceKey || supabaseKey;
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+  if (!googleKey) return alert('Configure your Google Places API key first.');
 
-const btn       = document.getElementById(‘rating-refresh-btn’);
-const statusEl  = document.getElementById(‘rating-refresh-status’);
-const progressEl = document.getElementById(‘rating-refresh-progress’);
-const barEl     = document.getElementById(‘rating-refresh-bar’);
-const logEl     = document.getElementById(‘rating-refresh-log’);
+  const btn       = document.getElementById('rating-refresh-btn');
+  const statusEl  = document.getElementById('rating-refresh-status');
+  const progressEl = document.getElementById('rating-refresh-progress');
+  const barEl     = document.getElementById('rating-refresh-bar');
+  const logEl     = document.getElementById('rating-refresh-log');
 
-if (!confirm(‘This will call the Google Places API once per location to refresh ratings. Costs ~$0.017 per location. Continue?’)) return;
+  if (!confirm('This will call the Google Places API once per location to refresh ratings. Costs ~$0.017 per location. Continue?')) return;
 
-btn.disabled = true;
-progressEl.style.display = ‘block’;
-logEl.innerHTML = ‘’;
+  btn.disabled = true;
+  progressEl.style.display = 'block';
+  logEl.innerHTML = '';
 
-try {
-// Fetch all locations with a google_place_id
-const res = await fetch(
-`${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,google_place_id&order=name.asc`,
-{ headers: { ‘apikey’: supabaseKey, ‘Authorization’: `Bearer ${supabaseKey}` } }
-);
-const locations = await res.json();
-if (!locations.length) { statusEl.textContent = ‘No locations with a Place ID found.’; btn.disabled = false; return; }
-
-```
-statusEl.textContent = `Refreshing ${locations.length} locations…`;
-let done = 0, errors = 0, updated = 0;
-
-for (const loc of locations) {
-  barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
   try {
-    const placeRes = await fetch(`https://places.googleapis.com/v1/places/${loc.google_place_id}`, {
-      headers: {
-        'X-Goog-Api-Key': googleKey,
-        'X-Goog-FieldMask': 'rating,userRatingCount',
-      }
-    });
-    if (!placeRes.ok) throw new Error(`HTTP ${placeRes.status}`);
-    const data = await placeRes.json();
+    // Fetch all locations with a google_place_id
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,google_place_id&order=name.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const locations = await res.json();
+    if (!locations.length) { statusEl.textContent = 'No locations with a Place ID found.'; btn.disabled = false; return; }
 
-    if (data.rating !== undefined) {
-      await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': writeKey,
-          'Authorization': `Bearer ${writeKey}`,
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({
-          google_rating: data.rating || null,
-          google_rating_count: data.userRatingCount || null,
-        }),
-      });
-      updated++;
-      logEl.innerHTML = `✓ ${loc.name}: ★ ${data.rating} (${data.userRatingCount || 0})
-```
+    statusEl.textContent = `Refreshing ${locations.length} locations…`;
+    let done = 0, errors = 0, updated = 0;
 
-`+ logEl.innerHTML; } else { logEl.innerHTML =`— ${loc.name}: no rating
-`+ logEl.innerHTML; } } catch(e) { errors++; logEl.innerHTML =`✗ ${loc.name}: ${e.message}
+    for (const loc of locations) {
+      barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
+      try {
+        const placeRes = await fetch(`https://places.googleapis.com/v1/places/${loc.google_place_id}`, {
+          headers: {
+            'X-Goog-Api-Key': googleKey,
+            'X-Goog-FieldMask': 'rating,userRatingCount',
+          }
+        });
+        if (!placeRes.ok) throw new Error(`HTTP ${placeRes.status}`);
+        const data = await placeRes.json();
+
+        if (data.rating !== undefined) {
+          await fetch(`${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${loc.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': writeKey,
+              'Authorization': `Bearer ${writeKey}`,
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify({
+              google_rating: data.rating || null,
+              google_rating_count: data.userRatingCount || null,
+            }),
+          });
+          updated++;
+          logEl.innerHTML = `✓ ${loc.name}: ★ ${data.rating} (${data.userRatingCount || 0})
 ` + logEl.innerHTML;
-}
-done++;
-// Delay to avoid hitting rate limits
-await new Promise(r => setTimeout(r, 150));
-}
+        } else {
+          logEl.innerHTML = `— ${loc.name}: no rating
+` + logEl.innerHTML;
+        }
+      } catch(e) {
+        errors++;
+        logEl.innerHTML = `✗ ${loc.name}: ${e.message}
+` + logEl.innerHTML;
+      }
+      done++;
+      // Delay to avoid hitting rate limits
+      await new Promise(r => setTimeout(r, 150));
+    }
 
-```
-statusEl.textContent = `✓ Done — ${updated} updated, ${errors} errors.`;
-barEl.style.width = '100%';
-```
-
-} catch(e) {
-statusEl.textContent = `Error: ${e.message}`;
-} finally {
-btn.disabled = false;
-}
+    statusEl.textContent = `✓ Done — ${updated} updated, ${errors} errors.`;
+    barEl.style.width = '100%';
+  } catch(e) {
+    statusEl.textContent = `Error: ${e.message}`;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ─── Places Autocomplete ─────────────────────────────────────────────────────
@@ -5224,76 +5107,73 @@ btn.disabled = false;
 let autocompleteTimeout = null;
 
 function initPlacesAutocomplete() {
-const input = document.getElementById(‘place-autocomplete’);
-if (!input) return;
-input.addEventListener(‘input’, () => {
-clearTimeout(autocompleteTimeout);
-const q = input.value.trim();
-if (q.length < 3) {
-document.getElementById(‘autocomplete-results’).innerHTML = ‘’;
-return;
-}
-autocompleteTimeout = setTimeout(() => searchPlacesAutocomplete(q), 300);
-});
+  const input = document.getElementById('place-autocomplete');
+  if (!input) return;
+  input.addEventListener('input', () => {
+    clearTimeout(autocompleteTimeout);
+    const q = input.value.trim();
+    if (q.length < 3) {
+      document.getElementById('autocomplete-results').innerHTML = '';
+      return;
+    }
+    autocompleteTimeout = setTimeout(() => searchPlacesAutocomplete(q), 300);
+  });
 }
 
 async function searchPlacesAutocomplete(query) {
-const { googleKey } = getConfig();
-if (!googleKey) return;
-const resultsEl = document.getElementById(‘autocomplete-results’);
+  const { googleKey } = getConfig();
+  if (!googleKey) return;
+  const resultsEl = document.getElementById('autocomplete-results');
 
-try {
-const res = await fetch(‘https://places.googleapis.com/v1/places:searchText’, {
-method: ‘POST’,
-headers: {
-‘Content-Type’: ‘application/json’,
-‘X-Goog-Api-Key’: googleKey,
-‘X-Goog-FieldMask’: ‘places.id,places.displayName,places.formattedAddress’,
-},
-body: JSON.stringify({
-textQuery: query,
-locationBias: {
-circle: { center: { latitude: 52.3676, longitude: 4.9041 }, radius: 50000 }
-},
-maxResultCount: 5,
-}),
-});
-const data = await res.json();
-if (!res.ok) {
-console.error(‘Places API error:’, JSON.stringify(data));
-throw new Error(data.error?.message || `HTTP ${res.status}`);
-}
-const places = data.places || [];
+  try {
+    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': googleKey,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress',
+      },
+      body: JSON.stringify({
+        textQuery: query,
+        locationBias: {
+          circle: { center: { latitude: 52.3676, longitude: 4.9041 }, radius: 50000 }
+        },
+        maxResultCount: 5,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      console.error('Places API error:', JSON.stringify(data));
+      throw new Error(data.error?.message || `HTTP ${res.status}`);
+    }
+    const places = data.places || [];
 
-```
-if (!places.length) {
-  resultsEl.innerHTML = '<div style="font-size:12px;color:#A09A94;padding:6px 0;">No results found</div>';
-  return;
-}
+    if (!places.length) {
+      resultsEl.innerHTML = '<div style="font-size:12px;color:#A09A94;padding:6px 0;">No results found</div>';
+      return;
+    }
 
-resultsEl.innerHTML = places.map(p => `
-  <div onclick="selectAutocompletePlace('${p.id}', this)"
-    style="padding:10px 14px;border-radius:8px;border:1.5px solid #D4CEC6;background:#FFFFFF;cursor:pointer;transition:border-color 0.15s;"
-    onmouseover="this.style.borderColor='#4daabb'" onmouseout="this.style.borderColor='#D4CEC6'">
-    <div style="font-size:13px;font-weight:600;color:#1A1714;">${p.displayName?.text || ''}</div>
-    <div style="font-size:11px;color:#A09A94;margin-top:2px;font-family:'DM Mono',monospace;">${p.formattedAddress || ''}</div>
-  </div>
-`).join('');
-```
-
-} catch(e) {
-resultsEl.innerHTML = `<div style="font-size:12px;color:#991B1B;padding:6px 0;">Search failed: ${e.message}</div>`;
-}
+    resultsEl.innerHTML = places.map(p => `
+      <div onclick="selectAutocompletePlace('${p.id}', this)"
+        style="padding:10px 14px;border-radius:8px;border:1.5px solid #D4CEC6;background:#FFFFFF;cursor:pointer;transition:border-color 0.15s;"
+        onmouseover="this.style.borderColor='#4daabb'" onmouseout="this.style.borderColor='#D4CEC6'">
+        <div style="font-size:13px;font-weight:600;color:#1A1714;">${p.displayName?.text || ''}</div>
+        <div style="font-size:11px;color:#A09A94;margin-top:2px;font-family:'DM Mono',monospace;">${p.formattedAddress || ''}</div>
+      </div>
+    `).join('');
+  } catch(e) {
+    resultsEl.innerHTML = `<div style="font-size:12px;color:#991B1B;padding:6px 0;">Search failed: ${e.message}</div>`;
+  }
 }
 
 async function selectAutocompletePlace(placeId, el) {
-// Clear autocomplete UI
-document.getElementById(‘place-autocomplete’).value = el.querySelector(‘div’).textContent;
-document.getElementById(‘autocomplete-results’).innerHTML = ‘’;
+  // Clear autocomplete UI
+  document.getElementById('place-autocomplete').value = el.querySelector('div').textContent;
+  document.getElementById('autocomplete-results').innerHTML = '';
 
-// Put place ID in the field and trigger lookup
-document.getElementById(‘maps-url’).value = placeId;
-await lookupPlace();
+  // Put place ID in the field and trigger lookup
+  document.getElementById('maps-url').value = placeId;
+  await lookupPlace();
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
@@ -5302,9 +5182,9 @@ loadConfig();
 initPlacesAutocomplete();
 
 // Open config on first load if no API key set
-if (!localStorage.getItem(‘bebop_google_key’)) {
-document.getElementById(‘config-panel’).classList.add(‘visible’);
-document.getElementById(‘config-toggle’).classList.add(‘open’);
+if (!localStorage.getItem('bebop_google_key')) {
+  document.getElementById('config-panel').classList.add('visible');
+  document.getElementById('config-toggle').classList.add('open');
 }
 </script>
 
