@@ -988,7 +988,7 @@ header {
 
         <div class="field full">
           <label>Title <span style="color:#E8541A;">*</span></label>
-          <input type="text" id="evt-title" placeholder="e.g. Zomerfestival Vondelpark" />
+          <input type="text" id="evt-title" placeholder="e.g. Zomerfestival Vondelpark" onblur="this.value=toTitleCase(this.value)" />
         </div>
 
         <div class="field full">
@@ -1074,7 +1074,9 @@ header {
             <option value="Workshop / Hands-on">Workshop / Hands-on</option>
             <option value="Arts & Crafts">Arts &amp; Crafts</option>
             <option value="Music">Music</option>
-            <option value="Outdoor activity">Outdoor activity</option>
+            <option value="Indoor Activity">Indoor Activity</option>
+            <option value="Outdoor Activity">Outdoor Activity</option>
+            <option value="Meal / Dining Experience">Meal / Dining Experience</option>
             <option value="Festival / Fair">Festival / Fair</option>
             <option value="Tour / Walk">Tour / Walk</option>
             <option value="Sports / Movement">Sports / Movement</option>
@@ -1519,7 +1521,9 @@ header {
           <option value="draft">Draft</option>
           <option value="ready">Ready</option>
           <option value="published">Published</option>
+          <option value="archived">Archived (hidden from map)</option>
         </select>
+        <p class="text-muted" id="archived-db-note" style="margin-top:4px;font-size:11px;display:none;color:#854d0e;">⚠ Run this SQL in Supabase first: <code style="background:#fef9c3;padding:1px 4px;border-radius:3px;font-size:10px;">ALTER TABLE locations DROP CONSTRAINT locations_status_check; ALTER TABLE locations ADD CONSTRAINT locations_status_check CHECK (status IN ('draft','ready','published','archived'));</code></p>
       </div>
     </div>
   </div>
@@ -3961,7 +3965,7 @@ async function evtSearchLocations(query) {
   if (query.length < 2) { resultsEl.innerHTML = ''; return; }
   try {
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/${supabaseTable}?name=ilike.*${encodeURIComponent(query)}*&select=id,name,city,website&limit=6`,
+      `${supabaseUrl}/rest/v1/${supabaseTable}?name=ilike.*${encodeURIComponent(query)}*&select=id,name,city,website,agenda_url,ideal_age_min,ideal_age_max&limit=6`,
       { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
     );
     const rows = await res.json();
@@ -3984,6 +3988,15 @@ function evtSelectLocation(loc) {
   // Pre-fill address from location name
   if (!document.getElementById('evt-address').value) {
     document.getElementById('evt-address').value = `${loc.name}${loc.city ? ', ' + loc.city : ''}`;
+  }
+  // Auto-populate age range from location if fields are currently empty
+  var ageMinEl = document.getElementById('evt-age-min');
+  var ageMaxEl = document.getElementById('evt-age-max');
+  if (ageMinEl && ageMinEl.value === '' && loc.ideal_age_min != null) {
+    ageMinEl.value = loc.ideal_age_min;
+  }
+  if (ageMaxEl && ageMaxEl.value === '' && loc.ideal_age_max != null) {
+    ageMaxEl.value = loc.ideal_age_max;
   }
 }
 
@@ -4012,13 +4025,28 @@ function evtResetForm() {
   document.getElementById('evt-save-status').textContent = '';
 }
 
+// ── Title case helper ────────────────────────────────────────────────────────────
+function toTitleCase(str) {
+  if (!str) return str;
+  // Small words that stay lowercase unless first word
+  var smalls = new Set(['a','an','the','and','but','or','for','nor','on','at','to','by','up','as','in','of','is']);
+  return str.trim().replace(/[^\s-]+/g, function(word, offset) {
+    var lower = word.toLowerCase();
+    // Always capitalise first word, last word, and non-small words
+    if (offset === 0 || !smalls.has(lower)) {
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }
+    return lower;
+  });
+}
+
 // ── Save event ────────────────────────────────────────────────────────────────
 async function saveEvent() {
   const { supabaseUrl, supabaseKey, serviceKey } = getConfig();
   const writeKey = serviceKey || supabaseKey;
   if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
 
-  const title = document.getElementById('evt-title').value.trim();
+  const title = toTitleCase(document.getElementById('evt-title').value.trim());
   const start = document.getElementById('evt-start').value;
   if (!title) return alert('Please enter an event title.');
   if (!start)  return alert('Please set a start date.');
@@ -4095,10 +4123,12 @@ async function extractEventsFromWebsite(websiteOverride) {
 Fetch this venue's website and find upcoming events or activities for families and children.
 Website: ${website}
 
+IMPORTANT: All output must be in English. If the website is in Dutch or another language, translate all titles and descriptions into natural English.
+
 Return ONLY a valid JSON array — no preamble, no markdown. Each object must have:
 {
-  "title": "",           // event name
-  "description": "",     // brief description, plain text only
+  "title": "",           // event name in English (translate if needed)
+  "description": "",     // brief description in English (translate if needed), plain text only
   "start_date": "",      // ISO 8601 format if date found, otherwise null
   "end_date": "",        // ISO 8601 format if found, otherwise null
   "price": "",           // e.g. "Free" or "€5" or null
@@ -4138,7 +4168,7 @@ Focus only on events suitable for families with children.`;
 
     // Pre-fill form with first event, show others as suggestions
     const e0 = events[0];
-    if (e0.title)       document.getElementById('evt-title').value       = e0.title;
+    if (e0.title)       document.getElementById('evt-title').value       = toTitleCase(e0.title);
     if (e0.description) document.getElementById('evt-description').value = e0.description;
     if (e0.start_date)  document.getElementById('evt-start').value       = e0.start_date.slice(0, 16);
     if (e0.end_date)    document.getElementById('evt-end').value         = e0.end_date.slice(0, 16);
@@ -4169,7 +4199,7 @@ Focus only on events suitable for families with children.`;
 }
 
 function evtFillFromExtracted(ev) {
-  if (ev.title)       document.getElementById('evt-title').value       = ev.title;
+  if (ev.title)       document.getElementById('evt-title').value       = toTitleCase(ev.title);
   if (ev.description) document.getElementById('evt-description').value = ev.description;
   if (ev.start_date)  document.getElementById('evt-start').value       = ev.start_date.slice(0, 16);
   if (ev.end_date)    document.getElementById('evt-end').value         = ev.end_date.slice(0, 16);
@@ -5180,6 +5210,12 @@ async function selectAutocompletePlace(placeId, el) {
 
 loadConfig();
 initPlacesAutocomplete();
+
+// Show DB migration note when archived is selected
+document.getElementById('f-status').addEventListener('change', function() {
+  var note = document.getElementById('archived-db-note');
+  if (note) note.style.display = this.value === 'archived' ? 'block' : 'none';
+});
 
 // Open config on first load if no API key set
 if (!localStorage.getItem('bebop_google_key')) {
