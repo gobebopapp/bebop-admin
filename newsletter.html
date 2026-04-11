@@ -857,13 +857,13 @@ async function loadActiveRec() {
 
   try {
     const res = await fetch(
-      supabaseUrl + '/rest/v1/recommendations?active=eq.true&select=id,headline,body,publish_date,locations(id,name,city,description,primary_category,secondary_category_lead,google_maps_url)&order=publish_date.desc&limit=1',
+      supabaseUrl + '/rest/v1/recommendations?active=eq.true&select=id,headline,body,publish_date,locations(id,name,city,description,primary_category,secondary_category_lead,google_maps_url)&limit=1',
       { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }
     );
     const rows = await res.json();
 
     if (!Array.isArray(rows) || !rows.length) {
-      el.innerHTML = '<div style="padding:20px;background:var(--red-light);border-radius:8px;font-size:13px;color:var(--red);">No active recommendation found. Activate one in the admin tool\'s Recs tab first.</div>';
+      el.innerHTML = '<div style="padding:20px;background:#FEE2E2;border-radius:8px;font-size:13px;color:#991B1B;">No active recommendation found. Activate one in the admin tool\'s Recs tab first.</div>';
       activeRec = null;
       document.getElementById('rec-overrides').style.display = 'none';
       return;
@@ -888,7 +888,7 @@ async function loadActiveRec() {
     document.getElementById('rec-overrides').style.display = 'block';
 
   } catch(e) {
-    el.innerHTML = '<div style="padding:20px;background:var(--red-light);border-radius:8px;font-size:13px;color:var(--red);">Error: ' + e.message + '</div>';
+    el.innerHTML = '<div style="padding:20px;background:#FEE2E2;border-radius:8px;font-size:13px;color:#991B1B;">Error: ' + e.message + '</div>';
   }
 }
 
@@ -959,7 +959,7 @@ async function loadWeather() {
     el.innerHTML = '<div class="weather-grid">' + renderDay(sat, satLabel) + renderDay(sun, sunLabel) + '</div>';
 
   } catch(e) {
-    el.innerHTML = '<div style="padding:12px;background:var(--red-light);border-radius:8px;font-size:13px;color:var(--red);">Error: ' + e.message + '</div>';
+    el.innerHTML = '<div style="padding:12px;background:#FEE2E2;border-radius:8px;font-size:13px;color:#991B1B;">Error: ' + e.message + '</div>';
   }
 }
 
@@ -1023,20 +1023,20 @@ async function loadRecentLocations() {
 
   try {
     const res = await fetch(
-      supabaseUrl + '/rest/v1/locations?status=eq.published&select=id,name,city,secondary_category_lead,created_at&order=created_at.desc&limit=12',
+      supabaseUrl + '/rest/v1/locations?status=in.(published,ready)&select=id,name,city,secondary_category_lead,created_at&order=created_at.desc&limit=12',
       { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }
     );
     const rows = await res.json();
 
     if (!Array.isArray(rows) || !rows.length) {
-      el.innerHTML = '<div style="font-size:13px;color:var(--ink-muted);">No recently published locations found.</div>';
+      el.innerHTML = '<div style="font-size:13px;color:#A09A94;">No recently published or ready locations found.</div>';
       return;
     }
 
     recentLocations = rows;
     renderRecentLocations();
   } catch(e) {
-    el.innerHTML = '<div style="font-size:13px;color:var(--red);">Error: ' + e.message + '</div>';
+    el.innerHTML = '<div style="font-size:13px;color:#991B1B;">Error: ' + e.message + '</div>';
   }
 }
 
@@ -1373,10 +1373,10 @@ async function sendWelcomeTest() {
   try {
     await sendLoopsTransactional(loopsKey, toEmail, subject, html);
     document.getElementById('welcome-status').textContent = '✓ Test sent to ' + toEmail;
-    document.getElementById('welcome-status').style.color = 'var(--green)';
+    document.getElementById('welcome-status').style.color = '#2D6A4F';
   } catch(e) {
     document.getElementById('welcome-status').textContent = '✗ Failed: ' + e.message;
-    document.getElementById('welcome-status').style.color = 'var(--red)';
+    document.getElementById('welcome-status').style.color = '#991B1B';
   } finally {
     btn.disabled = false;
     btn.textContent = '✉ Send test';
@@ -1476,17 +1476,17 @@ async function sendManualWelcome() {
   const firstName = document.getElementById('manual-welcome-name').value.trim() || null;
   const statusEl = document.getElementById('manual-welcome-status');
   statusEl.textContent = 'Sending…';
-  statusEl.style.color = 'var(--ink-muted)';
+  statusEl.style.color = '#A09A94';
 
   try {
     await sendLoopsTransactional(loopsKey, email, document.getElementById('welcome-subject').value || 'Welcome to GoBebop 👋', '', { firstName: firstName || 'there' });
     statusEl.textContent = '✓ Welcome email sent to ' + email;
-    statusEl.style.color = 'var(--green)';
+    statusEl.style.color = '#2D6A4F';
     document.getElementById('manual-welcome-email').value = '';
     document.getElementById('manual-welcome-name').value = '';
   } catch(e) {
     statusEl.textContent = '✗ Failed: ' + e.message;
-    statusEl.style.color = 'var(--red)';
+    statusEl.style.color = '#991B1B';
   }
 }
 
@@ -1504,10 +1504,9 @@ async function loadSubscribers() {
   listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-muted);font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;"><div class="spinner"></div> Loading from Loops…</div>';
 
   try {
-    const res = await fetch('https://app.loops.so/api/v1/contacts/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + loopsKey },
-      body: JSON.stringify({}),
+    const res = await fetch('https://app.loops.so/api/v1/contacts?limit=500', {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + loopsKey },
     });
     const data = await res.json();
 
@@ -1525,7 +1524,7 @@ async function loadSubscribers() {
 
     renderSubscriberList(allSubscribers);
   } catch(e) {
-    listEl.innerHTML = '<div style="padding:24px;color:var(--red);font-size:13px;">Error loading subscribers: ' + e.message + '</div>';
+    listEl.innerHTML = '<div style="padding:24px;color:#991B1B;font-size:13px;">Error loading subscribers: ' + e.message + '</div>';
   }
 }
 
@@ -1539,7 +1538,7 @@ function filterSubscribers(query) {
 function renderSubscriberList(subscribers) {
   const listEl = document.getElementById('sub-list');
   if (!subscribers.length) {
-    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-muted);font-size:13px;">No subscribers found.</div>';
+    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No subscribers found.</div>';
     return;
   }
 
@@ -1548,13 +1547,13 @@ function renderSubscriberList(subscribers) {
     const name = [s.firstName, s.lastName].filter(Boolean).join(' ');
     return '<div style="padding:12px 24px;border-bottom:1px solid #E8E3DC;display:flex;align-items:center;gap:14px;">' +
       '<div style="flex:1;min-width:0;">' +
-        '<div style="font-size:13px;font-weight:600;color:var(--ink);">' + (s.email || '—') + '</div>' +
-        (name ? '<div style="font-size:11px;color:var(--ink-muted);font-family:\'DM Mono\',monospace;margin-top:2px;">' + name + '</div>' : '') +
+        '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + (s.email || '—') + '</div>' +
+        (name ? '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;margin-top:2px;">' + name + '</div>' : '') +
       '</div>' +
-      '<span style="background:' + (isSubbed ? 'var(--green-light)' : 'var(--paper)') + ';color:' + (isSubbed ? 'var(--green)' : 'var(--ink-muted)') + ';font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;font-family:\'DM Mono\',monospace;">' + (isSubbed ? 'Subscribed' : 'Unsubscribed') + '</span>' +
+      '<span style="background:' + (isSubbed ? '#D8EDDF' : '#E4DDD3') + ';color:' + (isSubbed ? '#2D6A4F' : '#A09A94') + ';font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;font-family:\'DM Mono\',monospace;">' + (isSubbed ? 'Subscribed' : 'Unsubscribed') + '</span>' +
     '</div>';
   }).join('') +
-  (subscribers.length > 100 ? '<div style="padding:12px 24px;text-align:center;font-size:12px;color:var(--ink-muted);">Showing first 100 of ' + subscribers.length + '</div>' : '');
+  (subscribers.length > 100 ? '<div style="padding:12px 24px;text-align:center;font-size:12px;color:#A09A94;">Showing first 100 of ' + subscribers.length + '</div>' : '');
 }
 
 async function addSubscriber(sendWelcome) {
@@ -1565,7 +1564,7 @@ async function addSubscriber(sendWelcome) {
 
   const statusEl = document.getElementById('add-sub-status');
   statusEl.textContent = 'Adding…';
-  statusEl.style.color = 'var(--ink-muted)';
+  statusEl.style.color = '#A09A94';
 
   const payload = { email, subscribed: true };
   const fn = document.getElementById('add-sub-firstname').value.trim();
@@ -1588,14 +1587,14 @@ async function addSubscriber(sendWelcome) {
     } else {
       statusEl.textContent = '✓ ' + email + ' added to Loops.';
     }
-    statusEl.style.color = 'var(--green)';
+    statusEl.style.color = '#2D6A4F';
     document.getElementById('add-sub-email').value = '';
     document.getElementById('add-sub-firstname').value = '';
     document.getElementById('add-sub-lastname').value = '';
     loadSubscribers();
   } catch(e) {
     statusEl.textContent = '✗ Failed: ' + e.message;
-    statusEl.style.color = 'var(--red)';
+    statusEl.style.color = '#991B1B';
   }
 }
 
