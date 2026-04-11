@@ -235,20 +235,24 @@ header {
   transition: all 0.15s;
   white-space: nowrap;
   text-decoration: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #E4DDD3;
+  color: #1A1714;
 }
-.btn-primary { background: var(--accent); color: white; }
-.btn-primary:hover { background: #3a9aaa; transform: translateY(-1px); }
-.btn-primary:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
-.btn-secondary { background: var(--paper); color: var(--ink); border: 1.5px solid var(--border); }
-.btn-secondary:hover { background: var(--border); }
-.btn-save { background: var(--green); color: white; width: 100%; justify-content: center; padding: 14px 20px; font-size: 15px; }
-.btn-save:hover { background: #1E4D38; transform: translateY(-1px); }
-.btn-save:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
-.btn-enrich { background: var(--accent); color: white; font-size: 13px; padding: 8px 16px; }
-.btn-enrich:hover { background: #3a9aaa; }
-.btn-enrich:disabled { background: var(--ink-muted); cursor: not-allowed; }
-.btn-danger { background: var(--red-light); color: var(--red); border: 1.5px solid #FECACA; }
-.btn-danger:hover { background: #FECACA; }
+.btn-primary { background-color: #4daabb !important; color: #ffffff !important; border: none; }
+.btn-primary:hover { background-color: #3a9aaa !important; transform: translateY(-1px); }
+.btn-primary:disabled { background-color: #A09A94 !important; cursor: not-allowed; transform: none; }
+.btn-secondary { background-color: #E4DDD3 !important; color: #1A1714 !important; border: 1.5px solid #D4CEC6; }
+.btn-secondary:hover { background-color: #D4CEC6 !important; }
+.btn-save { background-color: #2D6A4F !important; color: #ffffff !important; border: none; width: 100%; justify-content: center; padding: 14px 20px; font-size: 15px; }
+.btn-save:hover { background-color: #1E4D38 !important; transform: translateY(-1px); }
+.btn-save:disabled { background-color: #A09A94 !important; cursor: not-allowed; transform: none; }
+.btn-enrich { background-color: #4daabb !important; color: #ffffff !important; border: none; font-size: 13px; padding: 8px 16px; }
+.btn-enrich:hover { background-color: #3a9aaa !important; }
+.btn-enrich:disabled { background-color: #A09A94 !important; cursor: not-allowed; }
+.btn-danger { background-color: #FEE2E2 !important; color: #991B1B !important; border: 1.5px solid #FECACA; }
+.btn-danger:hover { background-color: #FECACA !important; }
 
 /* ── Status ── */
 .status-bar {
@@ -1130,6 +1134,10 @@ async function generateSubject() {
 }
 
 // ─── Email HTML builder ───────────────────────────────────────────────────────
+// Fonts and colours match GoBebop website design tokens:
+// Primary font: Quicksand (website body) — falls back to Trebuchet MS (similar rounded feel)
+// Display font: Fredoka One (website section headers)
+// Colours: teal #4daabb, ink #111, gray-600 #555, page-bg #f5f6f8, border #ebebeb
 
 function buildEmailHtml(opts) {
   const {
@@ -1138,7 +1146,7 @@ function buildEmailHtml(opts) {
     weatherIntro = '',
     satLabel = '', satEmoji = '', satTemp = '', satDesc = '',
     sunLabel = '', sunEmoji = '', sunTemp = '', sunDesc = '',
-    recentLocs = [],    // [{name, city, cat}]
+    recentLocs = [],
     updates = '',
     isWelcome = false,
     welcomeOpener = '', welcomeBody = '', welcomeCtaText = '', welcomeCtaUrl = '', welcomeClosing = '',
@@ -1148,120 +1156,196 @@ function buildEmailHtml(opts) {
   const showRecent  = recentLocs.length > 0;
   const showUpdates = updates && updates.trim();
 
-  // Shared styles
-  const fontStack = "'DM Sans', 'Helvetica Neue', Arial, sans-serif";
-  const accent = '#4daabb';
-  const ink = '#1A1714';
-  const inkSoft = '#6B6560';
-  const cream = '#F7F3ED';
-  const border = '#E4DDD3';
-  const green = '#2D6A4F';
+  // Design tokens from GoBebop website
+  const fontBody    = "'Quicksand', 'Trebuchet MS', Arial, sans-serif";
+  const fontDisplay = "'Fredoka One', 'Trebuchet MS', Arial, sans-serif";
+  const teal        = '#4daabb';
+  const tealDark    = '#3d8a99';
+  const tealLight   = '#e8f6f8';
+  const ink         = '#111111';
+  const inkMid      = '#333333';
+  const inkSoft     = '#555555';
+  const inkMuted    = '#888888';
+  const pageBg      = '#f5f6f8';
+  const cardBg      = '#ffffff';
+  const border      = '#ebebeb';
+  const borderStrong = '#e0e0e0';
+  const amberBg     = '#fff8e6';
+  const amberBorder = '#f0d78c';
+  const amberText   = '#8a7235';
+  const openGreen   = '#2e8a55';
+  const openGreenBg = '#e8f6ee';
 
+  // Google Fonts link to include in email head
+  const gFonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Fredoka+One&display=swap';
+
+  // Section eyebrow label style — matches website nav label pattern
+  const eyebrow = 'font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 14px;';
+
+  // ── Header ──────────────────────────────────────────────────────────────────
+  // Matches website header: white bg, teal brand color, subtle bottom border
   const headerHtml =
-    '<tr><td style="padding:0;background:#ffffff;">' +
+    '<tr><td style="padding:0;background:' + cardBg + ';">' +
       '<table width="100%" cellpadding="0" cellspacing="0" border="0">' +
-        '<tr><td style="padding:24px 40px;border-bottom:2px solid ' + border + ';display:flex;align-items:center;justify-content:space-between;">' +
-          '<span style="font-family:Georgia,serif;font-size:24px;font-weight:300;letter-spacing:-0.02em;color:' + ink + ';">go<span style="color:' + accent + ';font-style:italic;">bebop</span></span>' +
-          '<span style="font-family:\'Courier New\',monospace;font-size:11px;color:#A09A94;letter-spacing:0.06em;text-transform:uppercase;">Family guide · Netherlands</span>' +
-        '</td></tr>' +
+        '<tr>' +
+          '<td style="padding:20px 32px;border-bottom:1px solid ' + border + ';">' +
+            '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
+              '<td>' +
+                '<span style="font-family:' + fontBody + ';font-size:22px;font-weight:700;color:' + ink + ';letter-spacing:-0.3px;">go</span>' +
+                '<span style="font-family:' + fontBody + ';font-size:22px;font-weight:700;color:' + teal + ';">bebop</span>' +
+              '</td>' +
+              '<td align="right">' +
+                '<span style="font-family:' + fontBody + ';font-size:12px;font-weight:600;color:' + inkMuted + ';letter-spacing:0.3px;">Family guide · Netherlands</span>' +
+              '</td>' +
+            '</tr></table>' +
+          '</td>' +
+        '</tr>' +
       '</table>' +
     '</td></tr>';
 
   let bodyRows = '';
 
   if (isWelcome) {
+    // ── Welcome email ────────────────────────────────────────────────────────
+    // Hero teal banner, then content
     bodyRows +=
-      '<tr><td style="padding:40px 40px 20px;">' +
-        '<p style="font-family:' + fontStack + ';font-size:16px;color:' + ink + ';margin:0 0 16px;line-height:1.6;">' + (welcomeOpener || 'Welcome to GoBebop!') + '</p>' +
-        '<p style="font-family:' + fontStack + ';font-size:15px;color:' + inkSoft + ';margin:0 0 24px;line-height:1.8;">' + (welcomeBody || '').replace(/\n/g, '<br>') + '</p>' +
-        '<a href="' + (welcomeCtaUrl || 'https://gobebop.app') + '" style="display:inline-block;background:' + accent + ';color:white;font-family:' + fontStack + ';font-size:14px;font-weight:600;padding:14px 28px;border-radius:8px;text-decoration:none;">' + (welcomeCtaText || 'Explore the map') + '</a>' +
-        '<p style="font-family:' + fontStack + ';font-size:14px;color:' + inkSoft + ';margin:32px 0 0;line-height:1.6;">' + (welcomeClosing || '') + '</p>' +
+      '<tr><td style="padding:0;background:' + teal + ';">' +
+        '<div style="padding:40px 32px 36px;">' +
+          '<p style="font-family:' + fontDisplay + ';font-size:28px;color:#ffffff;margin:0 0 8px;line-height:1.2;">Welcome to GoBebop! 👋</p>' +
+          '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.85);margin:0;line-height:1.6;">Family adventures, one pick at a time.</p>' +
+        '</div>' +
+      '</td></tr>' +
+      '<tr><td style="padding:36px 32px 20px;background:' + cardBg + ';">' +
+        '<p style="font-family:' + fontBody + ';font-size:16px;font-weight:600;color:' + ink + ';margin:0 0 16px;line-height:1.5;">' + (welcomeOpener || 'Welcome to GoBebop!') + '</p>' +
+        '<p style="font-family:' + fontBody + ';font-size:15px;color:' + inkSoft + ';margin:0 0 28px;line-height:1.7;">' + (welcomeBody || '').replace(/\n/g, '<br>') + '</p>' +
+        '<table cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:10px;background:' + teal + ';">' +
+          '<a href="' + (welcomeCtaUrl || 'https://gobebop.app') + '" style="display:inline-block;padding:14px 28px;font-family:' + fontBody + ';font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:10px;">' + (welcomeCtaText || 'Explore the map') + '</a>' +
+        '</td></tr></table>' +
+        '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:32px 0 0;line-height:1.6;">' + (welcomeClosing || '') + '</p>' +
       '</td></tr>';
+
   } else {
-    // Weather intro
+    // ── Weekly newsletter ────────────────────────────────────────────────────
+
+    // Weather intro — amber tip box style from website
     if (weatherIntro) {
       bodyRows +=
-        '<tr><td style="padding:32px 40px 0;">' +
-          '<p style="font-family:' + fontStack + ';font-size:15px;color:' + inkSoft + ';margin:0;line-height:1.8;">' + weatherIntro + '</p>' +
-        '</td></tr>';
-    }
-
-    // Featured rec
-    if (recName) {
-      bodyRows +=
-        '<tr><td style="padding:32px 40px 0;">' +
-          '<p style="font-family:\'Courier New\',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#A09A94;margin:0 0 16px;">✦ This week\'s pick</p>' +
-          '<div style="background:' + cream + ';border-left:4px solid ' + accent + ';border-radius:0 10px 10px 0;padding:20px 24px;">' +
-            '<p style="font-family:Georgia,serif;font-size:22px;font-weight:300;color:' + ink + ';margin:0 0 4px;letter-spacing:-0.02em;">' + recName + '</p>' +
-            '<p style="font-family:\'Courier New\',monospace;font-size:11px;color:#A09A94;margin:0 0 12px;">' + [recCity, recCat].filter(Boolean).join(' · ') + '</p>' +
-            (recHeadline ? '<p style="font-family:' + fontStack + ';font-size:14px;color:' + accent + ';font-weight:600;margin:0 0 10px;">"' + recHeadline + '"</p>' : '') +
-            '<p style="font-family:' + fontStack + ';font-size:14px;color:' + inkSoft + ';margin:0 0 20px;line-height:1.8;">' + (recBody || '') + '</p>' +
-            (recMapUrl ? '<a href="' + recMapUrl + '" style="font-family:' + fontStack + ';font-size:13px;color:' + accent + ';font-weight:600;text-decoration:none;">View on map →</a>' : '') +
+        '<tr><td style="padding:28px 32px 0;">' +
+          '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:16px 20px;">' +
+            '<p style="font-family:' + fontBody + ';font-size:15px;color:' + amberText + ';margin:0;line-height:1.7;">' + weatherIntro + '</p>' +
           '</div>' +
         '</td></tr>';
     }
 
-    // Weekend weather
-    if (showWeather) {
+    // Featured rec — card style matching website location cards
+    if (recName) {
       bodyRows +=
-        '<tr><td style="padding:32px 40px 0;">' +
-          '<p style="font-family:\'Courier New\',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#A09A94;margin:0 0 16px;">🌤 This weekend</p>' +
+        '<tr><td style="padding:28px 32px 0;">' +
+          '<p style="' + eyebrow + '">✦ This week\'s pick</p>' +
+          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">' +
+            '<div style="background:' + tealLight + ';padding:20px 24px 16px;border-bottom:1px solid ' + border + ';">' +
+              '<p style="font-family:' + fontDisplay + ';font-size:24px;color:' + ink + ';margin:0 0 4px;line-height:1.2;">' + recName + '</p>' +
+              '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:600;color:' + teal + ';margin:0;letter-spacing:0.3px;">' + [recCity, recCat].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
+            '</div>' +
+            '<div style="padding:20px 24px;">' +
+              (recHeadline ? '<p style="font-family:' + fontBody + ';font-size:15px;font-weight:700;color:' + ink + ';margin:0 0 10px;line-height:1.4;">' + recHeadline + '</p>' : '') +
+              '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 20px;line-height:1.7;">' + (recBody || '') + '</p>' +
+              (recMapUrl ?
+                '<table cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:10px;background:' + teal + ';">' +
+                  '<a href="' + recMapUrl + '" style="display:inline-block;padding:11px 22px;font-family:' + fontBody + ';font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;">View on map →</a>' +
+                '</td></tr></table>' : '') +
+            '</div>' +
+          '</div>' +
+        '</td></tr>';
+    }
+
+    // Weekend weather — two-column card layout
+    if (showWeather) {
+      const dayCell = (label, emoji, temp, desc) =>
+        '<td style="width:50%;padding:4px;">' +
+          '<div style="background:' + pageBg + ';border:1px solid ' + border + ';border-radius:12px;padding:16px;text-align:center;">' +
+            '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;color:' + inkMuted + ';text-transform:uppercase;letter-spacing:0.7px;margin:0 0 8px;">' + label + '</p>' +
+            '<p style="font-size:30px;margin:0 0 6px;line-height:1;">' + emoji + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:20px;font-weight:700;color:' + ink + ';margin:0 0 4px;">' + temp + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + desc + '</p>' +
+          '</div>' +
+        '</td>';
+      bodyRows +=
+        '<tr><td style="padding:28px 32px 0;">' +
+          '<p style="' + eyebrow + '">🌤 This weekend</p>' +
           '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
-            (satLabel ? '<td style="width:50%;padding-right:8px;"><div style="background:' + cream + ';border:1.5px solid ' + border + ';border-radius:10px;padding:16px;text-align:center;">' +
-              '<p style="font-family:\'Courier New\',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.07em;margin:0 0 6px;">' + satLabel + '</p>' +
-              '<p style="font-size:28px;margin:0 0 4px;">' + satEmoji + '</p>' +
-              '<p style="font-family:' + fontStack + ';font-size:18px;font-weight:600;color:' + ink + ';margin:0 0 4px;">' + satTemp + '</p>' +
-              '<p style="font-family:' + fontStack + ';font-size:12px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + satDesc + '</p>' +
-            '</div></td>' : '') +
-            (sunLabel ? '<td style="width:50%;padding-left:8px;"><div style="background:' + cream + ';border:1.5px solid ' + border + ';border-radius:10px;padding:16px;text-align:center;">' +
-              '<p style="font-family:\'Courier New\',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.07em;margin:0 0 6px;">' + sunLabel + '</p>' +
-              '<p style="font-size:28px;margin:0 0 4px;">' + sunEmoji + '</p>' +
-              '<p style="font-family:' + fontStack + ';font-size:18px;font-weight:600;color:' + ink + ';margin:0 0 4px;">' + sunTemp + '</p>' +
-              '<p style="font-family:' + fontStack + ';font-size:12px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + sunDesc + '</p>' +
-            '</div></td>' : '') +
+            (satLabel ? dayCell(satLabel, satEmoji, satTemp, satDesc) : '') +
+            (sunLabel ? dayCell(sunLabel, sunEmoji, sunTemp, sunDesc) : '') +
           '</tr></table>' +
         '</td></tr>';
     }
 
-    // Recently added
+    // Recently added — clean list matching website list-item style
     if (showRecent) {
-      const locItems = recentLocs.map(l =>
-        '<tr><td style="padding:10px 0;border-bottom:1px solid ' + border + ';">' +
-          '<p style="font-family:' + fontStack + ';font-size:14px;font-weight:600;color:' + ink + ';margin:0 0 2px;">' + l.name + '</p>' +
-          '<p style="font-family:\'Courier New\',monospace;font-size:11px;color:#A09A94;margin:0;">' + [l.city, l.cat].filter(Boolean).join(' · ') + '</p>' +
+      const locRows = recentLocs.map((l, i) =>
+        '<tr><td style="padding:12px 0;' + (i < recentLocs.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
+          '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
+            '<td>' +
+              '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:700;color:' + ink + ';margin:0 0 2px;">' + l.name + '</p>' +
+              '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:600;color:' + inkMuted + ';margin:0;letter-spacing:0.3px;">' + [l.city, l.cat].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
+            '</td>' +
+            '<td align="right" style="white-space:nowrap;">' +
+              '<span style="font-family:' + fontBody + ';font-size:11px;font-weight:700;color:' + openGreen + ';background:' + openGreenBg + ';padding:3px 10px;border-radius:4px;">New</span>' +
+            '</td>' +
+          '</tr></table>' +
         '</td></tr>'
       ).join('');
       bodyRows +=
-        '<tr><td style="padding:32px 40px 0;">' +
-          '<p style="font-family:\'Courier New\',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#A09A94;margin:0 0 16px;">🆕 Just added</p>' +
-          '<table width="100%" cellpadding="0" cellspacing="0" border="0">' + locItems + '</table>' +
+        '<tr><td style="padding:28px 32px 0;">' +
+          '<p style="' + eyebrow + '">🆕 Just added</p>' +
+          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:12px;padding:4px 20px;">' +
+            '<table width="100%" cellpadding="0" cellspacing="0" border="0">' + locRows + '</table>' +
+          '</div>' +
         '</td></tr>';
     }
 
-    // General updates
+    // General updates — subtle info card
     if (showUpdates) {
       bodyRows +=
-        '<tr><td style="padding:32px 40px 0;">' +
-          '<p style="font-family:\'Courier New\',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#A09A94;margin:0 0 12px;">📣 Updates</p>' +
-          '<p style="font-family:' + fontStack + ';font-size:14px;color:' + inkSoft + ';margin:0;line-height:1.8;">' + updates.replace(/\n/g, '<br>') + '</p>' +
+        '<tr><td style="padding:28px 32px 0;">' +
+          '<p style="' + eyebrow + '">📣 Updates</p>' +
+          '<div style="background:' + pageBg + ';border:1px solid ' + border + ';border-radius:12px;padding:16px 20px;">' +
+            '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0;line-height:1.7;">' + updates.replace(/\n/g, '<br>') + '</p>' +
+          '</div>' +
         '</td></tr>';
     }
   }
 
+  // ── Footer ───────────────────────────────────────────────────────────────────
+  // Matches website footer style: light gray text, small size
   const footerHtml =
-    '<tr><td style="padding:40px;border-top:2px solid ' + border + ';margin-top:32px;">' +
-      '<p style="font-family:\'Courier New\',monospace;font-size:11px;color:#A09A94;margin:0 0 8px;text-align:center;">GoBebop · Family guide to Amsterdam &amp; the Netherlands</p>' +
-      '<p style="font-family:\'Courier New\',monospace;font-size:11px;color:#A09A94;margin:0;text-align:center;"><a href="https://gobebop.app" style="color:' + accent + ';text-decoration:none;">gobebop.app</a> &nbsp;·&nbsp; <a href="{{unsubscribeUrl}}" style="color:#A09A94;text-decoration:none;">Unsubscribe</a></p>' +
+    '<tr><td style="padding:32px;margin-top:20px;border-top:1px solid ' + border + ';">' +
+      '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:600;color:' + inkMuted + ';margin:0 0 6px;text-align:center;">GoBebop · Family guide to Amsterdam &amp; the Netherlands</p>' +
+      '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;text-align:center;">' +
+        '<a href="https://gobebop.app" style="color:' + teal + ';text-decoration:none;font-weight:600;">gobebop.app</a>' +
+        ' &nbsp;·&nbsp; ' +
+        '<a href="{{unsubscribeUrl}}" style="color:' + inkMuted + ';text-decoration:underline;">Unsubscribe</a>' +
+      '</p>' +
     '</td></tr>';
 
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GoBebop</title>' +
-    (previewText ? '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">' + previewText + '&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>' : '') +
-    '</head><body style="margin:0;padding:0;background:#F7F3ED;">' +
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F7F3ED;">' +
-        '<tr><td align="center" style="padding:32px 16px;">' +
-          '<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">' +
+  return '<!DOCTYPE html>' +
+    '<html lang="en"><head>' +
+    '<meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<meta name="x-apple-disable-message-reformatting">' +
+    '<title>GoBebop</title>' +
+    '<link href="' + gFonts + '" rel="stylesheet">' +
+    (previewText ?
+      '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">' + previewText +
+      '&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>' : '') +
+    '</head>' +
+    '<body style="margin:0;padding:0;background:' + pageBg + ';-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">' +
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + pageBg + ';">' +
+        '<tr><td align="center" style="padding:28px 16px;">' +
+          '<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:' + cardBg + ';border-radius:20px;overflow:hidden;border:1px solid ' + borderStrong + ';box-shadow:0 4px 24px rgba(0,0,0,0.08);">' +
             headerHtml +
             bodyRows +
+            '<tr><td style="padding:28px 32px 0;"></td></tr>' +
             footerHtml +
           '</table>' +
         '</td></tr>' +
