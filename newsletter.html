@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bebop — newsletter</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+```
+html {
+  --cream: #EDE8DF;
+  --paper: #E4DDD3;
+  --ink: #1A1714;
+  --ink-soft: #6B6560;
+  --ink-muted: #A09A94;
+  --accent: #4daabb;
+  --accent-light: #dff0f5;
+  --green: #2D6A4F;
+  --green-light: #D8EDDF;
+  --border: #D4CEC6;
+  --white: #FFFFFF;
+  --shadow: 0 1px 3px rgba(26,23,20,0.10), 0 4px 16px rgba(26,23,20,0.08);
+  --red-light: #FEE2E2;
+  --red: #991B1B;
+}
+
+body {
+  background: #F7F3ED;
+  color: var(--ink);
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* ── Header ── */
+header {
+  background: var(--white);
+  border-bottom: 1px solid #E8E3DC;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+.logo span { color: var(--accent); font-style: italic; }
+.header-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.header-nav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.header-nav a {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+.header-nav a:hover { color: var(--accent); }
+
+/* ── Layout ── */
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 40px 0;
+}
+.page-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 36px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.page-sub {
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-bottom: 40px;
+}
+
+/* ── Tabs ── */
+.tab-toggle {
+  display: flex;
+  gap: 0;
+  margin-bottom: 32px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  width: 100%;
+}
+.tab-btn {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  background: var(--paper);
+  color: var(--ink);
+  border: none;
+  border-right: 2px solid var(--border);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.tab-btn:last-child { border-right: none; }
+.tab-btn:hover:not(.active) { background: var(--border); }
+.tab-btn.active { background: var(--accent); color: white; font-weight: 600; }
+
+/* ── Config ── */
+.config-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+.config-toggle svg { transition: transform 0.2s; }
+.config-toggle.open svg { transform: rotate(180deg); }
+.config-panel {
+  display: none;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow);
+}
+.config-panel.visible { display: block; }
+
+/* ── Form sections ── */
+.form-section {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.section-header {
+  padding: 16px 24px;
+  background: var(--paper);
+  border-bottom: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-body { padding: 24px; }
+
+/* ── Fields ── */
+.fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.fields-grid .full { grid-column: 1 / -1; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.field input, .field select, .field textarea {
+  background: #F0EBE3;
+  border: 1.5px solid #DDD7CF;
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+.field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+.field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6560' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+.text-muted { color: var(--ink-muted); font-size: 12px; margin-top: 4px; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #3a9aaa; transform: translateY(-1px); }
+.btn-primary:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
+.btn-secondary { background: var(--paper); color: var(--ink); border: 1.5px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-save { background: var(--green); color: white; width: 100%; justify-content: center; padding: 14px 20px; font-size: 15px; }
+.btn-save:hover { background: #1E4D38; transform: translateY(-1px); }
+.btn-save:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
+.btn-enrich { background: var(--accent); color: white; font-size: 13px; padding: 8px 16px; }
+.btn-enrich:hover { background: #3a9aaa; }
+.btn-enrich:disabled { background: var(--ink-muted); cursor: not-allowed; }
+.btn-danger { background: var(--red-light); color: var(--red); border: 1.5px solid #FECACA; }
+.btn-danger:hover { background: #FECACA; }
+
+/* ── Status ── */
+.status-bar {
+  display: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  font-family: 'DM Mono', monospace;
+}
+.status-bar.loading { background: var(--paper); color: var(--ink-soft); border: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.status-bar.error { background: var(--red-light); color: var(--red); border: 1.5px solid #FECACA; display: block; }
+.status-bar.success { background: var(--green-light); color: var(--green); border: 1.5px solid #A7D7BB; display: block; }
+.spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Rec card ── */
+.rec-card {
+  background: var(--accent-light);
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.rec-card-body { flex: 1; min-width: 0; }
+.rec-card-name { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.rec-card-city { font-size: 11px; color: var(--ink-muted); font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+.rec-card-headline { font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 4px; }
+.rec-card-body-text { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+.rec-card-badge { background: var(--green-light); color: var(--green); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+
+/* ── Weather card ── */
+.weather-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.weather-day {
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  text-align: center;
+  min-width: 80px;
+  flex: 1;
+}
+.weather-day.selected { background: var(--accent-light); border-color: var(--accent); }
+.weather-day-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 4px; }
+.weather-day-icon { font-size: 22px; margin-bottom: 4px; }
+.weather-day-temp { font-size: 13px; font-weight: 600; color: var(--ink); }
+.weather-day-desc { font-size: 10px; color: var(--ink-soft); margin-top: 2px; text-transform: capitalize; }
+
+/* ── Recent locations list ── */
+.recent-loc-list { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.recent-loc-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.recent-loc-item:hover { border-color: var(--accent); }
+.recent-loc-item.selected { background: var(--green-light); border-color: var(--green); }
+.recent-loc-item input[type=checkbox] { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--green); }
+.recent-loc-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.recent-loc-meta { font-size: 11px; color: var(--ink-muted); font-family: 'DM Mono', monospace; }
+
+/* ── Preview panel ── */
+#preview-panel {
+  display: none;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.preview-frame {
+  width: 100%;
+  border: none;
+  min-height: 500px;
+  display: block;
+  background: white;
+}
+
+/* ── Email HTML preview (rendered inside iframe) ── */
+
+/* ── Badge ── */
+.badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-blue  { background: var(--accent-light); color: var(--accent); }
+
+/* ── Tabs content ── */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Subscriber stats ── */
+.stats-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+.stat-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  flex: 1;
+  min-width: 120px;
+  box-shadow: var(--shadow);
+}
+.stat-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+.stat-value { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 300; color: var(--ink); letter-spacing: -0.02em; }
+
+/* ── Welcome email preview chips ── */
+.chip { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-light); color: var(--accent); font-size: 11px; font-family: 'DM Mono', monospace; padding: 3px 9px; border-radius: 20px; }
+
+@media (max-width: 600px) {
+  .container { padding: 20px 16px 0; }
+  header { padding: 0 16px; }
+  .header-tag, .header-nav { display: none; }
+  .page-title { font-size: 26px; }
+  .fields-grid { grid-template-columns: 1fr !important; }
+  .tab-btn { font-size: 12px; padding: 10px 8px; }
+  .stats-row { gap: 10px; }
+}
+```
+
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="https://gobebop.app/gobebop-logo.png" alt="GoBebop" style="height:32px;" />
+  <div class="header-nav">
+    <a href="admin-tool.html">← Admin tool</a>
+    <div class="header-tag">Newsletter</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Config -->
+
+  <div class="config-toggle" id="config-toggle" onclick="toggleConfig()">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    API Config
+  </div>
+  <div class="config-panel" id="config-panel">
+    <div class="fields-grid" style="grid-template-columns:1fr 1fr 1fr;">
+      <div class="field">
+        <label>Supabase URL</label>
+        <input type="text" id="cfg-supabase-url" placeholder="https://xxx.supabase.co" oninput="saveConfig()" />
+      </div>
+      <div class="field">
+        <label>Supabase Anon Key</label>
+        <input type="password" id="cfg-supabase-key" placeholder="eyJ..." oninput="saveConfig()" />
+      </div>
+      <div class="field">
+        <label>Loops API Key</label>
+        <input type="password" id="cfg-loops-key" placeholder="loops_..." oninput="saveConfig()" />
+      </div>
+      <div class="field">
+        <label>OpenWeather API Key</label>
+        <input type="password" id="cfg-weather-key" placeholder="..." oninput="saveConfig()" />
+      </div>
+      <div class="field">
+        <label>Loops Transactional ID — Welcome</label>
+        <input type="text" id="cfg-loops-welcome-id" placeholder="From Loops dashboard" oninput="saveConfig()" />
+      </div>
+      <div class="field">
+        <label>Loops Audience ID (optional)</label>
+        <input type="text" id="cfg-loops-audience-id" placeholder="Leave blank for default" oninput="saveConfig()" />
+      </div>
+    </div>
+    <p class="text-muted" style="margin-top:14px;">Keys are saved in your browser only. Never shared anywhere.</p>
+  </div>
+
+  <!-- Page title -->
+
+  <div class="page-title">Newsletter</div>
+  <p class="page-sub">Compose and send the weekly GoBebop email, or manage the welcome flow for new subscribers.</p>
+
+  <!-- Tab toggle -->
+
+  <div class="tab-toggle">
+    <button class="tab-btn active" onclick="setTab('weekly')">📬 Weekly newsletter</button>
+    <button class="tab-btn" onclick="setTab('welcome')">👋 Welcome email</button>
+    <button class="tab-btn" onclick="setTab('subscribers')">👥 Subscribers</button>
+  </div>
+
+  <!-- Status bar -->
+
+  <div class="status-bar" id="status-bar"></div>
+
+  <!-- ══ TAB: WEEKLY NEWSLETTER ══════════════════════════════════════════════ -->
+
+  <div class="tab-content active" id="tab-weekly">
+
+```
+<!-- Step 1: Featured rec -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">① Featured recommendation</div>
+    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadActiveRec()">↺ Refresh</button>
+  </div>
+  <div class="section-body">
+    <p class="text-muted" style="margin-bottom:16px;">Pulls the active recommendation from your database. Set one in the admin tool's Recs tab first.</p>
+    <div id="rec-display">
+      <div style="padding:20px;text-align:center;color:var(--ink-muted);font-size:13px;">Click Refresh to load the active recommendation.</div>
+    </div>
+    <!-- Override fields -->
+    <div id="rec-overrides" style="display:none;margin-top:16px;border-top:1.5px solid var(--border);padding-top:16px;">
+      <p class="text-muted" style="margin-bottom:12px;">Optional: override the AI-generated text for this send.</p>
+      <div class="fields-grid">
+        <div class="field full">
+          <label>Headline <span style="color:var(--ink-muted);font-weight:400;">(override)</span></label>
+          <input type="text" id="rec-headline-override" placeholder="Leave blank to use saved headline" />
+        </div>
+        <div class="field full">
+          <label>Body <span style="color:var(--ink-muted);font-weight:400;">(override)</span></label>
+          <textarea id="rec-body-override" placeholder="Leave blank to use saved recommendation text"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2: Weekend weather -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">② Weekend weather & suggestions</div>
+    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadWeather()">↺ Fetch weather</button>
+  </div>
+  <div class="section-body">
+    <p class="text-muted" style="margin-bottom:16px;">Fetches the Amsterdam weekend forecast and lets you write a short weather intro for the email.</p>
+
+    <div id="weather-display">
+      <div style="padding:20px;text-align:center;color:var(--ink-muted);font-size:13px;">Click "Fetch weather" to load the weekend forecast.</div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div class="field">
+        <label>Weekend intro <span style="color:var(--ink-muted);font-weight:400;">(optional — write a short, weather-inspired opener)</span></label>
+        <textarea id="weather-intro" placeholder="e.g. It's looking like a beautiful weekend — perfect for getting outside. Here's what we'd do..." style="min-height:70px;"></textarea>
+      </div>
+      <div style="margin-top:10px;">
+        <button class="btn btn-enrich" onclick="generateWeatherIntro()" id="weather-intro-btn">✦ Generate with AI</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 3: Recent locations -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">③ Recently added places</div>
+    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadRecentLocations()">↺ Load recent</button>
+  </div>
+  <div class="section-body">
+    <p class="text-muted" style="margin-bottom:16px;">Select up to 4 recently published locations to highlight. Click "Load recent" to fetch the latest.</p>
+    <div id="recent-locs-display">
+      <div style="padding:20px;text-align:center;color:var(--ink-muted);font-size:13px;">Click "Load recent" to see recently published locations.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 4: Updates / notes -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">④ General updates <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink-muted);">(optional)</span></div>
+  </div>
+  <div class="section-body">
+    <div class="field">
+      <label>Updates or notes</label>
+      <textarea id="general-updates" placeholder="e.g. We've added filter by province this week. More regions coming soon!" style="min-height:80px;"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- Step 5: Subject line -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">⑤ Subject line & preview text</div>
+  </div>
+  <div class="section-body">
+    <div class="fields-grid">
+      <div class="field full">
+        <label>Subject line <span style="color:#E8541A;">*</span></label>
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <input type="text" id="email-subject" placeholder="e.g. This weekend: a hidden gem in Utrecht 🌿" style="flex:1;" />
+          <button class="btn btn-enrich" onclick="generateSubject()" style="flex-shrink:0;white-space:nowrap;">✦ Generate</button>
+        </div>
+        <p class="text-muted" id="subject-count">0 characters</p>
+      </div>
+      <div class="field full">
+        <label>Preview text <span style="color:var(--ink-muted);font-weight:400;">(shown after subject in inbox)</span></label>
+        <input type="text" id="email-preview-text" placeholder="e.g. Plus 3 new spots and weekend weather..." />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Preview & send -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">⑥ Preview & send</div>
+  </div>
+  <div class="section-body">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+      <button class="btn btn-secondary" onclick="buildPreview()">👁 Preview email</button>
+      <button class="btn btn-enrich" onclick="sendTestEmail()" id="test-send-btn">✉ Send test to me</button>
+      <div class="field" style="flex:1;min-width:200px;">
+        <input type="email" id="test-email-addr" placeholder="your@email.com" style="font-size:13px;" />
+      </div>
+    </div>
+
+    <div id="preview-panel">
+      <div class="section-header" style="background:var(--paper);border-bottom:1.5px solid var(--border);">
+        <div class="section-title">Email preview</div>
+        <button onclick="document.getElementById('preview-panel').style.display='none'" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;">Close ✕</button>
+      </div>
+      <iframe id="preview-frame" class="preview-frame" title="Email preview"></iframe>
+    </div>
+
+    <div style="margin-top:8px;">
+      <button class="btn btn-save" onclick="sendCampaign()" id="send-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 6-12 6V8.5l8-1.5-8-1.5V1z" fill="white"/></svg>
+        Send newsletter to all subscribers
+      </button>
+      <p class="text-muted" style="margin-top:8px;text-align:center;">This will create and send a campaign via Loops immediately. Double-check the preview first.</p>
+    </div>
+  </div>
+</div>
+```
+
+  </div><!-- /tab-weekly -->
+
+  <!-- ══ TAB: WELCOME EMAIL ══════════════════════════════════════════════════ -->
+
+  <div class="tab-content" id="tab-welcome">
+
+```
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">Welcome email setup</div>
+  </div>
+  <div class="section-body">
+    <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:20px;">
+      The welcome email is sent automatically via a <strong>Loops transactional email</strong> whenever a new subscriber signs up.
+      Set up the trigger in Loops, then use this page to manage and preview the template content.
+    </p>
+
+    <div style="background:var(--accent-light);border:1.5px solid var(--accent);border-radius:10px;padding:16px 20px;margin-bottom:24px;">
+      <p style="font-size:13px;color:var(--ink);font-weight:600;margin-bottom:6px;">📋 How to set this up in Loops</p>
+      <ol style="font-size:13px;color:var(--ink-soft);line-height:2;padding-left:20px;">
+        <li>In Loops, go to <strong>Transactional</strong> → <strong>Create transactional email</strong></li>
+        <li>Design your welcome email template (use the preview below as a guide)</li>
+        <li>Copy the <strong>Transactional ID</strong> and paste it into the API Config panel above</li>
+        <li>When someone subscribes on gobebop.app, call the Loops API with their email to trigger the send</li>
+      </ol>
+    </div>
+
+    <!-- Welcome email content editor -->
+    <div class="fields-grid">
+      <div class="field full">
+        <label>Subject line</label>
+        <input type="text" id="welcome-subject" value="Welcome to GoBebop 👋" />
+      </div>
+      <div class="field full">
+        <label>Opening line <span style="color:var(--ink-muted);font-weight:400;">(personalised — use {{firstName}} for their name)</span></label>
+        <input type="text" id="welcome-opener" value="Hi {{firstName}}, welcome to GoBebop!" />
+      </div>
+      <div class="field full">
+        <label>Main message</label>
+        <textarea id="welcome-body" style="min-height:120px;">Every week we share a hand-picked recommendation for a family-friendly place in Amsterdam and the Netherlands — playgrounds, museums, farms, cafes, and everything in between.
+```
+
+We do the exploring so you don’t have to. Expect one great pick every Friday, plus weather-based tips for the weekend.</textarea>
+</div>
+<div class="field full">
+<label>Call to action text</label>
+<input type="text" id="welcome-cta-text" value="Explore the map" />
+</div>
+<div class="field full">
+<label>Call to action URL</label>
+<input type="text" id="welcome-cta-url" value="https://gobebop.app" />
+</div>
+<div class="field full">
+<label>Closing line</label>
+<input type="text" id="welcome-closing" value="See you Friday — Alison, GoBebop" />
+</div>
+</div>
+
+```
+    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="buildWelcomePreview()">👁 Preview welcome email</button>
+      <button class="btn btn-enrich" onclick="sendWelcomeTest()" id="welcome-test-btn">✉ Send test</button>
+      <div class="field" style="flex:1;min-width:200px;">
+        <input type="email" id="welcome-test-addr" placeholder="your@email.com" style="font-size:13px;" />
+      </div>
+    </div>
+
+    <div id="welcome-preview-panel" style="display:none;margin-top:16px;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;">
+      <div style="padding:12px 20px;background:var(--paper);border-bottom:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.07em;">Welcome email preview</span>
+        <button onclick="document.getElementById('welcome-preview-panel').style.display='none'" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;">Close ✕</button>
+      </div>
+      <iframe id="welcome-preview-frame" style="width:100%;border:none;min-height:500px;display:block;" title="Welcome email preview"></iframe>
+    </div>
+
+    <div id="welcome-status" style="margin-top:12px;font-size:13px;font-family:'DM Mono',monospace;"></div>
+  </div>
+</div>
+
+<!-- Manual trigger -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">Manual welcome trigger</div>
+  </div>
+  <div class="section-body">
+    <p class="text-muted" style="margin-bottom:16px;">Send the welcome email to a specific address — useful for testing or re-sending to someone who missed it.</p>
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+      <div class="field" style="flex:1;min-width:200px;">
+        <label>Email address</label>
+        <input type="email" id="manual-welcome-email" placeholder="subscriber@example.com" />
+      </div>
+      <div class="field" style="min-width:140px;">
+        <label>First name (optional)</label>
+        <input type="text" id="manual-welcome-name" placeholder="e.g. Sophie" />
+      </div>
+      <button class="btn btn-primary" onclick="sendManualWelcome()" style="flex-shrink:0;margin-bottom:0px;">Send welcome</button>
+    </div>
+    <div id="manual-welcome-status" style="margin-top:10px;font-size:13px;font-family:'DM Mono',monospace;"></div>
+  </div>
+</div>
+```
+
+  </div><!-- /tab-welcome -->
+
+  <!-- ══ TAB: SUBSCRIBERS ════════════════════════════════════════════════════ -->
+
+  <div class="tab-content" id="tab-subscribers">
+
+```
+<div class="stats-row" id="sub-stats">
+  <div class="stat-card">
+    <div class="stat-label">Total subscribers</div>
+    <div class="stat-value" id="stat-total">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Subscribed</div>
+    <div class="stat-value" id="stat-subscribed">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Unsubscribed</div>
+    <div class="stat-value" id="stat-unsub">—</div>
+  </div>
+</div>
+
+<div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
+  <button class="btn btn-primary" onclick="loadSubscribers()">↺ Load subscribers</button>
+  <div class="field" style="flex:1;min-width:200px;">
+    <input type="text" id="sub-search" placeholder="Search by email…" oninput="filterSubscribers(this.value)" style="font-size:13px;" />
+  </div>
+</div>
+
+<!-- Add subscriber -->
+<div class="form-section" style="margin-bottom:20px;">
+  <div class="section-header">
+    <div class="section-title">Add a subscriber</div>
+  </div>
+  <div class="section-body">
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+      <div class="field" style="flex:2;min-width:200px;">
+        <label>Email</label>
+        <input type="email" id="add-sub-email" placeholder="new@subscriber.com" />
+      </div>
+      <div class="field" style="flex:1;min-width:140px;">
+        <label>First name</label>
+        <input type="text" id="add-sub-firstname" placeholder="Optional" />
+      </div>
+      <div class="field" style="flex:1;min-width:140px;">
+        <label>Last name</label>
+        <input type="text" id="add-sub-lastname" placeholder="Optional" />
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="btn btn-primary" onclick="addSubscriber(false)">Add</button>
+        <button class="btn btn-enrich" onclick="addSubscriber(true)" title="Add and send welcome email">Add + Welcome</button>
+      </div>
+    </div>
+    <div id="add-sub-status" style="margin-top:10px;font-size:13px;font-family:'DM Mono',monospace;"></div>
+  </div>
+</div>
+
+<!-- Subscriber list -->
+<div class="form-section">
+  <div class="section-header">
+    <div class="section-title">Subscriber list</div>
+  </div>
+  <div class="section-body" style="padding:0;">
+    <div id="sub-list">
+      <div style="padding:24px;text-align:center;color:var(--ink-muted);font-size:13px;">Click "Load subscribers" above to fetch your list from Loops.</div>
+    </div>
+  </div>
+</div>
+```
+
+  </div><!-- /tab-subscribers -->
+
+</div><!-- /container -->
+
+<script>
+// ─── Config ──────────────────────────────────────────────────────────────────
+
+function saveConfig() {
+  localStorage.setItem('bebop_supabase_url',      document.getElementById('cfg-supabase-url').value);
+  localStorage.setItem('bebop_supabase_key',      document.getElementById('cfg-supabase-key').value);
+  localStorage.setItem('bebop_loops_key',         document.getElementById('cfg-loops-key').value);
+  localStorage.setItem('bebop_weather_key',       document.getElementById('cfg-weather-key').value);
+  localStorage.setItem('bebop_loops_welcome_id',  document.getElementById('cfg-loops-welcome-id').value);
+  localStorage.setItem('bebop_loops_audience_id', document.getElementById('cfg-loops-audience-id').value);
+}
+
+function loadConfig() {
+  document.getElementById('cfg-supabase-url').value      = localStorage.getItem('bebop_supabase_url') || '';
+  document.getElementById('cfg-supabase-key').value      = localStorage.getItem('bebop_supabase_key') || '';
+  document.getElementById('cfg-loops-key').value         = localStorage.getItem('bebop_loops_key') || '';
+  document.getElementById('cfg-weather-key').value       = localStorage.getItem('bebop_weather_key') || '';
+  document.getElementById('cfg-loops-welcome-id').value  = localStorage.getItem('bebop_loops_welcome_id') || '';
+  document.getElementById('cfg-loops-audience-id').value = localStorage.getItem('bebop_loops_audience_id') || '';
+}
+
+function getConfig() {
+  return {
+    supabaseUrl:     localStorage.getItem('bebop_supabase_url') || '',
+    supabaseKey:     localStorage.getItem('bebop_supabase_key') || '',
+    loopsKey:        localStorage.getItem('bebop_loops_key') || '',
+    weatherKey:      localStorage.getItem('bebop_weather_key') || '',
+    loopsWelcomeId:  localStorage.getItem('bebop_loops_welcome_id') || '',
+    loopsAudienceId: localStorage.getItem('bebop_loops_audience_id') || '',
+  };
+}
+
+function toggleConfig() {
+  document.getElementById('config-panel').classList.toggle('visible');
+  document.getElementById('config-toggle').classList.toggle('open');
+}
+
+// ─── Tab switching ────────────────────────────────────────────────────────────
+
+function setTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const idx = { weekly: 0, welcome: 1, subscribers: 2 }[tab];
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  if (tab === 'subscribers') loadSubscribers();
+}
+
+// ─── Status helpers ───────────────────────────────────────────────────────────
+
+function setStatus(type, msg) {
+  const el = document.getElementById('status-bar');
+  el.className = 'status-bar ' + type;
+  if (type === 'loading') {
+    el.innerHTML = '<div class="spinner"></div><span>' + msg + '</span>';
+  } else {
+    el.textContent = msg;
+  }
+  el.style.display = type === 'loading' ? 'flex' : 'block';
+}
+
+function clearStatus() {
+  const el = document.getElementById('status-bar');
+  el.className = 'status-bar';
+  el.style.display = 'none';
+}
+
+// ─── State ────────────────────────────────────────────────────────────────────
+
+let activeRec = null;          // loaded recommendation object
+let weatherData = null;        // loaded forecast
+let recentLocations = [];      // all recent locations loaded
+let selectedRecentIds = new Set(); // selected location IDs
+let allSubscribers = [];       // cached from Loops
+
+// ─── Step 1: Load active recommendation ──────────────────────────────────────
+
+async function loadActiveRec() {
+  const { supabaseUrl, supabaseKey } = getConfig();
+  if (!supabaseUrl || !supabaseKey) {
+    document.getElementById('config-panel').classList.add('visible');
+    document.getElementById('config-toggle').classList.add('open');
+    return alert('Please configure Supabase in the config panel.');
+  }
+
+  const el = document.getElementById('rec-display');
+  el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-muted);font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;"><div class="spinner"></div> Loading…</div>';
+
+  try {
+    const res = await fetch(
+      supabaseUrl + '/rest/v1/recommendations?active=eq.true&select=id,headline,body,publish_date,locations(id,name,city,description,primary_category,secondary_category_lead,google_maps_url)&order=publish_date.desc&limit=1',
+      { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }
+    );
+    const rows = await res.json();
+
+    if (!Array.isArray(rows) || !rows.length) {
+      el.innerHTML = '<div style="padding:20px;background:var(--red-light);border-radius:8px;font-size:13px;color:var(--red);">No active recommendation found. Activate one in the admin tool\'s Recs tab first.</div>';
+      activeRec = null;
+      document.getElementById('rec-overrides').style.display = 'none';
+      return;
+    }
+
+    activeRec = rows[0];
+    const loc = activeRec.locations || {};
+
+    el.innerHTML =
+      '<div class="rec-card">' +
+        '<div class="rec-card-body">' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+            '<div class="rec-card-name">' + (loc.name || '—') + '</div>' +
+            '<span class="badge badge-green">● Active rec</span>' +
+          '</div>' +
+          '<div class="rec-card-city">' + (loc.city || '') + (loc.secondary_category_lead ? ' · ' + loc.secondary_category_lead : '') + '</div>' +
+          (activeRec.headline ? '<div class="rec-card-headline">"' + activeRec.headline + '"</div>' : '') +
+          '<div class="rec-card-body-text">' + (activeRec.body || '') + '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.getElementById('rec-overrides').style.display = 'block';
+
+  } catch(e) {
+    el.innerHTML = '<div style="padding:20px;background:var(--red-light);border-radius:8px;font-size:13px;color:var(--red);">Error: ' + e.message + '</div>';
+  }
+}
+
+// ─── Step 2: Load weather ─────────────────────────────────────────────────────
+
+function getWeatherEmoji(id) {
+  if (id >= 200 && id < 300) return '⛈';
+  if (id >= 300 && id < 400) return '🌦';
+  if (id >= 500 && id < 600) return '🌧';
+  if (id >= 600 && id < 700) return '❄️';
+  if (id >= 700 && id < 800) return '🌫';
+  if (id === 800) return '☀️';
+  if (id === 801 || id === 802) return '⛅';
+  return '🌥';
+}
+
+async function loadWeather() {
+  const { weatherKey } = getConfig();
+  if (!weatherKey) {
+    document.getElementById('config-panel').classList.add('visible');
+    document.getElementById('config-toggle').classList.add('open');
+    return alert('Please add your OpenWeather API key in the config panel.');
+  }
+
+  const el = document.getElementById('weather-display');
+  el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-muted);"><div class="spinner"></div> Fetching Amsterdam forecast…</div>';
+
+  try {
+    // Amsterdam coords
+    const lat = 52.3676, lon = 4.9041;
+    const url = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + weatherKey + '&units=metric&cnt=16';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('OpenWeather API error: HTTP ' + res.status);
+    const data = await res.json();
+
+    // Find Saturday and Sunday forecasts (noon readings preferred)
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Sun, 6=Sat
+    const daysUntilSat = (6 - dayOfWeek + 7) % 7 || 7;
+    const satDate = new Date(now); satDate.setDate(now.getDate() + daysUntilSat);
+    const sunDate = new Date(satDate); sunDate.setDate(satDate.getDate() + 1);
+
+    const satStr = satDate.toISOString().slice(0, 10);
+    const sunStr = sunDate.toISOString().slice(0, 10);
+
+    // Get readings for each weekend day — prefer noon
+    const getDay = (dateStr) => {
+      const readings = data.list.filter(r => r.dt_txt.startsWith(dateStr));
+      return readings.find(r => r.dt_txt.includes('12:00')) || readings[0] || null;
+    };
+
+    const sat = getDay(satStr);
+    const sun = getDay(sunStr);
+
+    weatherData = { sat, sun, satStr, sunStr };
+
+    const renderDay = (reading, label) => {
+      if (!reading) return '<div class="weather-day"><div class="weather-day-label">' + label + '</div><div class="weather-day-icon">—</div><div class="weather-day-temp">No data</div></div>';
+      const temp = Math.round(reading.main.temp);
+      const emoji = getWeatherEmoji(reading.weather[0].id);
+      const desc = reading.weather[0].description;
+      return '<div class="weather-day"><div class="weather-day-label">' + label + '</div><div class="weather-day-icon">' + emoji + '</div><div class="weather-day-temp">' + temp + '°C</div><div class="weather-day-desc">' + desc + '</div></div>';
+    };
+
+    const satLabel = satDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+    const sunLabel = sunDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+
+    el.innerHTML = '<div class="weather-grid">' + renderDay(sat, satLabel) + renderDay(sun, sunLabel) + '</div>';
+
+  } catch(e) {
+    el.innerHTML = '<div style="padding:12px;background:var(--red-light);border-radius:8px;font-size:13px;color:var(--red);">Error: ' + e.message + '</div>';
+  }
+}
+
+// ─── Generate weather intro via Claude ───────────────────────────────────────
+
+async function generateWeatherIntro() {
+  const anthropicKey = localStorage.getItem('bebop_anthropic_key') || '';
+  if (!anthropicKey) return alert('Add your Anthropic API key in the admin tool config panel first — it shares the same localStorage.');
+
+  if (!weatherData) return alert('Fetch the weather forecast first.');
+
+  const btn = document.getElementById('weather-intro-btn');
+  btn.disabled = true;
+  btn.textContent = '✦ Generating…';
+
+  const satDesc = weatherData.sat ? Math.round(weatherData.sat.main.temp) + '°C, ' + weatherData.sat.weather[0].description : 'unknown';
+  const sunDesc = weatherData.sun ? Math.round(weatherData.sun.main.temp) + '°C, ' + weatherData.sun.weather[0].description : 'unknown';
+  const recName = activeRec?.locations?.name || '';
+  const recCity = activeRec?.locations?.city || '';
+
+  const prompt = 'Write a short, warm 2-sentence intro for a weekly family newsletter about Amsterdam and the Netherlands. ' +
+    'Weekend weather: Saturday ' + satDesc + ', Sunday ' + sunDesc + '. ' +
+    (recName ? 'The featured place this week is ' + recName + (recCity ? ' in ' + recCity : '') + '. ' : '') +
+    'Write from the perspective of a friendly local parent. Plain text only, no markdown, no HTML. ' +
+    'Return only the intro text, nothing else.';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 200,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text?.trim();
+    if (text) document.getElementById('weather-intro').value = text;
+  } catch(e) {
+    alert('Generation failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ Generate with AI';
+  }
+}
+
+// ─── Step 3: Load recent locations ────────────────────────────────────────────
+
+async function loadRecentLocations() {
+  const { supabaseUrl, supabaseKey } = getConfig();
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+
+  const el = document.getElementById('recent-locs-display');
+  el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-muted);"><div class="spinner"></div> Loading…</div>';
+
+  try {
+    const res = await fetch(
+      supabaseUrl + '/rest/v1/locations?status=eq.published&select=id,name,city,secondary_category_lead,created_at&order=created_at.desc&limit=12',
+      { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }
+    );
+    const rows = await res.json();
+
+    if (!Array.isArray(rows) || !rows.length) {
+      el.innerHTML = '<div style="font-size:13px;color:var(--ink-muted);">No recently published locations found.</div>';
+      return;
+    }
+
+    recentLocations = rows;
+    renderRecentLocations();
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--red);">Error: ' + e.message + '</div>';
+  }
+}
+
+function renderRecentLocations() {
+  const el = document.getElementById('recent-locs-display');
+  el.innerHTML = '<p class="text-muted" style="margin-bottom:10px;">Select up to 4 to highlight in the newsletter:</p>' +
+    '<div class="recent-loc-list">' +
+    recentLocations.map(r => {
+      const dateStr = new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      const isSelected = selectedRecentIds.has(r.id);
+      return '<div class="recent-loc-item ' + (isSelected ? 'selected' : '') + '" onclick="toggleRecentLoc(\'' + r.id + '\')" id="rloc-' + r.id + '">' +
+        '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onclick="event.stopPropagation();toggleRecentLoc(\'' + r.id + '\')" />' +
+        '<div style="flex:1;">' +
+          '<div class="recent-loc-name">' + r.name + '</div>' +
+          '<div class="recent-loc-meta">' + (r.city || '—') + (r.secondary_category_lead ? ' · ' + r.secondary_category_lead : '') + ' · Added ' + dateStr + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('') +
+    '</div>';
+}
+
+function toggleRecentLoc(id) {
+  if (selectedRecentIds.has(id)) {
+    selectedRecentIds.delete(id);
+  } else {
+    if (selectedRecentIds.size >= 4) {
+      alert('Select up to 4 locations.');
+      return;
+    }
+    selectedRecentIds.add(id);
+  }
+  renderRecentLocations();
+}
+
+// ─── Step 5: Subject line helpers ────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  const subjectInput = document.getElementById('email-subject');
+  if (subjectInput) {
+    subjectInput.addEventListener('input', () => {
+      document.getElementById('subject-count').textContent = subjectInput.value.length + ' characters';
+    });
+  }
+});
+
+async function generateSubject() {
+  const anthropicKey = localStorage.getItem('bebop_anthropic_key') || '';
+  if (!anthropicKey) return alert('Add your Anthropic API key in the admin tool config panel first.');
+
+  const recName = activeRec?.locations?.name || '';
+  const recCity = activeRec?.locations?.city || '';
+  const headline = document.getElementById('rec-headline-override').value || activeRec?.headline || '';
+  const weatherIntro = document.getElementById('weather-intro').value || '';
+
+  const prompt = 'Write a short, punchy email subject line for a weekly family newsletter about Amsterdam / the Netherlands. ' +
+    (recName ? 'Featured place this week: ' + recName + (recCity ? ' in ' + recCity : '') + '. ' : '') +
+    (headline ? 'Headline: ' + headline + '. ' : '') +
+    (weatherIntro ? 'Weather context: ' + weatherIntro.slice(0, 100) + '. ' : '') +
+    'Max 55 characters. Warm, specific, not clickbait. May include one relevant emoji. ' +
+    'Return only the subject line, nothing else.';
+
+  const btn = document.querySelector('[onclick="generateSubject()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '✦ …'; }
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 80,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text?.trim().replace(/^["']|["']$/g, '');
+    if (text) {
+      document.getElementById('email-subject').value = text;
+      document.getElementById('subject-count').textContent = text.length + ' characters';
+    }
+  } catch(e) {
+    alert('Failed: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✦ Generate'; }
+  }
+}
+
+// ─── Email HTML builder ───────────────────────────────────────────────────────
+
+function buildEmailHtml(opts) {
+  const {
+    previewText = '',
+    recName = '', recCity = '', recCat = '', recHeadline = '', recBody = '', recMapUrl = '',
+    weatherIntro = '',
+    satLabel = '', satEmoji = '', satTemp = '', satDesc = '',
+    sunLabel = '', sunEmoji = '', sunTemp = '', sunDesc = '',
+    recentLocs = [],    // [{name, city, cat}]
+    updates = '',
+    isWelcome = false,
+    welcomeOpener = '', welcomeBody = '', welcomeCtaText = '', welcomeCtaUrl = '', welcomeClosing = '',
+  } = opts;
+
+  const showWeather = (satLabel || sunLabel) && (weatherIntro || satTemp);
+  const showRecent  = recentLocs.length > 0;
+  const showUpdates = updates && updates.trim();
+
+  // Shared styles
+  const fontStack = "'DM Sans', 'Helvetica Neue', Arial, sans-serif";
+  const accent = '#4daabb';
+  const ink = '#1A1714';
+  const inkSoft = '#6B6560';
+  const cream = '#F7F3ED';
+  const border = '#E4DDD3';
+  const green = '#2D6A4F';
+
+  const headerHtml =
+    '<tr><td style="padding:0;background:#ffffff;">' +
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0">' +
+        '<tr><td style="padding:24px 40px;border-bottom:2px solid ' + border + ';display:flex;align-items:center;justify-content:space-between;">' +
+          '<span style="font-family:Georgia,serif;font-size:24px;font-weight:300;letter-spacing:-0.02em;color:' + ink + ';">go<span style="color:' + accent + ';font-style:italic;">bebop</span></span>' +
+          '<span style="font-family:\'Courier New\',monospace;font-size:11px;color:#A09A94;letter-spacing:0.06em;text-transform:uppercase;">Family guide · Netherlands</span>' +
+        '</td></tr>' +
+      '</table>' +
+    '</td></tr>';
+
+  let bodyRows = '';
+
+  if (isWelcome) {
+    bodyRows +=
+      '<tr><td style="padding:40px 40px 20px;">' +
+        '<p style="font-family:' + fontStack + ';font-size:16px;color:' + ink + ';margin:0 0 16px;line-height:1.6;">' + (welcomeOpener || 'Welcome to GoBebop!') + '</p>' +
+        '<p style="font-family:' + fontStack + ';font-size:15px;color:' + inkSoft + ';margin:0 0 24px;line-height:1.8;">' + (welcomeBody || '').replace(/\n/g, '<br>') + '</p>' +
+        '<a href="' + (welcomeCtaUrl || 'https://gobebop.app') + '" style="display:inline-block;background:' + accent + ';color:white;font-family:' + fontStack + ';font-size:14px;font-weight:600;padding:14px 28px;border-radius:8px;text-decoration:none;">' + (welcomeCtaText || 'Explore the map') + '</a>' +
+        '<p style="font-family:' + fontStack + ';font-size:14px;color:' + inkSoft + ';margin:32px 0 0;line-height:1.6;">' + (welcomeClosing || '') + '</p>' +
+      '</td></tr>';
+  } else {
+    // Weather intro
+    if (weatherIntro) {
+      bodyRows +=
+        '<tr><td style="padding:32px 40px 0;">' +
+          '<p style="font-family:' + fontStack + ';font-size:15px;color:' + inkSoft + ';margin:0;line-height:1.8;">' + weatherIntro + '</p>' +
+        '</td></tr>';
+    }
+
+    // Featured rec
+    if (recName) {
+      bodyRows +=
+        '<tr><td style="padding:32px 40px 0;">' +
+          '<p style="font-family:\'Courier New\',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#A09A94;margin:0 0 16px;">✦ This week\'s pick</p>' +
+          '<div style="background:' + cream + ';border-left:4px solid ' + accent + ';border-radius:0 10px 10px 0;padding:20px 24px;">' +
+            '<p style="font-family:Georgia,serif;font-size:22px;font-weight:300;color:' + ink + ';margin:0 0 4px;letter-spacing:-0.02em;">' + recName + '</p>' +
+            '<p style="font-family:\'Courier New\',monospace;font-size:11px;color:#A09A94;margin:0 0 12px;">' + [recCity, recCat].filter(Boolean).join(' · ') + '</p>' +
+            (recHeadline ? '<p style="font-family:' + fontStack + ';font-size:14px;color:' + accent + ';font-weight:600;margin:0 0 10px;">"' + recHeadline + '"</p>' : '') +
+            '<p style="font-family:' + fontStack + ';font-size:14px;color:' + inkSoft + ';margin:0 0 20px;line-height:1.8;">' + (recBody || '') + '</p>' +
+            (recMapUrl ? '<a href="' + recMapUrl + '" style="font-family:' + fontStack + ';font-size:13px;color:' + accent + ';font-weight:600;text-decoration:none;">View on map →</a>' : '') +
+          '</div>' +
+        '</td></tr>';
+    }
+
+    // Weekend weather
+    if (showWeather) {
+      bodyRows +=
+        '<tr><td style="padding:32px 40px 0;">' +
+          '<p style="font-family:\'Courier New\',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#A09A94;margin:0 0 16px;">🌤 This weekend</p>' +
+          '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
+            (satLabel ? '<td style="width:50%;padding-right:8px;"><div style="background:' + cream + ';border:1.5px solid ' + border + ';border-radius:10px;padding:16px;text-align:center;">' +
+              '<p style="font-family:\'Courier New\',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.07em;margin:0 0 6px;">' + satLabel + '</p>' +
+              '<p style="font-size:28px;margin:0 0 4px;">' + satEmoji + '</p>' +
+              '<p style="font-family:' + fontStack + ';font-size:18px;font-weight:600;color:' + ink + ';margin:0 0 4px;">' + satTemp + '</p>' +
+              '<p style="font-family:' + fontStack + ';font-size:12px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + satDesc + '</p>' +
+            '</div></td>' : '') +
+            (sunLabel ? '<td style="width:50%;padding-left:8px;"><div style="background:' + cream + ';border:1.5px solid ' + border + ';border-radius:10px;padding:16px;text-align:center;">' +
+              '<p style="font-family:\'Courier New\',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.07em;margin:0 0 6px;">' + sunLabel + '</p>' +
+              '<p style="font-size:28px;margin:0 0 4px;">' + sunEmoji + '</p>' +
+              '<p style="font-family:' + fontStack + ';font-size:18px;font-weight:600;color:' + ink + ';margin:0 0 4px;">' + sunTemp + '</p>' +
+              '<p style="font-family:' + fontStack + ';font-size:12px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + sunDesc + '</p>' +
+            '</div></td>' : '') +
+          '</tr></table>' +
+        '</td></tr>';
+    }
+
+    // Recently added
+    if (showRecent) {
+      const locItems = recentLocs.map(l =>
+        '<tr><td style="padding:10px 0;border-bottom:1px solid ' + border + ';">' +
+          '<p style="font-family:' + fontStack + ';font-size:14px;font-weight:600;color:' + ink + ';margin:0 0 2px;">' + l.name + '</p>' +
+          '<p style="font-family:\'Courier New\',monospace;font-size:11px;color:#A09A94;margin:0;">' + [l.city, l.cat].filter(Boolean).join(' · ') + '</p>' +
+        '</td></tr>'
+      ).join('');
+      bodyRows +=
+        '<tr><td style="padding:32px 40px 0;">' +
+          '<p style="font-family:\'Courier New\',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#A09A94;margin:0 0 16px;">🆕 Just added</p>' +
+          '<table width="100%" cellpadding="0" cellspacing="0" border="0">' + locItems + '</table>' +
+        '</td></tr>';
+    }
+
+    // General updates
+    if (showUpdates) {
+      bodyRows +=
+        '<tr><td style="padding:32px 40px 0;">' +
+          '<p style="font-family:\'Courier New\',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#A09A94;margin:0 0 12px;">📣 Updates</p>' +
+          '<p style="font-family:' + fontStack + ';font-size:14px;color:' + inkSoft + ';margin:0;line-height:1.8;">' + updates.replace(/\n/g, '<br>') + '</p>' +
+        '</td></tr>';
+    }
+  }
+
+  const footerHtml =
+    '<tr><td style="padding:40px;border-top:2px solid ' + border + ';margin-top:32px;">' +
+      '<p style="font-family:\'Courier New\',monospace;font-size:11px;color:#A09A94;margin:0 0 8px;text-align:center;">GoBebop · Family guide to Amsterdam &amp; the Netherlands</p>' +
+      '<p style="font-family:\'Courier New\',monospace;font-size:11px;color:#A09A94;margin:0;text-align:center;"><a href="https://gobebop.app" style="color:' + accent + ';text-decoration:none;">gobebop.app</a> &nbsp;·&nbsp; <a href="{{unsubscribeUrl}}" style="color:#A09A94;text-decoration:none;">Unsubscribe</a></p>' +
+    '</td></tr>';
+
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GoBebop</title>' +
+    (previewText ? '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">' + previewText + '&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>' : '') +
+    '</head><body style="margin:0;padding:0;background:#F7F3ED;">' +
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F7F3ED;">' +
+        '<tr><td align="center" style="padding:32px 16px;">' +
+          '<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">' +
+            headerHtml +
+            bodyRows +
+            footerHtml +
+          '</table>' +
+        '</td></tr>' +
+      '</table>' +
+    '</body></html>';
+}
+
+function getEmailOpts() {
+  const loc = activeRec?.locations || {};
+  const satR = weatherData?.sat;
+  const sunR = weatherData?.sun;
+
+  const selectedLocs = recentLocations.filter(r => selectedRecentIds.has(r.id));
+
+  return {
+    previewText:   document.getElementById('email-preview-text').value,
+    recName:       loc.name || '',
+    recCity:       loc.city || '',
+    recCat:        loc.secondary_category_lead || '',
+    recHeadline:   document.getElementById('rec-headline-override').value || activeRec?.headline || '',
+    recBody:       document.getElementById('rec-body-override').value || activeRec?.body || '',
+    recMapUrl:     loc.google_maps_url || 'https://gobebop.app',
+    weatherIntro:  document.getElementById('weather-intro').value,
+    satLabel:      weatherData ? weatherData.satStr : '',
+    satEmoji:      satR ? getWeatherEmoji(satR.weather[0].id) : '',
+    satTemp:       satR ? Math.round(satR.main.temp) + '°C' : '',
+    satDesc:       satR ? satR.weather[0].description : '',
+    sunLabel:      weatherData ? weatherData.sunStr : '',
+    sunEmoji:      sunR ? getWeatherEmoji(sunR.weather[0].id) : '',
+    sunTemp:       sunR ? Math.round(sunR.main.temp) + '°C' : '',
+    sunDesc:       sunR ? sunR.weather[0].description : '',
+    recentLocs:    selectedLocs.map(r => ({ name: r.name, city: r.city, cat: r.secondary_category_lead || '' })),
+    updates:       document.getElementById('general-updates').value,
+  };
+}
+
+// ─── Preview ─────────────────────────────────────────────────────────────────
+
+function buildPreview() {
+  const html = buildEmailHtml(getEmailOpts());
+  const panel = document.getElementById('preview-panel');
+  panel.style.display = 'block';
+  const frame = document.getElementById('preview-frame');
+  frame.srcdoc = html;
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function buildWelcomePreview() {
+  const html = buildEmailHtml({
+    isWelcome: true,
+    welcomeOpener:  document.getElementById('welcome-opener').value,
+    welcomeBody:    document.getElementById('welcome-body').value,
+    welcomeCtaText: document.getElementById('welcome-cta-text').value,
+    welcomeCtaUrl:  document.getElementById('welcome-cta-url').value,
+    welcomeClosing: document.getElementById('welcome-closing').value,
+  });
+  const panel = document.getElementById('welcome-preview-panel');
+  panel.style.display = 'block';
+  document.getElementById('welcome-preview-frame').srcdoc = html;
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── Send test email ──────────────────────────────────────────────────────────
+
+async function sendTestEmail() {
+  const { loopsKey } = getConfig();
+  if (!loopsKey) return alert('Add your Loops API key in the config panel.');
+  const toEmail = document.getElementById('test-email-addr').value.trim();
+  if (!toEmail) return alert('Enter a test email address.');
+
+  const subject = document.getElementById('email-subject').value.trim() || '[TEST] GoBebop Newsletter';
+  const html = buildEmailHtml(getEmailOpts());
+
+  const btn = document.getElementById('test-send-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    await sendLoopsTransactional(loopsKey, toEmail, subject, html);
+    setStatus('success', '✅ Test email sent to ' + toEmail);
+  } catch(e) {
+    setStatus('error', '❌ Failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✉ Send test to me';
+  }
+}
+
+async function sendWelcomeTest() {
+  const { loopsKey } = getConfig();
+  if (!loopsKey) return alert('Add your Loops API key in the config panel.');
+  const toEmail = document.getElementById('welcome-test-addr').value.trim();
+  if (!toEmail) return alert('Enter a test email address.');
+
+  const subject = document.getElementById('welcome-subject').value || 'Welcome to GoBebop 👋';
+  const html = buildEmailHtml({
+    isWelcome: true,
+    welcomeOpener:  document.getElementById('welcome-opener').value,
+    welcomeBody:    document.getElementById('welcome-body').value,
+    welcomeCtaText: document.getElementById('welcome-cta-text').value,
+    welcomeCtaUrl:  document.getElementById('welcome-cta-url').value,
+    welcomeClosing: document.getElementById('welcome-closing').value,
+  });
+
+  const btn = document.getElementById('welcome-test-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    await sendLoopsTransactional(loopsKey, toEmail, subject, html);
+    document.getElementById('welcome-status').textContent = '✓ Test sent to ' + toEmail;
+    document.getElementById('welcome-status').style.color = 'var(--green)';
+  } catch(e) {
+    document.getElementById('welcome-status').textContent = '✗ Failed: ' + e.message;
+    document.getElementById('welcome-status').style.color = 'var(--red)';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✉ Send test';
+  }
+}
+
+// ─── Loops API helpers ────────────────────────────────────────────────────────
+
+async function sendLoopsTransactional(apiKey, toEmail, subject, htmlBody, variables) {
+  const { loopsWelcomeId } = getConfig();
+  // Use transactional endpoint with HTML content
+  const payload = {
+    transactionalId: loopsWelcomeId || 'custom',
+    email: toEmail,
+    addToAudience: false,
+    dataVariables: variables || {},
+  };
+
+  // For test sends and welcome emails, we use the Loops transactional API.
+  // Since we're building the HTML ourselves, we send it as a custom email.
+  const res = await fetch('https://app.loops.so/api/v1/transactional', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Loops API error: HTTP ' + res.status);
+  }
+  return res.json();
+}
+
+async function sendCampaign() {
+  const { loopsKey } = getConfig();
+  if (!loopsKey) return alert('Add your Loops API key in the config panel.');
+
+  const subject = document.getElementById('email-subject').value.trim();
+  if (!subject) return alert('Please add a subject line before sending.');
+  if (!activeRec) return alert('Please load an active recommendation first (Step 1).');
+
+  if (!confirm('Send this newsletter to ALL subscribers now? This cannot be undone.')) return;
+
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  setStatus('loading', 'Creating and sending campaign via Loops…');
+
+  try {
+    const html = buildEmailHtml(getEmailOpts());
+    const { loopsAudienceId } = getConfig();
+
+    // Create campaign via Loops API
+    const payload = {
+      name: 'GoBebop Newsletter — ' + new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+      subject,
+      previewText: document.getElementById('email-preview-text').value || '',
+      html,
+      from: { email: 'hello@gobebop.app', name: 'GoBebop' },
+    };
+    if (loopsAudienceId) payload.audienceId = loopsAudienceId;
+
+    const res = await fetch('https://app.loops.so/api/v1/campaigns/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + loopsKey,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Loops API error: HTTP ' + res.status);
+    }
+
+    setStatus('success', '✅ Campaign sent successfully! Check your Loops dashboard for delivery stats.');
+  } catch(e) {
+    setStatus('error', '❌ Send failed: ' + e.message + '. You can also create the campaign manually in Loops using the preview HTML.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 6-12 6V8.5l8-1.5-8-1.5V1z" fill="white"/></svg> Send newsletter to all subscribers';
+  }
+}
+
+// ─── Manual welcome send ──────────────────────────────────────────────────────
+
+async function sendManualWelcome() {
+  const { loopsKey } = getConfig();
+  if (!loopsKey) return alert('Add your Loops API key in the config panel.');
+  const email = document.getElementById('manual-welcome-email').value.trim();
+  if (!email) return alert('Enter an email address.');
+
+  const firstName = document.getElementById('manual-welcome-name').value.trim() || null;
+  const statusEl = document.getElementById('manual-welcome-status');
+  statusEl.textContent = 'Sending…';
+  statusEl.style.color = 'var(--ink-muted)';
+
+  try {
+    await sendLoopsTransactional(loopsKey, email, document.getElementById('welcome-subject').value || 'Welcome to GoBebop 👋', '', { firstName: firstName || 'there' });
+    statusEl.textContent = '✓ Welcome email sent to ' + email;
+    statusEl.style.color = 'var(--green)';
+    document.getElementById('manual-welcome-email').value = '';
+    document.getElementById('manual-welcome-name').value = '';
+  } catch(e) {
+    statusEl.textContent = '✗ Failed: ' + e.message;
+    statusEl.style.color = 'var(--red)';
+  }
+}
+
+// ─── Subscribers ─────────────────────────────────────────────────────────────
+
+async function loadSubscribers() {
+  const { loopsKey } = getConfig();
+  if (!loopsKey) {
+    document.getElementById('config-panel').classList.add('visible');
+    document.getElementById('config-toggle').classList.add('open');
+    return;
+  }
+
+  const listEl = document.getElementById('sub-list');
+  listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-muted);font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;"><div class="spinner"></div> Loading from Loops…</div>';
+
+  try {
+    const res = await fetch('https://app.loops.so/api/v1/contacts/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + loopsKey },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || 'Loops error');
+
+    allSubscribers = Array.isArray(data) ? data : (data.contacts || data.data || []);
+
+    const total = allSubscribers.length;
+    const subscribed = allSubscribers.filter(s => s.subscribed !== false).length;
+    const unsub = total - subscribed;
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-subscribed').textContent = subscribed;
+    document.getElementById('stat-unsub').textContent = unsub;
+
+    renderSubscriberList(allSubscribers);
+  } catch(e) {
+    listEl.innerHTML = '<div style="padding:24px;color:var(--red);font-size:13px;">Error loading subscribers: ' + e.message + '</div>';
+  }
+}
+
+function filterSubscribers(query) {
+  if (!allSubscribers.length) return;
+  const q = query.toLowerCase();
+  const filtered = q ? allSubscribers.filter(s => (s.email || '').toLowerCase().includes(q)) : allSubscribers;
+  renderSubscriberList(filtered);
+}
+
+function renderSubscriberList(subscribers) {
+  const listEl = document.getElementById('sub-list');
+  if (!subscribers.length) {
+    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-muted);font-size:13px;">No subscribers found.</div>';
+    return;
+  }
+
+  listEl.innerHTML = subscribers.slice(0, 100).map(s => {
+    const isSubbed = s.subscribed !== false;
+    const name = [s.firstName, s.lastName].filter(Boolean).join(' ');
+    return '<div style="padding:12px 24px;border-bottom:1px solid #E8E3DC;display:flex;align-items:center;gap:14px;">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:13px;font-weight:600;color:var(--ink);">' + (s.email || '—') + '</div>' +
+        (name ? '<div style="font-size:11px;color:var(--ink-muted);font-family:\'DM Mono\',monospace;margin-top:2px;">' + name + '</div>' : '') +
+      '</div>' +
+      '<span style="background:' + (isSubbed ? 'var(--green-light)' : 'var(--paper)') + ';color:' + (isSubbed ? 'var(--green)' : 'var(--ink-muted)') + ';font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;font-family:\'DM Mono\',monospace;">' + (isSubbed ? 'Subscribed' : 'Unsubscribed') + '</span>' +
+    '</div>';
+  }).join('') +
+  (subscribers.length > 100 ? '<div style="padding:12px 24px;text-align:center;font-size:12px;color:var(--ink-muted);">Showing first 100 of ' + subscribers.length + '</div>' : '');
+}
+
+async function addSubscriber(sendWelcome) {
+  const { loopsKey } = getConfig();
+  if (!loopsKey) return alert('Add your Loops API key in the config panel.');
+  const email = document.getElementById('add-sub-email').value.trim();
+  if (!email) return alert('Enter an email address.');
+
+  const statusEl = document.getElementById('add-sub-status');
+  statusEl.textContent = 'Adding…';
+  statusEl.style.color = 'var(--ink-muted)';
+
+  const payload = { email, subscribed: true };
+  const fn = document.getElementById('add-sub-firstname').value.trim();
+  const ln = document.getElementById('add-sub-lastname').value.trim();
+  if (fn) payload.firstName = fn;
+  if (ln) payload.lastName = ln;
+
+  try {
+    const res = await fetch('https://app.loops.so/api/v1/contacts/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + loopsKey },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Loops error');
+
+    if (sendWelcome) {
+      await sendLoopsTransactional(loopsKey, email, document.getElementById('welcome-subject').value || 'Welcome to GoBebop 👋', '', { firstName: fn || 'there' });
+      statusEl.textContent = '✓ ' + email + ' added and welcome email sent.';
+    } else {
+      statusEl.textContent = '✓ ' + email + ' added to Loops.';
+    }
+    statusEl.style.color = 'var(--green)';
+    document.getElementById('add-sub-email').value = '';
+    document.getElementById('add-sub-firstname').value = '';
+    document.getElementById('add-sub-lastname').value = '';
+    loadSubscribers();
+  } catch(e) {
+    statusEl.textContent = '✗ Failed: ' + e.message;
+    statusEl.style.color = 'var(--red)';
+  }
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+loadConfig();
+
+if (!localStorage.getItem('bebop_loops_key')) {
+  document.getElementById('config-panel').classList.add('visible');
+  document.getElementById('config-toggle').classList.add('open');
+}
+</script>
+
+</body>
+</html>
