@@ -10,7 +10,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 ```
-html {
+:root {
   --cream: #EDE8DF;
   --paper: #E4DDD3;
   --ink: #1A1714;
@@ -546,7 +546,7 @@ header {
         <label>Subject line <span style="color:#E8541A;">*</span></label>
         <div style="display:flex;gap:8px;align-items:flex-start;">
           <input type="text" id="email-subject" placeholder="e.g. This weekend: a hidden gem in Utrecht 🌿" style="flex:1;" />
-          <button class="btn btn-enrich" onclick="generateSubject()" style="flex-shrink:0;white-space:nowrap;">✦ Generate</button>
+          <button class="btn btn-enrich" id="subject-generate-btn" onclick="generateSubject()" style="flex-shrink:0;white-space:nowrap;">✦ Generate</button>
         </div>
         <p class="text-muted" id="subject-count">0 characters</p>
       </div>
@@ -1019,17 +1019,17 @@ async function loadRecentLocations() {
   if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
 
   const el = document.getElementById('recent-locs-display');
-  el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-muted);"><div class="spinner"></div> Loading…</div>';
+  el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#A09A94;"><div class="spinner"></div> Loading…</div>';
 
   try {
     const res = await fetch(
-      supabaseUrl + '/rest/v1/locations?status=in.(published,ready)&select=id,name,city,secondary_category_lead,created_at&order=created_at.desc&limit=12',
+      supabaseUrl + '/rest/v1/locations?select=id,name,city,secondary_category_lead,created_at&order=created_at.desc&limit=12',
       { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }
     );
     const rows = await res.json();
 
     if (!Array.isArray(rows) || !rows.length) {
-      el.innerHTML = '<div style="font-size:13px;color:#A09A94;">No recently published or ready locations found.</div>';
+      el.innerHTML = '<div style="font-size:13px;color:#A09A94;">No locations found.</div>';
       return;
     }
 
@@ -1098,7 +1098,7 @@ async function generateSubject() {
     'Max 55 characters. Warm, specific, not clickbait. May include one relevant emoji. ' +
     'Return only the subject line, nothing else.';
 
-  const btn = document.querySelector('[onclick="generateSubject()"]');
+  const btn = document.getElementById('subject-generate-btn');
   if (btn) { btn.disabled = true; btn.textContent = '✦ …'; }
 
   try {
