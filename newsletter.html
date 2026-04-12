@@ -104,7 +104,7 @@ header {
   display: flex;
   gap: 0;
   margin-bottom: 32px;
-  border: 2px solid var(--border);
+  border: 2px solid #D4CEC6;
   border-radius: 12px;
   overflow: hidden;
   width: 100%;
@@ -115,16 +115,18 @@ header {
   font-size: 13.5px;
   font-family: 'DM Sans', sans-serif;
   font-weight: 500;
-  background: var(--paper);
-  color: var(--ink);
+  background-color: #E4DDD3;
+  color: #1A1714;
   border: none;
-  border-right: 2px solid var(--border);
+  border-right: 2px solid #D4CEC6;
   cursor: pointer;
   transition: all 0.18s;
+  -webkit-appearance: none;
+  appearance: none;
 }
 .tab-btn:last-child { border-right: none; }
-.tab-btn:hover:not(.active) { background: var(--border); }
-.tab-btn.active { background: var(--accent); color: white; font-weight: 600; }
+.tab-btn:hover:not(.active) { background-color: #D4CEC6; }
+.tab-btn.active { background-color: #4daabb !important; color: white !important; font-weight: 600; }
 
 /* ── Config ── */
 .config-toggle {
@@ -812,7 +814,11 @@ We do the exploring so you don’t have to. Expect one great pick every Friday, 
       </div>
       <div class="field full">
         <label>Intro text <span style="color:#E8541A;">*</span></label>
-        <textarea id="evt-intro" placeholder="e.g. Koningsdag is just around the corner — and Amsterdam goes all out for it. Here are our picks for families this year." style="min-height:80px;"></textarea>
+        <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;">
+          <textarea id="evt-intro-notes" placeholder="Your notes — e.g. Koningsdag is huge, lots of free outdoor stuff, great for all ages, market stalls everywhere…" style="flex:1;min-height:60px;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;resize:vertical;"></textarea>
+          <button class="btn btn-enrich" id="evt-intro-gen-btn" onclick="generateEvtIntro()" style="flex-shrink:0;white-space:nowrap;">✦ Generate</button>
+        </div>
+        <textarea id="evt-intro" placeholder="The intro text that will appear in the email…" style="min-height:80px;"></textarea>
       </div>
       <div class="field full">
         <label>Events page URL <span style="color:#E8541A;">*</span> <span style="font-weight:400;color:#A09A94;">(the full link to the occasion page on gobebop.app)</span></label>
@@ -870,14 +876,15 @@ We do the exploring so you don’t have to. Expect one great pick every Friday, 
 <div class="form-section">
   <div class="section-header">
     <div class="section-title">③ More events <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(3–5 additional events shown as a compact list)</span></div>
+    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadAllOccasionEventsForList()">↺ Load events</button>
   </div>
   <div class="section-body">
-    <p class="text-muted" style="margin-bottom:12px;">Pick up to 5 more events to tease below the featured one. These show as a compact scannable list — no photos, just title, date and location.</p>
+    <p class="text-muted" style="margin-bottom:12px;">Pick up to 5 more events to tease below the featured one. These show as a compact scannable list with emoji, event type, date and location.</p>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <input type="text" id="evt-list-search" placeholder="Search events by title…" oninput="searchOccasionEventsForList(this.value)" autocomplete="off"
+      <input type="text" id="evt-list-search" placeholder="Or search by title…" oninput="searchOccasionEventsForList(this.value)" autocomplete="off"
         style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
     </div>
-    <div id="evt-list-results" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;max-height:200px;overflow-y:auto;"></div>
+    <div id="evt-list-results" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;max-height:300px;overflow-y:auto;"></div>
     <div id="evt-list-selected" style="display:flex;flex-direction:column;gap:6px;"></div>
   </div>
 </div>
@@ -2124,7 +2131,54 @@ function renderEvtList() {
   }).join('');
 }
 
-// ── Subject line generator ────────────────────────────────────────────────────
+// ── AI intro generator ────────────────────────────────────────────────────────
+
+async function generateEvtIntro() {
+  const anthropicKey = localStorage.getItem('bebop_anthropic_key') || '';
+  if (!anthropicKey) return alert('Add your Anthropic API key in the admin tool config panel first.');
+  const occasion  = document.getElementById('evt-occasion-select').value || 'this occasion';
+  const dateRange = document.getElementById('evt-date-range').value;
+  const notes     = document.getElementById('evt-intro-notes').value.trim();
+  const btn = document.getElementById('evt-intro-gen-btn');
+  btn.disabled = true; btn.textContent = '✦ Writing…';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001', max_tokens: 250,
+        messages: [{ role: 'user', content:
+          'Write a short, warm 2–3 sentence intro paragraph for a family events email about ' + occasion +
+          (dateRange ? ' (' + dateRange + ')' : '') + ' in the Netherlands. ' +
+          (notes ? 'Editor notes: ' + notes + '. ' : '') +
+          'Tone: friendly local parent, excited but not over the top. ' +
+          'Plain text only, no markdown, no HTML. Return only the intro, nothing else.'
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text?.trim();
+    if (text) document.getElementById('evt-intro').value = text;
+  } catch(e) { alert('Failed: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = '✦ Generate'; }
+}
+
+// ── Load all occasion events for the list ────────────────────────────────────
+
+async function loadAllOccasionEventsForList() {
+  const resultsEl = document.getElementById('evt-list-results');
+  resultsEl.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#A09A94;padding:8px;"><div class="spinner"></div> Loading…</div>';
+  const rows = await _searchEventsDb('');
+  const filtered = rows.filter(ev => !evtFeaturedEvent || ev.id !== evtFeaturedEvent.id);
+  if (!filtered.length) {
+    resultsEl.innerHTML = '<div style="font-size:12px;color:#A09A94;padding:8px;">No events found — select an occasion above first.</div>';
+    return;
+  }
+  resultsEl.innerHTML = filtered.map(ev => evtResultCard(ev, 'addEvtListEvent', evtListEvents.some(e => e.id === ev.id))).join('');
+}
+
+// ── Subject line + preview text generator (both at once) ──────────────────────
 
 async function generateEvtSubject() {
   const anthropicKey = localStorage.getItem('bebop_anthropic_key') || '';
@@ -2137,20 +2191,31 @@ async function generateEvtSubject() {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': anthropicKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001', max_tokens: 80,
+        model: 'claude-haiku-4-5-20251001', max_tokens: 150,
         messages: [{ role: 'user', content:
-          'Write a short email subject line (max 55 chars) for a family events newsletter for ' + (occasion || 'a Dutch holiday') + '. ' +
+          'Write an email subject line and preview text for a family events newsletter about ' + (occasion || 'a Dutch holiday') + '. ' +
           (featuredTitle ? 'Featured event: ' + featuredTitle + '. ' : '') +
-          (intro ? 'Intro tone: ' + intro.slice(0, 100) + '. ' : '') +
-          'Warm, specific, may include one emoji. Return only the subject line.'
+          (intro ? 'Intro tone: ' + intro.slice(0, 120) + '. ' : '') +
+          'Subject: max 55 chars, warm, specific, may include one emoji. ' +
+          'Preview text: max 90 chars, complements the subject, adds a teaser detail. ' +
+          'Return ONLY valid JSON like: {"subject":"...","preview":"..."} — no markdown, no preamble.'
         }]
       })
     });
     const data = await res.json();
-    const text = data.content?.[0]?.text?.trim().replace(/^["']|["']$/g, '');
-    if (text) document.getElementById('evt-subject').value = text;
+    const raw = data.content?.[0]?.text?.trim() || '';
+    const first = raw.indexOf('{'), last = raw.lastIndexOf('}');
+    if (first === -1) throw new Error('No JSON in response');
+    const result = JSON.parse(raw.slice(first, last + 1));
+    if (result.subject) {
+      document.getElementById('evt-subject').value = result.subject.replace(/^["']|["']$/g, '');
+    }
+    if (result.preview) {
+      document.getElementById('evt-preview-text').value = result.preview.replace(/^["']|["']$/g, '');
+    }
   } catch(e) { alert('Failed: ' + e.message); }
   finally { btn.disabled = false; btn.textContent = '✦ Generate'; }
 }
@@ -2193,20 +2258,7 @@ function buildEvtEmailHtml() {
   const logoUrl = 'https://gobebop.app/gobebop-logo.png';
   const eyebrow = 'font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 14px;';
 
-  // ── Header ──
-  const headerHtml =
-    '<tr><td style="padding:0;background:' + cardBg + ';">' +
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0">' +
-        '<tr><td align="center" style="padding:20px 32px;border-bottom:1px solid ' + border + ';">' +
-          '<a href="https://gobebop.app" style="text-decoration:none;">' +
-            '<img src="' + logoUrl + '" alt="GoBebop" height="36" style="height:36px;display:block;" />' +
-          '</a>' +
-        '</td></tr>' +
-      '</table>' +
-    '</td></tr>';
-
   // ── Occasion hero banner ──
-  // Uses the orange/amber palette — festive feel distinct from the weekly teal
   const heroHtml =
     '<tr><td style="padding:0;background:linear-gradient(135deg,#e8a020,#c07a20);">' +
       '<div style="padding:36px 32px 32px;">' +
@@ -2222,7 +2274,6 @@ function buildEvtEmailHtml() {
     '<tr><td style="padding:28px 32px 0;">' +
       '<p style="' + eyebrow + '">⭐ Featured</p>' +
       '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">' +
-        // Orange accent stripe at top
         '<div style="height:4px;background:linear-gradient(90deg,#e8a020,#c07a20);"></div>' +
         '<div style="padding:20px 24px;">' +
           (featType ? '<span style="font-family:' + fontBody + ';font-size:11px;font-weight:700;background:' + orangeBg + ';color:' + orange + ';padding:3px 10px;border-radius:20px;letter-spacing:0.3px;">' + featType + '</span><br><br>' : '') +
@@ -2238,28 +2289,34 @@ function buildEvtEmailHtml() {
       '</div>' +
     '</td></tr>' : '';
 
-  // ── More events list ──
+  // ── More events list — with emoji and event type ──
   const moreHtml = evtListEvents.length ?
     '<tr><td style="padding:28px 32px 0;">' +
       '<p style="' + eyebrow + '">Also worth checking out</p>' +
       '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:12px;overflow:hidden;">' +
         evtListEvents.map((ev, i) => {
           const loc = ev.locations || {};
+          const emoji = ev.emoji || '📅';
+          const meta = [ev.event_type, formatEvtDate(ev.start_date), loc.name ? loc.name + (loc.city ? ', ' + loc.city : '') : '', ev.price].filter(Boolean).join('  ·  ');
           return '<div style="padding:14px 20px;' + (i < evtListEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
-            '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + ev.title + '</p>' +
-            '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;">' +
-              [formatEvtDate(ev.start_date), loc.name, ev.price].filter(Boolean).join('  ·  ') +
-            '</p>' +
+            '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
+              '<td style="width:36px;vertical-align:middle;padding-right:12px;font-size:22px;line-height:1;">' + emoji + '</td>' +
+              '<td style="vertical-align:middle;">' +
+                '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + ev.title + '</p>' +
+                '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;">' + meta + '</p>' +
+              '</td>' +
+            '</tr></table>' +
           '</div>';
         }).join('') +
       '</div>' +
     '</td></tr>' : '';
 
-  // ── CTA banner ──
+  // ── CTA banner — teal background, white button ──
   const ctaHtml =
     '<tr><td style="padding:28px 32px 0;">' +
       '<div style="background:' + teal + ';border-radius:14px;padding:24px;text-align:center;">' +
-        '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin:0 0 12px;text-transform:uppercase;letter-spacing:0.7px;">Don\'t miss out</p>' +
+        '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.7px;">Don\'t miss out</p>' +
+        '<p style="font-family:' + fontBody + ';font-size:14px;color:rgba(255,255,255,0.75);margin:0 0 16px;">See the full programme on GoBebop</p>' +
         '<table cellpadding="0" cellspacing="0" border="0" align="center"><tr><td style="border-radius:10px;background:#ffffff;">' +
           '<a href="' + pageUrl + '" style="display:inline-block;padding:13px 28px;font-family:' + fontBody + ';font-size:15px;font-weight:700;color:' + teal + ';text-decoration:none;">' + ctaText + '</a>' +
         '</td></tr></table>' +
@@ -2291,9 +2348,15 @@ function buildEvtEmailHtml() {
     (previewText ? '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">' + previewText + '&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>' : '') +
     '</head><body style="margin:0;padding:0;background:' + pageBg + ';-webkit-text-size-adjust:100%;">' +
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + pageBg + ';">' +
-        '<tr><td align="center" style="padding:28px 16px;">' +
+        '<tr><td align="center" style="padding:28px 16px 0;">' +
+          // Logo sits on the grey background, above the white card
+          '<a href="https://gobebop.app" style="text-decoration:none;display:block;margin-bottom:16px;">' +
+            '<img src="' + logoUrl + '" alt="GoBebop" height="44" style="height:44px;display:block;margin:0 auto;" />' +
+          '</a>' +
+        '</td></tr>' +
+        '<tr><td align="center" style="padding:0 16px 28px;">' +
           '<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:' + cardBg + ';border-radius:20px;overflow:hidden;border:1px solid ' + borderStrong + ';box-shadow:0 4px 24px rgba(0,0,0,0.08);">' +
-            headerHtml + heroHtml + featuredHtml + moreHtml + ctaHtml + tipHtml +
+            heroHtml + featuredHtml + moreHtml + ctaHtml + tipHtml +
             '<tr><td style="padding:20px 0 0;"></td></tr>' +
             footerHtml +
           '</table>' +
