@@ -4074,11 +4074,13 @@ async function evtLoadIcons() {
     return [];
   }
 
-  // Build public URL base — icons bucket is public
+  // Public URL base — no encoding needed for simple filenames like coffee.svg
   _evtIconPublicBase = cfg.supabaseUrl + '/storage/v1/object/public/icons/';
 
+  if (h) h.innerHTML = '<div style="font-size:12px;color:#A09A94;padding:8px;">Loading icons…</div>';
+
   try {
-    // List all objects in the icons bucket (root, no prefix)
+    // Supabase Storage list API — POST to /storage/v1/object/list/{bucket}
     var res = await fetch(cfg.supabaseUrl + '/storage/v1/object/list/icons', {
       method: 'POST',
       headers: {
@@ -4086,17 +4088,33 @@ async function evtLoadIcons() {
         'apikey': cfg.supabaseKey,
         'Authorization': 'Bearer ' + cfg.supabaseKey,
       },
-      body: JSON.stringify({ prefix: '', limit: 200, offset: 0 }),
+      body: JSON.stringify({ prefix: '', limit: 200, offset: 0, sortBy: { column: 'name', order: 'asc' } }),
     });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (!res.ok) {
+      var errText = await res.text();
+      throw new Error('HTTP ' + res.status + ' — ' + errText.slice(0, 120));
+    }
     var data = await res.json();
-    // Filter to SVG files only, sort alphabetically
-    _evtIconCache = (data || [])
-      .map(function(f) { return f.name; })
+    console.log('[icons] raw list response:', data);
+
+    // Supabase returns an array of objects; each has a .name property
+    // Some entries may be folder placeholders (name ends with '/') — skip those
+    var items = Array.isArray(data) ? data : (data.items || data.objects || []);
+    _evtIconCache = items
+      .map(function(f) { return (f && (f.name || f.key || '')).trim(); })
       .filter(function(n) { return n && n.toLowerCase().endsWith('.svg'); })
       .sort();
+
+    console.log('[icons] found', _evtIconCache.length, 'SVGs:', _evtIconCache.slice(0,5));
+
+    if (!_evtIconCache.length && items.length) {
+      // Show what we got so we can debug the shape
+      if (h) h.innerHTML = '<div style="font-size:11px;color:#A09A94;padding:8px;">Loaded ' + items.length + ' items but none are .svg — check console for shape.</div>';
+      return [];
+    }
     return _evtIconCache;
   } catch(e) {
+    console.error('[icons] load error:', e);
     if (h) h.innerHTML = '<div style="font-size:12px;color:#991B1B;padding:8px;">Could not load icons: ' + e.message + '</div>';
     return [];
   }
@@ -4124,7 +4142,7 @@ function evtRenderIconGrid(icons, filterText) {
     var cls = 'icon-picker-cell' + (filename === evtSelectedIcon ? ' selected' : '');
     var p = [];
     p.push('<div class="' + cls + '" data-icon="' + filename + '" onclick="evtSelectIcon(this.dataset.icon)" title="' + label + '">');
-    p.push('<img src="' + base + encodeURIComponent(filename) + '" alt="' + label + '" onerror="this.style.opacity=0.2" />');
+    p.push('<img src="' + base + filename + '" alt="' + label + '" onerror="this.style.opacity=0.2" />');
     p.push('<div class="icon-name">' + label + '</div>');
     p.push('</div>');
     parts.push(p.join(''));
