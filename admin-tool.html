@@ -601,6 +601,19 @@ header {
   .recent-item { padding: 12px 14px; }
 }
 
+/* ── Event icon picker ── */
+.icon-picker-grid { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; max-height:260px; overflow-y:auto; padding:4px 2px; }
+.icon-picker-cell { width:56px; height:56px; border-radius:8px; border:1.5px solid #D4CEC6; background:#F0EBE3; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:all 0.12s; flex-shrink:0; position:relative; }
+.icon-picker-cell:hover { border-color:#4daabb; background:#dff0f5; }
+.icon-picker-cell.selected { border-color:#2D6A4F; border-width:2px; background:#D8EDDF; }
+.icon-picker-cell img { width:28px; height:28px; object-fit:contain; pointer-events:none; }
+.icon-picker-cell .icon-name { font-family:'DM Mono',monospace; font-size:8px; color:#A09A94; margin-top:3px; text-align:center; word-break:break-all; line-height:1.2; max-width:52px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.icon-picker-cell.selected .icon-name { color:#2D6A4F; }
+.icon-selected-chip { display:inline-flex; align-items:center; gap:8px; background:#D8EDDF; border:1.5px solid #2D6A4F; border-radius:8px; padding:6px 12px; margin-top:8px; }
+.icon-selected-chip img { width:20px; height:20px; object-fit:contain; }
+.icon-selected-chip span { font-size:12px; color:#2D6A4F; font-family:'DM Mono',monospace; }
+.icon-selected-chip button { background:none; border:none; color:#2D6A4F; cursor:pointer; font-size:14px; line-height:1; padding:0; margin-left:2px; }
+
 /* ── Import modal ── */
 #import-modal.open { display:flex !important; }
 .import-event-card { padding:14px 24px;border-bottom:1px solid #E8E3DC;display:flex;gap:12px;align-items:flex-start; }
@@ -1123,6 +1136,25 @@ header {
         </div>
 
       </div>
+
+      <!-- Icon picker — full width below the grid -->
+      <div class="field" style="margin-top:18px;">
+        <label>Event icon <span style="color:#A09A94;font-weight:400;">(optional — pick one from your icons library)</span></label>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px;">
+          <button class="btn btn-secondary" id="evt-icon-toggle-btn" onclick="evtToggleIconPicker()" style="font-size:12px;padding:6px 14px;">
+            🎨 Choose icon
+          </button>
+          <div id="evt-icon-selected-chip" style="display:none;"></div>
+        </div>
+        <div id="evt-icon-picker-wrap" style="display:none;">
+          <input type="text" id="evt-icon-search" placeholder="Filter icons…" oninput="evtFilterIcons(this.value)"
+            style="width:100%;max-width:300px;background:#F0EBE3;border:1.5px solid #D4CEC6;border-radius:8px;padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:8px;" />
+          <div id="evt-icon-grid" class="icon-picker-grid">
+            <div style="font-size:12px;color:#A09A94;padding:12px;">Loading icons…</div>
+          </div>
+        </div>
+      </div>
+
       <div id="evt-extract-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;margin-top:8px;"></div>
 
       <div class="actions-bar" style="margin-top:20px;">
@@ -4023,6 +4055,143 @@ function evtResetForm() {
   document.getElementById('evt-language').value = '';
   document.getElementById('evt-status').value = 'draft';
   document.getElementById('evt-save-status').textContent = '';
+  evtClearIcon();
+}
+
+
+// ── Event icon picker ─────────────────────────────────────────────────────────
+
+var evtSelectedIcon = null;      // filename, e.g. "coffee.svg"
+var _evtIconCache = null;        // cached list of icon filenames from storage
+var _evtIconPublicBase = null;   // public URL base for the icons bucket
+
+async function evtLoadIcons() {
+  if (_evtIconCache) return _evtIconCache;
+  var h = document.getElementById('evt-icon-grid');
+  var cfg = getConfig();
+  if (!cfg.supabaseUrl || !cfg.supabaseKey) {
+    if (h) h.innerHTML = '<div style="font-size:12px;color:#991B1B;padding:8px;">Configure Supabase first.</div>';
+    return [];
+  }
+
+  // Build public URL base — icons bucket is public
+  _evtIconPublicBase = cfg.supabaseUrl + '/storage/v1/object/public/icons/';
+
+  try {
+    // List all objects in the icons bucket (root, no prefix)
+    var res = await fetch(cfg.supabaseUrl + '/storage/v1/object/list/icons', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': cfg.supabaseKey,
+        'Authorization': 'Bearer ' + cfg.supabaseKey,
+      },
+      body: JSON.stringify({ prefix: '', limit: 200, offset: 0 }),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
+    // Filter to SVG files only, sort alphabetically
+    _evtIconCache = (data || [])
+      .map(function(f) { return f.name; })
+      .filter(function(n) { return n && n.toLowerCase().endsWith('.svg'); })
+      .sort();
+    return _evtIconCache;
+  } catch(e) {
+    if (h) h.innerHTML = '<div style="font-size:12px;color:#991B1B;padding:8px;">Could not load icons: ' + e.message + '</div>';
+    return [];
+  }
+}
+
+function evtIconLabel(filename) {
+  // "coffee.svg" → "coffee", "ferris-wheel.svg" → "ferris wheel"
+  return filename.replace(/\.svg$/i, '').replace(/[-_]/g, ' ');
+}
+
+function evtRenderIconGrid(icons, filterText) {
+  var h = document.getElementById('evt-icon-grid');
+  if (!h) return;
+  var filtered = filterText
+    ? icons.filter(function(f) { return f.toLowerCase().includes(filterText.toLowerCase()); })
+    : icons;
+  if (!filtered.length) {
+    h.innerHTML = '<div style="font-size:12px;color:#A09A94;padding:8px;">No icons match.</div>';
+    return;
+  }
+  var base = _evtIconPublicBase || '';
+  var parts = [];
+  filtered.forEach(function(filename) {
+    var label = evtIconLabel(filename);
+    var cls = 'icon-picker-cell' + (filename === evtSelectedIcon ? ' selected' : '');
+    var p = [];
+    p.push('<div class="' + cls + '" data-icon="' + filename + '" onclick="evtSelectIcon(this.dataset.icon)" title="' + label + '">');
+    p.push('<img src="' + base + encodeURIComponent(filename) + '" alt="' + label + '" onerror="this.style.opacity=0.2" />');
+    p.push('<div class="icon-name">' + label + '</div>');
+    p.push('</div>');
+    parts.push(p.join(''));
+  });
+  h.innerHTML = parts.join('');
+}
+
+async function evtToggleIconPicker() {
+  var wrap = document.getElementById('evt-icon-picker-wrap');
+  var btn  = document.getElementById('evt-icon-toggle-btn');
+  if (!wrap) return;
+  var isOpen = wrap.style.display !== 'none';
+  if (isOpen) {
+    wrap.style.display = 'none';
+    btn.textContent = '🎨 Choose icon';
+    return;
+  }
+  wrap.style.display = '';
+  btn.textContent = 'Hide picker';
+  // Load icons if not yet loaded
+  var icons = await evtLoadIcons();
+  var filterEl = document.getElementById('evt-icon-search');
+  evtRenderIconGrid(icons, filterEl ? filterEl.value : '');
+}
+
+function evtSelectIcon(filename) {
+  evtSelectedIcon = filename;
+  // Update grid selection state
+  document.querySelectorAll('.icon-picker-cell').forEach(function(cell) {
+    cell.classList.toggle('selected', cell.dataset.icon === filename);
+  });
+  // Update selected chip
+  evtUpdateSelectedChip();
+}
+
+function evtUpdateSelectedChip() {
+  var chip = document.getElementById('evt-icon-selected-chip');
+  if (!chip) return;
+  if (!evtSelectedIcon) { chip.style.display = 'none'; chip.innerHTML = ''; return; }
+  var base = _evtIconPublicBase || '';
+  var label = evtIconLabel(evtSelectedIcon);
+  chip.style.display = 'inline-flex';
+  chip.className = 'icon-selected-chip';
+  chip.innerHTML =
+    '<img src="' + base + evtSelectedIcon + '" alt="' + label + '" />' +
+    '<span>' + evtSelectedIcon + '</span>' +
+    '<button onclick="evtClearIcon()" title="Remove icon">✕</button>';
+}
+
+function evtClearIcon() {
+  evtSelectedIcon = null;
+  var chip = document.getElementById('evt-icon-selected-chip');
+  if (chip) { chip.style.display = 'none'; chip.innerHTML = ''; }
+  var wrap = document.getElementById('evt-icon-picker-wrap');
+  if (wrap) wrap.style.display = 'none';
+  var btn = document.getElementById('evt-icon-toggle-btn');
+  if (btn) btn.textContent = '🎨 Choose icon';
+  var searchEl = document.getElementById('evt-icon-search');
+  if (searchEl) searchEl.value = '';
+  document.querySelectorAll('.icon-picker-cell').forEach(function(cell) {
+    cell.classList.remove('selected');
+  });
+}
+
+function evtFilterIcons(val) {
+  if (!_evtIconCache) return;
+  evtRenderIconGrid(_evtIconCache, val);
 }
 
 // ── Title case helper ────────────────────────────────────────────────────────────
@@ -4074,6 +4243,7 @@ async function saveEvent() {
     occasion:         document.getElementById('evt-occasion').value || null,
     language:         document.getElementById('evt-language').value || null,
     source:           'manual',
+    icon:             evtSelectedIcon || null,
   };
 
   try {
