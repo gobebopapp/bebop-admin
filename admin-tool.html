@@ -4081,12 +4081,13 @@ async function evtLoadIcons() {
 
   try {
     // Supabase Storage list API — POST to /storage/v1/object/list/{bucket}
+    var listKey = cfg.serviceKey || cfg.supabaseKey;
     var res = await fetch(cfg.supabaseUrl + '/storage/v1/object/list/icons', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': cfg.supabaseKey,
-        'Authorization': 'Bearer ' + cfg.supabaseKey,
+        'apikey': listKey,
+        'Authorization': 'Bearer ' + listKey,
       },
       body: JSON.stringify({ prefix: '', limit: 200, offset: 0, sortBy: { column: 'name', order: 'asc' } }),
     });
