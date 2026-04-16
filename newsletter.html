@@ -583,11 +583,13 @@ header {
   <div class="section-body">
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
       <button class="btn btn-secondary" onclick="buildPreview()">👁 Preview email</button>
+      <button class="btn btn-secondary" onclick="copyEmailHtml('weekly')" id="copy-html-btn">📋 Copy HTML</button>
       <button class="btn btn-enrich" onclick="sendTestEmail()" id="test-send-btn">✉ Send test to me</button>
       <div class="field" style="flex:1;min-width:200px;">
         <input type="email" id="test-email-addr" placeholder="your@email.com" style="font-size:13px;" />
       </div>
     </div>
+    <div id="copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:8px;">✓ HTML copied to clipboard — paste into Mailchimp's HTML editor</div>
 
     <div id="preview-panel">
       <div class="section-header" style="background:var(--paper);border-bottom:1.5px solid var(--border);">
@@ -915,11 +917,13 @@ We do the exploring so you don’t have to. Expect one great pick every Friday, 
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
       <button class="btn btn-secondary" onclick="buildEvtPreview()">👁 Preview email</button>
+      <button class="btn btn-secondary" onclick="copyEmailHtml('events')" id="evt-copy-html-btn">📋 Copy HTML</button>
       <button class="btn btn-enrich" onclick="sendEvtTest()" id="evt-test-btn">✉ Send test</button>
       <div class="field" style="flex:1;min-width:200px;">
         <input type="email" id="evt-test-addr" placeholder="your@email.com" style="font-size:13px;" />
       </div>
     </div>
+    <div id="evt-copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:8px;">✓ HTML copied to clipboard — paste into Mailchimp's HTML editor</div>
     <div id="evt-preview-panel" style="display:none;border:1.5px solid #D4CEC6;border-radius:10px;overflow:hidden;margin-bottom:16px;">
       <div style="padding:12px 20px;background:#E4DDD3;border-bottom:1.5px solid #D4CEC6;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-family:'DM Mono',monospace;font-size:11px;color:#6B6560;text-transform:uppercase;letter-spacing:0.07em;">Events email preview</span>
@@ -2479,6 +2483,32 @@ async function sendEvtCampaign() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 6-12 6V8.5l8-1.5-8-1.5V1z" fill="white"/></svg> Send to all subscribers';
+  }
+}
+
+// ─── Copy HTML to clipboard ───────────────────────────────────────────────────
+
+async function copyEmailHtml(type) {
+  const html = type === 'events' ? buildEvtEmailHtml() : buildEmailHtml(getEmailOpts());
+  const confirmId = type === 'events' ? 'evt-copy-html-confirm' : 'copy-html-confirm';
+  const btnId     = type === 'events' ? 'evt-copy-html-btn'     : 'copy-html-btn';
+  try {
+    await navigator.clipboard.writeText(html);
+    const confirmEl = document.getElementById(confirmId);
+    const btn = document.getElementById(btnId);
+    if (confirmEl) { confirmEl.style.display = 'block'; setTimeout(() => { confirmEl.style.display = 'none'; }, 4000); }
+    if (btn) { const orig = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = orig; }, 2000); }
+  } catch(e) {
+    // Fallback for browsers that block clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = html;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const confirmEl = document.getElementById(confirmId);
+    if (confirmEl) { confirmEl.style.display = 'block'; setTimeout(() => { confirmEl.style.display = 'none'; }, 4000); }
   }
 }
 
