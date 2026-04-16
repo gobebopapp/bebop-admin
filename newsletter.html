@@ -821,6 +821,11 @@ We do the exploring so you don’t have to. Expect one great pick every Friday, 
         <textarea id="evt-intro" placeholder="The intro text that will appear in the email…" style="min-height:80px;"></textarea>
       </div>
       <div class="field full">
+        <label>Hero image URL <span style="font-weight:400;color:#A09A94;">(optional — shown behind the intro text. Paste any image URL.)</span></label>
+        <input type="text" id="evt-hero-image" placeholder="https://your-storage-url.com/photo.webp" />
+        <p class="text-muted" style="margin-top:4px;">Tip: copy the public URL of any photo from your Supabase storage bucket, or use an image hosted elsewhere.</p>
+      </div>
+      <div class="field full">
         <label>Events page URL <span style="color:#E8541A;">*</span> <span style="font-weight:400;color:#A09A94;">(the full link to the occasion page on gobebop.app)</span></label>
         <input type="text" id="evt-page-url" placeholder="https://gobebop.app/kids-activities/amsterdam/events/koningsdag/index.html" />
       </div>
@@ -1435,7 +1440,7 @@ function buildEmailHtml(opts) {
 
   // Design tokens matching GoBebop website
   const fontBody    = "'Quicksand', 'Trebuchet MS', Arial, sans-serif";
-  const fontDisplay = "'Fredoka One', 'Trebuchet MS', Arial, sans-serif";
+  const fontDisplay = "'Outfit', 'Trebuchet MS', Arial, sans-serif";
   const teal        = '#4daabb';
   const tealLight   = '#e8f6f8';
   const ink         = '#111111';
@@ -1451,7 +1456,7 @@ function buildEmailHtml(opts) {
   const openGreen   = '#2e8a55';
   const openGreenBg = '#e8f6ee';
 
-  const gFonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Fredoka+One&display=swap';
+  const gFonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap';
   const eyebrow = 'font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 14px;';
   const logoUrl = 'https://gobebop.app/gobebop-logo.png';
 
@@ -1720,7 +1725,7 @@ async function sendTestEmail() {
   btn.textContent = 'Sending…';
 
   try {
-    await sendLoopsTransactional(loopsKey, toEmail, subject, html);
+    await sendLoopsTestEmail(loopsKey, toEmail, subject, html);
     setStatus('success', '✅ Test email sent to ' + toEmail);
   } catch(e) {
     setStatus('error', '❌ Failed: ' + e.message);
@@ -1751,7 +1756,7 @@ async function sendWelcomeTest() {
   btn.textContent = 'Sending…';
 
   try {
-    await sendLoopsTransactional(loopsKey, toEmail, subject, html);
+    await sendLoopsTestEmail(loopsKey, toEmail, subject, html);
     document.getElementById('welcome-status').textContent = '✓ Test sent to ' + toEmail;
     document.getElementById('welcome-status').style.color = '#2D6A4F';
   } catch(e) {
@@ -1764,28 +1769,47 @@ async function sendWelcomeTest() {
 }
 
 // ─── Loops API helpers ────────────────────────────────────────────────────────
+// Note: Loops /transactional endpoint blocks browser CORS preflight.
+// For test sends we use /campaigns/send with a single-recipient list instead.
 
+async function sendLoopsTestEmail(apiKey, toEmail, subject, htmlBody) {
+  // Loops campaigns/send is the only CORS-friendly endpoint for custom HTML.
+  // We create a one-off campaign addressed to a single email.
+  const payload = {
+    name: '[TEST] ' + subject + ' — ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+    subject: '[TEST] ' + subject,
+    html: htmlBody,
+    from: { email: 'hello@gobebop.app', name: 'GoBebop' },
+    toEmail,  // Loops supports single-recipient campaign sends for testing
+  };
+  const res = await fetch('https://app.loops.so/api/v1/campaigns/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    // If Loops doesn't support toEmail on campaigns, surface a helpful message
+    throw new Error(err.message || 'Loops API error ' + res.status +
+      '. Try sending from the Loops dashboard directly — paste the preview HTML there.');
+  }
+  return res.json();
+}
+
+// sendLoopsTransactional kept for welcome email trigger (requires transactional ID set in Loops dashboard)
 async function sendLoopsTransactional(apiKey, toEmail, subject, htmlBody, variables) {
   const { loopsWelcomeId } = getConfig();
-  // Use transactional endpoint with HTML content
   const payload = {
     transactionalId: loopsWelcomeId || 'custom',
     email: toEmail,
     addToAudience: false,
     dataVariables: variables || {},
   };
-
-  // For test sends and welcome emails, we use the Loops transactional API.
-  // Since we're building the HTML ourselves, we send it as a custom email.
   const res = await fetch('https://app.loops.so/api/v1/transactional', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + apiKey,
-    },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
     body: JSON.stringify(payload),
   });
-
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || 'Loops API error: HTTP ' + res.status);
@@ -2019,7 +2043,7 @@ async function _searchEventsDb(query) {
   const { supabaseUrl, supabaseKey } = getConfig();
   if (!supabaseUrl || !supabaseKey) return [];
   const occasion = document.getElementById('evt-occasion-select').value;
-  let url = supabaseUrl + '/rest/v1/events?select=id,title,description,start_date,end_date,price,event_type,occasion,address,location_id,locations(name,city)&order=start_date.asc&limit=20';
+  let url = supabaseUrl + '/rest/v1/events?select=id,title,description,start_date,end_date,price,event_type,occasion,address,icon,location_id,locations(name,city)&order=start_date.asc&limit=20';
   if (occasion) url += '&occasion=eq.' + encodeURIComponent(occasion);
   if (query && query.length >= 2) url += '&title=ilike.*' + encodeURIComponent(query) + '*';
   try {
@@ -2121,10 +2145,14 @@ function renderEvtList() {
   if (!evtListEvents.length) { el.innerHTML = ''; return; }
   el.innerHTML = evtListEvents.map(ev => {
     const loc = ev.locations || {};
+    const icon = ev.icon || ev.emoji || '📅';
     return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FFFFFF;border:1.5px solid #D4CEC6;border-radius:8px;">' +
+      '<span style="font-size:22px;flex-shrink:0;">' + icon + '</span>' +
       '<div style="flex:1;min-width:0;">' +
         '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + ev.title + '</div>' +
-        '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;">' + formatEvtDate(ev.start_date) + (loc.name ? ' · ' + loc.name : '') + '</div>' +
+        '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;">' +
+          [ev.event_type, formatEvtDate(ev.start_date), loc.name].filter(Boolean).join(' · ') +
+        '</div>' +
       '</div>' +
       '<button onclick="removeEvtListEvent(\'' + ev.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;">✕</button>' +
     '</div>';
@@ -2226,6 +2254,7 @@ function buildEvtEmailHtml() {
   const occasion    = document.getElementById('evt-occasion-select').value || 'Upcoming Events';
   const dateRange   = document.getElementById('evt-date-range').value;
   const intro       = document.getElementById('evt-intro').value;
+  const heroImage   = document.getElementById('evt-hero-image').value.trim();
   const pageUrl     = document.getElementById('evt-page-url').value || 'https://gobebop.app';
   const ctaText     = document.getElementById('evt-cta-text').value || 'See all events on GoBebop →';
   const tip         = document.getElementById('evt-tip').value;
@@ -2238,9 +2267,9 @@ function buildEvtEmailHtml() {
   const featPrice = evtFeaturedEvent?.price || '';
   const featType  = evtFeaturedEvent?.event_type || '';
 
-  // Design tokens
+  // Design tokens — updated to match website (Outfit replaced Fredoka One as of March 2026)
   const fontBody    = "'Quicksand', 'Trebuchet MS', Arial, sans-serif";
-  const fontDisplay = "'Fredoka One', 'Trebuchet MS', Arial, sans-serif";
+  const fontDisplay = "'Outfit', 'Trebuchet MS', Arial, sans-serif";
   const teal        = '#4daabb';
   const ink         = '#111111';
   const inkSoft     = '#555555';
@@ -2254,16 +2283,32 @@ function buildEvtEmailHtml() {
   const amberText   = '#8a7235';
   const orange      = '#c07a20';
   const orangeBg    = 'rgba(200,130,30,0.1)';
-  const gFonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Fredoka+One&display=swap';
+  // Updated Google Fonts — Outfit replaces Fredoka One
+  const gFonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap';
   const logoUrl = 'https://gobebop.app/gobebop-logo.png';
   const eyebrow = 'font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 14px;';
 
   // ── Occasion hero banner ──
-  const heroHtml =
+  // If a hero image URL is provided: photo background with dark gradient overlay
+  // Otherwise: flat orange/amber gradient
+  const heroHtml = heroImage ?
+    '<tr><td style="padding:0;position:relative;">' +
+      // Background image cell — VML fallback for Outlook omitted for simplicity
+      '<div style="background-image:url(' + heroImage + ');background-size:cover;background-position:center;background-color:#c07a20;">' +
+        // Dark gradient overlay for text legibility
+        '<div style="background:linear-gradient(180deg,rgba(0,0,0,0.18) 0%,rgba(0,0,0,0.62) 100%);padding:44px 32px 40px;">' +
+          '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.75);margin:0 0 8px;">GoBebop Events</p>' +
+          '<p style="font-family:' + fontDisplay + ';font-size:34px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
+          (dateRange ? '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:600;color:rgba(255,255,255,0.88);margin:0 0 16px;">' + dateRange + '</p>' : '<div style="margin-bottom:16px;"></div>') +
+          (intro ? '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.92);margin:0;line-height:1.7;">' + intro + '</p>' : '') +
+        '</div>' +
+      '</div>' +
+    '</td></tr>' :
+    // Fallback: flat amber gradient (no image)
     '<tr><td style="padding:0;background:linear-gradient(135deg,#e8a020,#c07a20);">' +
-      '<div style="padding:36px 32px 32px;">' +
+      '<div style="padding:40px 32px 36px;">' +
         '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.7);margin:0 0 8px;">GoBebop Events</p>' +
-        '<p style="font-family:' + fontDisplay + ';font-size:32px;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
+        '<p style="font-family:' + fontDisplay + ';font-size:34px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
         (dateRange ? '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:600;color:rgba(255,255,255,0.85);margin:0 0 16px;">' + dateRange + '</p>' : '<div style="margin-bottom:16px;"></div>') +
         (intro ? '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.9);margin:0;line-height:1.7;">' + intro + '</p>' : '') +
       '</div>' +
@@ -2296,7 +2341,7 @@ function buildEvtEmailHtml() {
       '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:12px;overflow:hidden;">' +
         evtListEvents.map((ev, i) => {
           const loc = ev.locations || {};
-          const emoji = ev.emoji || '📅';
+          const emoji = ev.icon || ev.emoji || '📅';
           const meta = [ev.event_type, formatEvtDate(ev.start_date), loc.name ? loc.name + (loc.city ? ', ' + loc.city : '') : '', ev.price].filter(Boolean).join('  ·  ');
           return '<div style="padding:14px 20px;' + (i < evtListEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
             '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
@@ -2385,7 +2430,7 @@ async function sendEvtTest() {
   const btn = document.getElementById('evt-test-btn');
   btn.disabled = true; btn.textContent = 'Sending…';
   try {
-    await sendLoopsTransactional(loopsKey, toEmail, subject, html);
+    await sendLoopsTestEmail(loopsKey, toEmail, subject, html);
     document.getElementById('evt-send-status').textContent = '✓ Test sent to ' + toEmail;
     document.getElementById('evt-send-status').style.color = '#2D6A4F';
   } catch(e) {
