@@ -2296,6 +2296,7 @@ function buildEvtEmailHtml() {
   const fontBody    = "'Quicksand', 'Trebuchet MS', Arial, sans-serif";
   const fontDisplay = "'Outfit', 'Trebuchet MS', Arial, sans-serif";
   const teal        = '#4daabb';
+  const tealDark    = '#3d8a99';
   const ink         = '#111111';
   const inkSoft     = '#555555';
   const inkMuted    = '#888888';
@@ -2310,107 +2311,113 @@ function buildEvtEmailHtml() {
   const orangeBg    = 'rgba(200,130,30,0.1)';
   const gFonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap';
   const logoUrl = 'https://gobebop.app/gobebop-logo.png';
-  const eyebrow = 'font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 14px;';
+  const eyebrow = 'font-family:' + fontBody + ';font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 12px;';
 
-  // ── Occasion hero banner ──
-  // Photo background with dark overlay if URL provided, else teal fallback
-  const heroHtml = heroImage ?
-    '<tr><td style="padding:0;">' +
-      '<div style="background-image:url(' + heroImage + ');background-size:cover;background-position:center;background-color:' + teal + ';">' +
-        '<div style="background:linear-gradient(180deg,rgba(0,0,0,0.18) 0%,rgba(0,0,0,0.62) 100%);padding:44px 32px 40px;">' +
-          '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.75);margin:0 0 8px;">GoBebop Events</p>' +
-          '<p style="font-family:' + fontDisplay + ';font-size:34px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
-          (dateRange ? '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:600;color:rgba(255,255,255,0.88);margin:0 0 16px;">' + dateRange + '</p>' : '<div style="margin-bottom:16px;"></div>') +
-          (intro ? '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.92);margin:0;line-height:1.7;">' + intro + '</p>' : '') +
-        '</div>' +
-      '</div>' +
-    '</td></tr>' :
-    // Fallback: teal (brand colour, safe and on-brand)
-    '<tr><td style="padding:0;background:' + teal + ';">' +
-      '<div style="padding:40px 32px 36px;">' +
-        '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.7);margin:0 0 8px;">GoBebop Events</p>' +
-        '<p style="font-family:' + fontDisplay + ';font-size:34px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
-        (dateRange ? '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:600;color:rgba(255,255,255,0.85);margin:0 0 16px;">' + dateRange + '</p>' : '<div style="margin-bottom:16px;"></div>') +
-        (intro ? '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.9);margin:0;line-height:1.7;">' + intro + '</p>' : '') +
-      '</div>' +
+  // ── Logo header — sits on page background ──
+  const logoHtml =
+    '<tr><td align="center" style="padding:24px 20px 16px;background:' + pageBg + ';">' +
+      '<a href="https://gobebop.app" style="text-decoration:none;">' +
+        '<img src="' + logoUrl + '" alt="GoBebop" height="40" style="height:40px;display:block;margin:0 auto;" />' +
+      '</a>' +
     '</td></tr>';
 
-  // ── Featured event card — no price, links to featuredUrl ──
+  // ── Hero: photo strip (fixed height) then teal title/intro below — fully separated ──
+  // This way the photo is purely decorative and intro text is always legible
+  const heroHtml = heroImage
+    ?
+      // Photo strip — fixed height, no text overlay
+      '<tr><td style="padding:0;line-height:0;">' +
+        '<img src="' + heroImage + '" width="100%" style="width:100%;height:220px;object-fit:cover;object-position:center;display:block;" alt="' + occasion + '" />' +
+      '</td></tr>' +
+      // Teal title + intro block below the photo
+      '<tr><td style="padding:28px 20px 24px;background:' + teal + ';">' +
+        '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 6px;">GoBebop Events</p>' +
+        '<p style="font-family:' + fontDisplay + ';font-size:30px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
+        (dateRange ? '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin:0 0 14px;">' + dateRange + '</p>' : '<div style="margin-bottom:14px;"></div>') +
+        (intro ? '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.92);margin:0;line-height:1.7;">' + intro + '</p>' : '') +
+      '</td></tr>'
+    :
+      // No photo — just teal block
+      '<tr><td style="padding:32px 20px 28px;background:' + teal + ';">' +
+        '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 6px;">GoBebop Events</p>' +
+        '<p style="font-family:' + fontDisplay + ';font-size:30px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
+        (dateRange ? '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin:0 0 14px;">' + dateRange + '</p>' : '<div style="margin-bottom:14px;"></div>') +
+        (intro ? '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.92);margin:0;line-height:1.7;">' + intro + '</p>' : '') +
+      '</td></tr>';
+
+  // ── Featured event card — clean, mobile-optimised ──
   const featuredHtml = evtFeaturedEvent ?
-    '<tr><td style="padding:28px 32px 0;">' +
+    '<tr><td style="padding:20px 20px 0;">' +
       '<p style="' + eyebrow + '">⭐ Featured</p>' +
-      '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">' +
-        '<div style="height:4px;background:linear-gradient(90deg,' + teal + ',#3d8a99);"></div>' +
-        '<div style="padding:20px 24px;">' +
-          (featType ? '<span style="font-family:' + fontBody + ';font-size:11px;font-weight:700;background:' + orangeBg + ';color:' + orange + ';padding:3px 10px;border-radius:20px;letter-spacing:0.3px;">' + featType + '</span><br><br>' : '') +
-          '<p style="font-family:' + fontDisplay + ';font-size:22px;font-weight:700;color:' + ink + ';margin:0 0 6px;line-height:1.2;">' + featTitle + '</p>' +
-          '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0 0 14px;letter-spacing:0.3px;">' +
-            [featDate, featLoc.name ? featLoc.name + (featLoc.city ? ', ' + featLoc.city : '') : ''].filter(Boolean).join('  ·  ') +
+      '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
+        '<div style="height:3px;background:linear-gradient(90deg,' + teal + ',' + tealDark + ');"></div>' +
+        '<div style="padding:18px 18px 20px;">' +
+          (featType ? '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;background:' + orangeBg + ';color:' + orange + ';display:inline-block;padding:2px 9px;border-radius:20px;margin:0 0 10px;">' + featType + '</p>' : '') +
+          '<p style="font-family:' + fontDisplay + ';font-size:20px;font-weight:700;color:' + ink + ';margin:0 0 6px;line-height:1.2;">' + featTitle + '</p>' +
+          '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:' + teal + ';margin:0 0 12px;">' +
+            [featDate, featLoc.name ? featLoc.name + (featLoc.city ? ', ' + featLoc.city : '') : ''].filter(Boolean).join(' · ') +
           '</p>' +
-          (featDesc ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 20px;line-height:1.7;">' + featDesc.slice(0, 300) + (featDesc.length > 300 ? '…' : '') + '</p>' : '') +
-          '<table cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:10px;background:' + teal + ';">' +
-            '<a href="' + featuredUrl + '" style="display:inline-block;padding:11px 22px;font-family:' + fontBody + ';font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;">Find out more →</a>' +
-          '</td></tr></table>' +
+          (featDesc ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 18px;line-height:1.65;">' + featDesc.slice(0, 280) + (featDesc.length > 280 ? '…' : '') + '</p>' : '') +
+          // Full-width button — easy tap target on mobile
+          '<a href="' + featuredUrl + '" style="display:block;background:' + teal + ';color:#ffffff;font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:13px 20px;border-radius:10px;text-decoration:none;">Find out more →</a>' +
         '</div>' +
       '</div>' +
     '</td></tr>' : '';
 
-  // ── More events list — icon images, no price, "→" link per event, renamed section ──
+  // ── More events list ──
+  // Mobile-first: icon + title/meta stacked, Info button full-width on its own line
+  // No event type, no price
   const moreHtml = evtListEvents.length ?
-    '<tr><td style="padding:28px 32px 0;">' +
-      '<p style="' + eyebrow + '">More events coming up this week</p>' +
-      '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:12px;overflow:hidden;">' +
+    '<tr><td style="padding:20px 20px 0;">' +
+      '<p style="' + eyebrow + '">More events coming up</p>' +
+      '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
         evtListEvents.map((ev, i) => {
           const loc = ev.locations || {};
           const iconFile = ev.icon || ev.emoji || null;
-          const iconCell = (iconFile && iconBaseUrl)
-            ? '<td style="width:36px;vertical-align:middle;padding-right:12px;">' +
-                '<img src="' + iconBaseUrl + iconFile + '" width="28" height="28" style="width:28px;height:28px;object-fit:contain;display:block;" />' +
-              '</td>'
-            : '<td style="width:36px;vertical-align:middle;padding-right:12px;font-size:20px;line-height:1;">📅</td>';
-          const meta = [ev.event_type, formatEvtDate(ev.start_date), loc.name ? loc.name + (loc.city ? ', ' + loc.city : '') : ''].filter(Boolean).join('  ·  ');
-          const linkCell = ev._url
-            ? '<td style="vertical-align:middle;white-space:nowrap;padding-left:10px;">' +
-                '<a href="' + ev._url + '" style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';text-decoration:none;border:1.5px solid ' + teal + ';border-radius:6px;padding:4px 10px;white-space:nowrap;">Info →</a>' +
-              '</td>'
-            : '';
-          return '<div style="padding:14px 20px;' + (i < evtListEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
+          const iconImg = (iconFile && iconBaseUrl)
+            ? '<img src="' + iconBaseUrl + iconFile + '" width="36" height="36" style="width:36px;height:36px;object-fit:contain;display:block;flex-shrink:0;" />'
+            : '<span style="font-size:28px;line-height:1;flex-shrink:0;">📅</span>';
+          // Date + location only — no event type, no price
+          const meta = [formatEvtDate(ev.start_date), loc.name ? loc.name + (loc.city ? ', ' + loc.city : '') : ''].filter(Boolean).join(' · ');
+          return '<div style="padding:16px 18px;' + (i < evtListEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
+            // Row 1: icon + title + meta
             '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
-              iconCell +
-              '<td style="vertical-align:middle;">' +
-                '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + ev.title + '</p>' +
-                '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;">' + meta + '</p>' +
+              '<td style="width:44px;vertical-align:top;padding-right:12px;padding-top:2px;">' + iconImg + '</td>' +
+              '<td style="vertical-align:top;">' +
+                '<p style="font-family:' + fontBody + ';font-size:15px;font-weight:700;color:' + ink + ';margin:0 0 4px;line-height:1.3;">' + ev.title + '</p>' +
+                '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkMuted + ';margin:0;line-height:1.5;">' + meta + '</p>' +
               '</td>' +
-              linkCell +
             '</tr></table>' +
+            // Row 2: Info button on its own line — full width, easy tap target
+            (ev._url
+              ? '<a href="' + ev._url + '" style="display:block;margin-top:12px;text-align:center;font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;border:1.5px solid ' + teal + ';border-radius:8px;padding:9px 16px;">More info →</a>'
+              : '') +
           '</div>';
         }).join('') +
       '</div>' +
     '</td></tr>' : '';
 
-  // ── CTA banner ──
+  // ── CTA banner — full width, generous padding ──
   const ctaHtml =
-    '<tr><td style="padding:28px 32px 0;">' +
-      '<div style="background:' + teal + ';border-radius:14px;padding:24px;text-align:center;">' +
-        '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.7px;">Don\'t miss out</p>' +
-        '<p style="font-family:' + fontBody + ';font-size:14px;color:rgba(255,255,255,0.75);margin:0 0 16px;">See the full programme on GoBebop</p>' +
-        '<table cellpadding="0" cellspacing="0" border="0" align="center"><tr><td style="border-radius:10px;background:#ffffff;">' +
-          '<a href="' + pageUrl + '" style="display:inline-block;padding:13px 28px;font-family:' + fontBody + ';font-size:15px;font-weight:700;color:' + teal + ';text-decoration:none;">' + ctaText + '</a>' +
-        '</td></tr></table>' +
+    '<tr><td style="padding:20px 20px 0;">' +
+      '<div style="background:' + teal + ';border-radius:14px;padding:24px 20px;text-align:center;">' +
+        '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.8px;">Don\'t miss out</p>' +
+        '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.85);margin:0 0 18px;line-height:1.5;">See the full programme on GoBebop</p>' +
+        '<a href="' + pageUrl + '" style="display:block;background:#ffffff;color:' + teal + ';font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:14px 20px;border-radius:10px;text-decoration:none;">' + ctaText + '</a>' +
       '</div>' +
     '</td></tr>';
 
   // ── Tip box ──
   const tipHtml = tip ?
-    '<tr><td style="padding:20px 32px 0;">' +
-      '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 18px;">' +
+    '<tr><td style="padding:16px 20px 0;">' +
+      '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 16px;">' +
         '<p style="font-family:' + fontBody + ';font-size:13px;color:' + amberText + ';margin:0;line-height:1.6;">💡 ' + tip + '</p>' +
       '</div>' +
     '</td></tr>' : '';
 
   // ── Footer ──
   const footerHtml =
-    '<tr><td style="padding:32px;border-top:1px solid ' + border + ';">' +
+    '<tr><td style="padding:28px 20px;border-top:1px solid ' + border + ';margin-top:20px;">' +
       '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:600;color:' + inkMuted + ';margin:0 0 6px;text-align:center;">GoBebop · Family guide to Amsterdam &amp; the Netherlands</p>' +
       '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;text-align:center;">' +
         '<a href="https://gobebop.app" style="color:' + teal + ';text-decoration:none;font-weight:600;">gobebop.app</a>' +
@@ -2418,22 +2425,22 @@ function buildEvtEmailHtml() {
       '</p>' +
     '</td></tr>';
 
+  // ── Outer wrapper — no horizontal padding, fills screen width on mobile ──
   return '<!DOCTYPE html><html lang="en"><head>' +
     '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<meta name="x-apple-disable-message-reformatting"><title>GoBebop — ' + occasion + '</title>' +
     '<link href="' + gFonts + '" rel="stylesheet">' +
     (previewText ? '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">' + previewText + '&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>' : '') +
-    '</head><body style="margin:0;padding:0;background:' + pageBg + ';-webkit-text-size-adjust:100%;">' +
-      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + pageBg + ';">' +
-        '<tr><td align="center" style="padding:28px 16px 0;">' +
-          '<a href="https://gobebop.app" style="text-decoration:none;display:block;margin-bottom:16px;">' +
-            '<img src="' + logoUrl + '" alt="GoBebop" height="44" style="height:44px;display:block;margin:0 auto;" />' +
-          '</a>' +
-        '</td></tr>' +
-        '<tr><td align="center" style="padding:0 16px 28px;">' +
-          '<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:' + cardBg + ';border-radius:20px;overflow:hidden;border:1px solid ' + borderStrong + ';box-shadow:0 4px 24px rgba(0,0,0,0.08);">' +
+    '</head>' +
+    '<body style="margin:0;padding:0;background:' + pageBg + ';-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">' +
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + pageBg + ';width:100%;">' +
+        // Logo above the card, centred on the grey background
+        logoHtml +
+        // Main card — no side padding on mobile, rounded corners only on wider screens via max-width
+        '<tr><td style="padding:0 0 28px;">' +
+          '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;margin:0 auto;background:' + cardBg + ';border-radius:0;overflow:hidden;">' +
             heroHtml + featuredHtml + moreHtml + ctaHtml + tipHtml +
-            '<tr><td style="padding:20px 0 0;"></td></tr>' +
+            '<tr><td style="padding:16px 0 0;"></td></tr>' +
             footerHtml +
           '</table>' +
         '</td></tr>' +
