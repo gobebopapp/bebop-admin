@@ -866,6 +866,10 @@ We do the exploring so you don’t have to. Expect one great pick every Friday, 
         <p class="text-muted" style="margin-bottom:10px;">Optional overrides for this send:</p>
         <div class="fields-grid">
           <div class="field full">
+            <label>Event page URL <span style="color:#E8541A;">*</span> <span style="font-weight:400;color:#A09A94;">("Find out more" button links here)</span></label>
+            <input type="text" id="evt-featured-url" placeholder="https://gobebop.app/kids-activities/amsterdam/events/..." />
+          </div>
+          <div class="field full">
             <label>Featured event title override</label>
             <input type="text" id="evt-featured-title-override" placeholder="Leave blank to use saved title" />
           </div>
@@ -882,11 +886,11 @@ We do the exploring so you don’t have to. Expect one great pick every Friday, 
 <!-- Step 3: Additional events -->
 <div class="form-section">
   <div class="section-header">
-    <div class="section-title">③ More events <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(3–5 additional events shown as a compact list)</span></div>
+    <div class="section-title">③ More events <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(3–5 events — each gets its own link)</span></div>
     <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadAllOccasionEventsForList()">↺ Load events</button>
   </div>
   <div class="section-body">
-    <p class="text-muted" style="margin-bottom:12px;">Pick up to 5 more events to tease below the featured one. These show as a compact scannable list with emoji, event type, date and location.</p>
+    <p class="text-muted" style="margin-bottom:12px;">Pick up to 5 more events. After selecting, paste the event page URL for each one.</p>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <input type="text" id="evt-list-search" placeholder="Or search by title…" oninput="searchOccasionEventsForList(this.value)" autocomplete="off"
         style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
@@ -2133,7 +2137,7 @@ async function searchOccasionEventsForList(query) {
 function addEvtListEvent(ev) {
   if (evtListEvents.some(e => e.id === ev.id)) return;
   if (evtListEvents.length >= 5) return alert('Maximum 5 events in the list.');
-  evtListEvents.push(ev);
+  evtListEvents.push({ ...ev, _url: '' }); // _url = event page URL, entered manually
   document.getElementById('evt-list-search').value = '';
   document.getElementById('evt-list-results').innerHTML = '';
   renderEvtList();
@@ -2144,21 +2148,35 @@ function removeEvtListEvent(id) {
   renderEvtList();
 }
 
+function updateEvtListUrl(id, url) {
+  const ev = evtListEvents.find(e => e.id === id);
+  if (ev) ev._url = url;
+}
+
 function renderEvtList() {
   const el = document.getElementById('evt-list-selected');
   if (!evtListEvents.length) { el.innerHTML = ''; return; }
   el.innerHTML = evtListEvents.map(ev => {
     const loc = ev.locations || {};
-    const icon = ev.icon || ev.emoji || '📅';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FFFFFF;border:1.5px solid #D4CEC6;border-radius:8px;">' +
-      '<span style="font-size:22px;flex-shrink:0;">' + icon + '</span>' +
-      '<div style="flex:1;min-width:0;">' +
-        '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + ev.title + '</div>' +
-        '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;">' +
-          [ev.event_type, formatEvtDate(ev.start_date), loc.name].filter(Boolean).join(' · ') +
+    const icon = ev.icon || ev.emoji || null;
+    const { supabaseUrl } = getConfig();
+    const iconHtml = icon && supabaseUrl
+      ? '<img src="' + supabaseUrl + '/storage/v1/object/public/icons/' + icon + '" style="width:28px;height:28px;object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'" />'
+      : '<span style="font-size:22px;flex-shrink:0;">📅</span>';
+    return '<div style="background:#FFFFFF;border:1.5px solid #D4CEC6;border-radius:8px;padding:10px 12px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">' +
+        iconHtml +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + ev.title + '</div>' +
+          '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;">' +
+            [ev.event_type, formatEvtDate(ev.start_date), loc.name].filter(Boolean).join(' · ') +
+          '</div>' +
         '</div>' +
+        '<button onclick="removeEvtListEvent(\'' + ev.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;flex-shrink:0;">✕</button>' +
       '</div>' +
-      '<button onclick="removeEvtListEvent(\'' + ev.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;">✕</button>' +
+      '<input type="text" value="' + (ev._url || '') + '" placeholder="Event page URL (optional — e.g. https://gobebop.app/...)"' +
+        ' oninput="updateEvtListUrl(\'' + ev.id + '\', this.value)"' +
+        ' style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;" />' +
     '</div>';
   }).join('');
 }
@@ -2263,15 +2281,18 @@ function buildEvtEmailHtml() {
   const ctaText     = document.getElementById('evt-cta-text').value || 'See all events on GoBebop →';
   const tip         = document.getElementById('evt-tip').value;
   const previewText = document.getElementById('evt-preview-text').value;
+  const featuredUrl = document.getElementById('evt-featured-url').value.trim() || pageUrl;
 
   const featTitle = document.getElementById('evt-featured-title-override').value || evtFeaturedEvent?.title || '';
   const featDesc  = document.getElementById('evt-featured-desc-override').value || evtFeaturedEvent?.description || '';
   const featLoc   = evtFeaturedEvent?.locations || {};
   const featDate  = formatEvtDate(evtFeaturedEvent?.start_date);
-  const featPrice = evtFeaturedEvent?.price || '';
   const featType  = evtFeaturedEvent?.event_type || '';
 
-  // Design tokens — updated to match website (Outfit replaced Fredoka One as of March 2026)
+  const { supabaseUrl } = getConfig();
+  const iconBaseUrl = supabaseUrl ? supabaseUrl + '/storage/v1/object/public/icons/' : '';
+
+  // Design tokens
   const fontBody    = "'Quicksand', 'Trebuchet MS', Arial, sans-serif";
   const fontDisplay = "'Outfit', 'Trebuchet MS', Arial, sans-serif";
   const teal        = '#4daabb';
@@ -2287,19 +2308,15 @@ function buildEvtEmailHtml() {
   const amberText   = '#8a7235';
   const orange      = '#c07a20';
   const orangeBg    = 'rgba(200,130,30,0.1)';
-  // Updated Google Fonts — Outfit replaces Fredoka One
   const gFonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap';
   const logoUrl = 'https://gobebop.app/gobebop-logo.png';
   const eyebrow = 'font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 14px;';
 
   // ── Occasion hero banner ──
-  // If a hero image URL is provided: photo background with dark gradient overlay
-  // Otherwise: flat orange/amber gradient
+  // Photo background with dark overlay if URL provided, else teal fallback
   const heroHtml = heroImage ?
-    '<tr><td style="padding:0;position:relative;">' +
-      // Background image cell — VML fallback for Outlook omitted for simplicity
-      '<div style="background-image:url(' + heroImage + ');background-size:cover;background-position:center;background-color:#c07a20;">' +
-        // Dark gradient overlay for text legibility
+    '<tr><td style="padding:0;">' +
+      '<div style="background-image:url(' + heroImage + ');background-size:cover;background-position:center;background-color:' + teal + ';">' +
         '<div style="background:linear-gradient(180deg,rgba(0,0,0,0.18) 0%,rgba(0,0,0,0.62) 100%);padding:44px 32px 40px;">' +
           '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.75);margin:0 0 8px;">GoBebop Events</p>' +
           '<p style="font-family:' + fontDisplay + ';font-size:34px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
@@ -2308,8 +2325,8 @@ function buildEvtEmailHtml() {
         '</div>' +
       '</div>' +
     '</td></tr>' :
-    // Fallback: flat amber gradient (no image)
-    '<tr><td style="padding:0;background:linear-gradient(135deg,#e8a020,#c07a20);">' +
+    // Fallback: teal (brand colour, safe and on-brand)
+    '<tr><td style="padding:0;background:' + teal + ';">' +
       '<div style="padding:40px 32px 36px;">' +
         '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.7);margin:0 0 8px;">GoBebop Events</p>' +
         '<p style="font-family:' + fontDisplay + ';font-size:34px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
@@ -2318,49 +2335,60 @@ function buildEvtEmailHtml() {
       '</div>' +
     '</td></tr>';
 
-  // ── Featured event card ──
+  // ── Featured event card — no price, links to featuredUrl ──
   const featuredHtml = evtFeaturedEvent ?
     '<tr><td style="padding:28px 32px 0;">' +
       '<p style="' + eyebrow + '">⭐ Featured</p>' +
       '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">' +
-        '<div style="height:4px;background:linear-gradient(90deg,#e8a020,#c07a20);"></div>' +
+        '<div style="height:4px;background:linear-gradient(90deg,' + teal + ',#3d8a99);"></div>' +
         '<div style="padding:20px 24px;">' +
           (featType ? '<span style="font-family:' + fontBody + ';font-size:11px;font-weight:700;background:' + orangeBg + ';color:' + orange + ';padding:3px 10px;border-radius:20px;letter-spacing:0.3px;">' + featType + '</span><br><br>' : '') +
-          '<p style="font-family:' + fontDisplay + ';font-size:22px;color:' + ink + ';margin:0 0 6px;line-height:1.2;">' + featTitle + '</p>' +
+          '<p style="font-family:' + fontDisplay + ';font-size:22px;font-weight:700;color:' + ink + ';margin:0 0 6px;line-height:1.2;">' + featTitle + '</p>' +
           '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0 0 14px;letter-spacing:0.3px;">' +
-            [featDate, featLoc.name ? featLoc.name + (featLoc.city ? ', ' + featLoc.city : '') : '', featPrice].filter(Boolean).join('  ·  ') +
+            [featDate, featLoc.name ? featLoc.name + (featLoc.city ? ', ' + featLoc.city : '') : ''].filter(Boolean).join('  ·  ') +
           '</p>' +
           (featDesc ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 20px;line-height:1.7;">' + featDesc.slice(0, 300) + (featDesc.length > 300 ? '…' : '') + '</p>' : '') +
           '<table cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:10px;background:' + teal + ';">' +
-            '<a href="' + pageUrl + '" style="display:inline-block;padding:11px 22px;font-family:' + fontBody + ';font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;">Find out more →</a>' +
+            '<a href="' + featuredUrl + '" style="display:inline-block;padding:11px 22px;font-family:' + fontBody + ';font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;">Find out more →</a>' +
           '</td></tr></table>' +
         '</div>' +
       '</div>' +
     '</td></tr>' : '';
 
-  // ── More events list — with emoji and event type ──
+  // ── More events list — icon images, no price, "→" link per event, renamed section ──
   const moreHtml = evtListEvents.length ?
     '<tr><td style="padding:28px 32px 0;">' +
-      '<p style="' + eyebrow + '">Also worth checking out</p>' +
+      '<p style="' + eyebrow + '">More events coming up this week</p>' +
       '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:12px;overflow:hidden;">' +
         evtListEvents.map((ev, i) => {
           const loc = ev.locations || {};
-          const emoji = ev.icon || ev.emoji || '📅';
-          const meta = [ev.event_type, formatEvtDate(ev.start_date), loc.name ? loc.name + (loc.city ? ', ' + loc.city : '') : '', ev.price].filter(Boolean).join('  ·  ');
+          const iconFile = ev.icon || ev.emoji || null;
+          const iconCell = (iconFile && iconBaseUrl)
+            ? '<td style="width:36px;vertical-align:middle;padding-right:12px;">' +
+                '<img src="' + iconBaseUrl + iconFile + '" width="28" height="28" style="width:28px;height:28px;object-fit:contain;display:block;" />' +
+              '</td>'
+            : '<td style="width:36px;vertical-align:middle;padding-right:12px;font-size:20px;line-height:1;">📅</td>';
+          const meta = [ev.event_type, formatEvtDate(ev.start_date), loc.name ? loc.name + (loc.city ? ', ' + loc.city : '') : ''].filter(Boolean).join('  ·  ');
+          const linkCell = ev._url
+            ? '<td style="vertical-align:middle;white-space:nowrap;padding-left:10px;">' +
+                '<a href="' + ev._url + '" style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';text-decoration:none;border:1.5px solid ' + teal + ';border-radius:6px;padding:4px 10px;white-space:nowrap;">Info →</a>' +
+              '</td>'
+            : '';
           return '<div style="padding:14px 20px;' + (i < evtListEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
             '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
-              '<td style="width:36px;vertical-align:middle;padding-right:12px;font-size:22px;line-height:1;">' + emoji + '</td>' +
+              iconCell +
               '<td style="vertical-align:middle;">' +
                 '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + ev.title + '</p>' +
                 '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;">' + meta + '</p>' +
               '</td>' +
+              linkCell +
             '</tr></table>' +
           '</div>';
         }).join('') +
       '</div>' +
     '</td></tr>' : '';
 
-  // ── CTA banner — teal background, white button ──
+  // ── CTA banner ──
   const ctaHtml =
     '<tr><td style="padding:28px 32px 0;">' +
       '<div style="background:' + teal + ';border-radius:14px;padding:24px;text-align:center;">' +
@@ -2372,7 +2400,7 @@ function buildEvtEmailHtml() {
       '</div>' +
     '</td></tr>';
 
-  // ── Tip box (optional) ──
+  // ── Tip box ──
   const tipHtml = tip ?
     '<tr><td style="padding:20px 32px 0;">' +
       '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 18px;">' +
@@ -2398,7 +2426,6 @@ function buildEvtEmailHtml() {
     '</head><body style="margin:0;padding:0;background:' + pageBg + ';-webkit-text-size-adjust:100%;">' +
       '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + pageBg + ';">' +
         '<tr><td align="center" style="padding:28px 16px 0;">' +
-          // Logo sits on the grey background, above the white card
           '<a href="https://gobebop.app" style="text-decoration:none;display:block;margin-bottom:16px;">' +
             '<img src="' + logoUrl + '" alt="GoBebop" height="44" style="height:44px;display:block;margin:0 auto;" />' +
           '</a>' +
