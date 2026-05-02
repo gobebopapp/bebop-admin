@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bebop — stock photos</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+```
+html {
+  --cream: #EDE8DF;
+  --paper: #E4DDD3;
+  --ink: #1A1714;
+  --ink-soft: #6B6560;
+  --ink-muted: #A09A94;
+  --accent: #4daabb;
+  --green: #2D6A4F;
+  --green-light: #D8EDDF;
+  --border: #D4CEC6;
+  --white: #FFFFFF;
+  --shadow: 0 1px 3px rgba(26,23,20,0.10), 0 4px 16px rgba(26,23,20,0.08);
+}
+
+body {
+  background: #F7F3ED;
+  color: var(--ink);
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  padding: 0 0 80px;
+}
+
+header {
+  background: var(--white);
+  border-bottom: 1px solid #E8E3DC;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.logo span { color: var(--accent); font-style: italic; }
+
+.header-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 40px 0;
+}
+
+.page-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 36px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.page-sub {
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-bottom: 40px;
+}
+
+/* ── Config ── */
+.config-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+.config-toggle svg { transition: transform 0.2s; }
+.config-toggle.open svg { transform: rotate(180deg); }
+
+.config-panel {
+  display: none;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow);
+}
+.config-panel.visible { display: block; }
+
+/* ── Form sections ── */
+.form-section {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.section-header {
+  padding: 16px 24px;
+  background: var(--paper);
+  border-bottom: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.section-body { padding: 24px; }
+
+/* ── Fields ── */
+.fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.fields-grid .full { grid-column: 1 / -1; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.field input,
+.field select {
+  background: #F0EBE3;
+  border: 1.5px solid #DDD7CF;
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.field input:focus,
+.field select:focus { border-color: var(--accent); }
+.field input::placeholder { color: var(--ink-muted); }
+
+.field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6560' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.text-muted {
+  color: var(--ink-muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #3a9aaa; transform: translateY(-1px); }
+.btn-primary:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  background: var(--paper);
+  color: var(--ink);
+  border: 1.5px solid var(--border);
+}
+.btn-secondary:hover { background: var(--border); }
+
+.btn-save {
+  background: var(--green);
+  color: white;
+  width: 100%;
+  justify-content: center;
+  padding: 14px 20px;
+  font-size: 15px;
+}
+.btn-save:hover { background: #1E4D38; transform: translateY(-1px); }
+.btn-save:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
+
+/* ── Drop zone ── */
+.photo-drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 32px;
+  text-align: center;
+  background: var(--paper);
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+.photo-drop-zone:hover,
+.photo-drop-zone.drag-over { border-color: var(--accent); background: #dff0f5; }
+
+/* ── Preview grid ── */
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.preview-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.preview-card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+.preview-card .card-meta {
+  padding: 10px 12px 12px;
+}
+
+.preview-card .filename {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-muted);
+  word-break: break-all;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.preview-card .status {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+}
+.preview-card .status.pending  { color: var(--ink-muted); }
+.preview-card .status.resizing { color: var(--accent); }
+.preview-card .status.uploading { color: var(--accent); }
+.preview-card .status.done    { color: var(--green); }
+.preview-card .status.error   { color: #991B1B; }
+
+.preview-card .orientation-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+  line-height: 1.6;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  background: rgba(0,0,0,0.55);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  backdrop-filter: blur(2px);
+}
+
+/* ── Results ── */
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #F7F3ED;
+  border-radius: 8px;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.result-row .r-icon { flex-shrink: 0; font-size: 14px; }
+.result-row .r-filename {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.result-row .r-copy {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.result-row .r-copy:hover { color: #3a9aaa; }
+.result-row .r-error {
+  font-size: 11px;
+  color: #991B1B;
+}
+
+/* ── Upload summary ── */
+.upload-summary {
+  display: none;
+  background: var(--green-light);
+  border: 1.5px solid #A7D7BB;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.upload-summary.visible { display: flex; }
+.upload-summary p { font-size: 13px; color: var(--green); font-weight: 500; }
+.upload-summary button {
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ── Progress bar ── */
+.progress-wrap {
+  display: none;
+  margin-top: 12px;
+}
+.progress-wrap.visible { display: block; }
+.progress-bar-track {
+  height: 6px;
+  background: var(--paper);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.3s;
+  border-radius: 3px;
+}
+.progress-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+
+/* ── Spinner ── */
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Recent uploads list ── */
+.recent-header {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 8px;
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .container { padding: 20px 16px 0; }
+  header { padding: 0 16px; }
+  .header-tag { display: none; }
+  .page-title { font-size: 26px; }
+  .fields-grid { grid-template-columns: 1fr; gap: 14px; }
+  .preview-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .section-body { padding: 16px; }
+  .btn-save { padding: 16px 20px; font-size: 15px; }
+}
+```
+
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="https://gobebop.app/gobebop-logo.png" alt="GoBebop" style="height:32px;" />
+  <div class="header-tag">Stock Photos</div>
+</header>
+
+<div class="container">
+
+  <div class="config-toggle" id="config-toggle" onclick="toggleConfig()">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    API Config
+  </div>
+
+  <div class="config-panel" id="config-panel">
+    <div class="fields-grid">
+      <div class="field">
+        <label>Supabase URL</label>
+        <input type="text" id="cfg-supabase-url" placeholder="https://xxx.supabase.co" oninput="saveConfig()" />
+      </div>
+      <div class="field">
+        <label>Supabase Service Role Key</label>
+        <input type="password" id="cfg-service-key" placeholder="eyJ… (service role key)" oninput="saveConfig()" />
+      </div>
+    </div>
+    <p class="text-muted" style="margin-top:14px;">Keys are saved in your browser only. Shared with the admin tool via localStorage.</p>
+  </div>
+
+  <div class="page-title">Stock photos</div>
+  <p class="page-sub">Upload and resize images for the stock-photos bucket. Files are saved as WebP at 1200px (display) and 400px (thumbnail).</p>
+
+  <!-- ── Step 1: Name & descriptor ── -->
+
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-title">1 · File naming</div>
+    </div>
+    <div class="section-body">
+      <div class="fields-grid">
+        <div class="field">
+          <label>Base name <span style="color:#E8541A;">*</span></label>
+          <input type="text" id="base-name"
+            placeholder="e.g. canal-boats-amsterdam"
+            oninput="onNameChange()" />
+          <p class="text-muted">Lowercase, hyphens only — no spaces or special characters.</p>
+        </div>
+        <div class="field">
+          <label>Descriptor <span style="color:#E8541A;">*</span></label>
+          <select id="descriptor" onchange="onNameChange()">
+            <option value="">— select —</option>
+            <option value="interior">interior</option>
+            <option value="exterior">exterior</option>
+            <option value="play-area">play-area</option>
+            <option value="kids-cafe">kids-cafe</option>
+            <option value="entrance">entrance</option>
+            <option value="playground">playground</option>
+            <option value="activity">activity</option>
+            <option value="overview">overview</option>
+            <option value="hero">hero</option>
+            <option value="detail">detail</option>
+            <option value="landscape">landscape</option>
+            <option value="people">people</option>
+          </select>
+        </div>
+      </div>
+      <div id="filename-preview" style="display:none;margin-top:14px;padding:10px 14px;background:#F0EBE3;border-radius:8px;border:1.5px solid #DDD7CF;">
+        <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Filename preview</p>
+        <p id="filename-preview-text" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);"></p>
+        <p id="thumb-preview-text" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--ink-muted);margin-top:2px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Step 2: Upload ── -->
+
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-title">2 · Choose photos</div>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ink-muted);" id="queue-count"></span>
+    </div>
+    <div class="section-body">
+      <div class="photo-drop-zone" id="drop-zone"
+        ondragover="handleDragOver(event)"
+        ondragleave="handleDragLeave(event)"
+        ondrop="handleDrop(event)">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="color:var(--ink-muted);margin-bottom:10px;">
+          <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:8px;">Drag photos here or</p>
+        <label class="btn btn-secondary" style="cursor:pointer;">
+          Choose files
+          <input type="file" id="file-input" accept="image/*" multiple style="display:none;" onchange="handleFileInput(this.files)" />
+        </label>
+        <p class="text-muted" style="margin-top:10px;">Up to 5 files · JPG, PNG, WebP, HEIC</p>
+      </div>
+
+```
+  <div class="preview-grid" id="preview-grid"></div>
+</div>
+```
+
+  </div>
+
+  <!-- ── Step 3: Upload button + progress ── -->
+
+  <div class="form-section" id="upload-section" style="display:none;">
+    <div class="section-header">
+      <div class="section-title">3 · Upload</div>
+    </div>
+    <div class="section-body">
+      <button class="btn btn-save" id="upload-btn" onclick="startUpload()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M6.5 9V1M3 4l3.5-3.5L10 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M1 10.5h11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Upload to stock-photos
+      </button>
+
+```
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+    <p class="progress-label" id="progress-label"></p>
+  </div>
+
+  <div id="results-list" style="margin-top:12px;"></div>
+
+  <div class="upload-summary" id="upload-summary">
+    <p id="summary-text"></p>
+    <button onclick="resetAll()">Upload more →</button>
+  </div>
+</div>
+```
+
+  </div>
+
+</div>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────────
+
+function saveConfig() {
+  localStorage.setItem('bebop_supabase_url',          document.getElementById('cfg-supabase-url').value);
+  localStorage.setItem('bebop_supabase_service_key',  document.getElementById('cfg-service-key').value);
+}
+
+function loadConfig() {
+  document.getElementById('cfg-supabase-url').value  = localStorage.getItem('bebop_supabase_url')          || '';
+  document.getElementById('cfg-service-key').value   = localStorage.getItem('bebop_supabase_service_key')  || '';
+}
+
+function getConfig() {
+  return {
+    supabaseUrl: localStorage.getItem('bebop_supabase_url')         || '',
+    serviceKey:  localStorage.getItem('bebop_supabase_service_key') || '',
+  };
+}
+
+function toggleConfig() {
+  document.getElementById('config-panel').classList.toggle('visible');
+  document.getElementById('config-toggle').classList.toggle('open');
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+var queue = [];  // [{file, objectUrl, status}]
+var MAX_FILES = 5;
+
+// ── Filename helpers ──────────────────────────────────────────────────────────
+
+function slugify(str) {
+  var s = str.toLowerCase();
+  // Replace non-alphanumeric with hyphens
+  var result = '';
+  for (var i = 0; i < s.length; i++) {
+    var c = s.charCodeAt(i);
+    var isAlphaNum = (c >= 97 && c <= 122) || (c >= 48 && c <= 57);
+    result += isAlphaNum ? s[i] : '-';
+  }
+  // Collapse multiple hyphens and trim
+  result = result.replace(/-+/g, '-');
+  var start = 0;
+  var end = result.length;
+  while (start < end && result[start] === '-') start++;
+  while (end > start && result[end - 1] === '-') end--;
+  return result.slice(start, end);
+}
+
+function buildFilename(baseName, descriptor, num, isThumb) {
+  var base = slugify(baseName || 'stock');
+  var desc = descriptor || 'photo';
+  if (isThumb) return base + '-' + desc + '-thumb-' + num + '.webp';
+  return base + '-' + desc + '-' + num + '.webp';
+}
+
+function onNameChange() {
+  var baseName   = document.getElementById('base-name').value.trim();
+  var descriptor = document.getElementById('descriptor').value;
+  updateFilenamePreview(baseName, descriptor);
+  updateQueueFilenames(baseName, descriptor);
+  updateUploadSection();
+}
+
+function updateFilenamePreview(baseName, descriptor) {
+  var wrap = document.getElementById('filename-preview');
+  if (!baseName || !descriptor) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  document.getElementById('filename-preview-text').textContent = buildFilename(baseName, descriptor, 1, false);
+  document.getElementById('thumb-preview-text').textContent   = buildFilename(baseName, descriptor, 1, true);
+}
+
+function updateQueueFilenames(baseName, descriptor) {
+  queue.forEach(function(entry, idx) {
+    var el = document.getElementById('fn-' + idx);
+    if (el) el.textContent = buildFilename(baseName, descriptor, idx + 1, false);
+  });
+}
+
+// ── Drag and drop ─────────────────────────────────────────────────────────────
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+  document.getElementById('drop-zone').classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  addFiles(e.dataTransfer.files);
+}
+
+function handleFileInput(files) {
+  addFiles(files);
+  // Reset input so same file can be re-selected after removal
+  document.getElementById('file-input').value = '';
+}
+
+function addFiles(files) {
+  var remaining = MAX_FILES - queue.length;
+  var toAdd = Array.from(files).slice(0, remaining);
+  toAdd.forEach(function(file) {
+    if (!file.type.startsWith('image/')) return;
+    var objectUrl = URL.createObjectURL(file);
+    queue.push({ file: file, objectUrl: objectUrl, status: 'pending' });
+  });
+  renderPreviews();
+  updateUploadSection();
+}
+
+// ── Preview rendering ─────────────────────────────────────────────────────────
+
+function renderPreviews() {
+  var container  = document.getElementById('preview-grid');
+  var baseName   = document.getElementById('base-name').value.trim();
+  var descriptor = document.getElementById('descriptor').value;
+  var countEl    = document.getElementById('queue-count');
+
+  container.innerHTML = '';
+  countEl.textContent = queue.length ? queue.length + ' / ' + MAX_FILES + ' files' : '';
+
+  queue.forEach(function(entry, idx) {
+    var card = document.createElement('div');
+    card.className = 'preview-card';
+    card.id = 'card-' + idx;
+
+    var img = document.createElement('img');
+    img.src = entry.objectUrl;
+    img.alt = 'preview';
+
+    img.onload = function() {
+      var w = img.naturalWidth;
+      var h = img.naturalHeight;
+      var isLandscape = w >= h;
+      var badge = card.querySelector('.orientation-badge');
+      if (badge) {
+        badge.textContent = (isLandscape ? 'Landscape' : 'Portrait') + ' · ' + w + 'x' + h;
+        badge.style.background = isLandscape ? '#dcfce7' : '#dbeafe';
+        badge.style.color      = isLandscape ? '#166534' : '#1e40af';
+      }
+    };
+
+    var removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-btn';
+    removeBtn.textContent = '✕';
+    removeBtn.onclick = (function(i) { return function() { removeFile(i); }; })(idx);
+
+    var badge = document.createElement('div');
+    badge.className = 'orientation-badge';
+    badge.style.background = '#F0EBE3';
+    badge.style.color = 'var(--ink-muted)';
+    badge.textContent = '…';
+
+    var meta = document.createElement('div');
+    meta.className = 'card-meta';
+
+    var fn = document.createElement('p');
+    fn.className = 'filename';
+    fn.id = 'fn-' + idx;
+    fn.textContent = buildFilename(baseName, descriptor, idx + 1, false);
+
+    var status = document.createElement('p');
+    status.className = 'status pending';
+    status.id = 'status-' + idx;
+    status.textContent = 'Ready';
+
+    meta.appendChild(fn);
+    meta.appendChild(status);
+
+    card.appendChild(img);
+    card.appendChild(removeBtn);
+    card.appendChild(badge);
+    card.appendChild(meta);
+    container.appendChild(card);
+  });
+}
+
+function removeFile(idx) {
+  URL.revokeObjectURL(queue[idx].objectUrl);
+  queue.splice(idx, 1);
+  renderPreviews();
+  updateUploadSection();
+}
+
+function updateUploadSection() {
+  var baseName   = document.getElementById('base-name').value.trim();
+  var descriptor = document.getElementById('descriptor').value;
+  var section    = document.getElementById('upload-section');
+  section.style.display = (queue.length && baseName && descriptor) ? '' : 'none';
+}
+
+// ── Image resize ──────────────────────────────────────────────────────────────
+
+function resizeImage(file, maxLongEdge) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function() {
+      var isLandscape = img.width >= img.height;
+      var outW, outH;
+      if (isLandscape) {
+        outW = Math.min(img.width, maxLongEdge);
+        outH = Math.round(outW * img.height / img.width);
+      } else {
+        outH = Math.min(img.height, maxLongEdge);
+        outW = Math.round(outH * img.width / img.height);
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width  = outW;
+      canvas.height = outH;
+      canvas.getContext('2d').drawImage(img, 0, 0, outW, outH);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(resolve, 'image/webp', 0.88);
+    };
+    img.src = url;
+  });
+}
+
+// ── Upload ────────────────────────────────────────────────────────────────────
+
+function setStatus(idx, text, cls) {
+  var el = document.getElementById('status-' + idx);
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'status ' + cls;
+}
+
+function uploadOne(cfg, entry, baseName, descriptor, idx) {
+  setStatus(idx, 'Resizing…', 'resizing');
+
+  return resizeImage(entry.file, 1200).then(function(displayBlob) {
+    return resizeImage(entry.file, 400).then(function(thumbBlob) {
+      setStatus(idx, 'Uploading…', 'uploading');
+
+      var filename      = buildFilename(baseName, descriptor, idx + 1, false);
+      var thumbFilename = buildFilename(baseName, descriptor, idx + 1, true);
+      var writeKey = cfg.serviceKey;
+      var headers = {
+        'apikey':        writeKey,
+        'Authorization': 'Bearer ' + writeKey,
+        'Content-Type':  'image/webp',
+        'x-upsert':      'true',
+      };
+
+      var displayUrl = cfg.supabaseUrl + '/storage/v1/object/stock-photos/' + filename;
+      var thumbUrl   = cfg.supabaseUrl + '/storage/v1/object/stock-photos/' + thumbFilename;
+
+      return fetch(displayUrl, { method: 'POST', headers: headers, body: displayBlob })
+        .then(function(r) {
+          if (!r.ok) return r.json().catch(function() { return {}; }).then(function(e) { throw new Error(e.message || 'Upload failed'); });
+          return fetch(thumbUrl, { method: 'POST', headers: headers, body: thumbBlob });
+        })
+        .then(function(r2) {
+          if (r2 && !r2.ok) return r2.json().catch(function() { return {}; }).then(function(e) { throw new Error('Thumb: ' + (e.message || 'failed')); });
+
+          setStatus(idx, '✓ Done', 'done');
+
+          var publicUrl = cfg.supabaseUrl + '/storage/v1/object/public/stock-photos/' + filename;
+          addResult(filename, publicUrl, null);
+          return { ok: true };
+        });
+    });
+  }).catch(function(err) {
+    setStatus(idx, '✗ ' + err.message, 'error');
+    addResult(buildFilename(baseName, descriptor, idx + 1, false), null, err.message);
+    return { ok: false, err: err.message };
+  });
+}
+
+function addResult(filename, publicUrl, errMsg) {
+  var list = document.getElementById('results-list');
+  var row  = document.createElement('div');
+  row.className = 'result-row';
+
+  if (publicUrl) {
+    var iconEl = document.createElement('span');
+    iconEl.className = 'r-icon';
+    iconEl.textContent = '✓';
+    iconEl.style.color = 'var(--green)';
+
+    var nameEl = document.createElement('span');
+    nameEl.className = 'r-filename';
+    nameEl.textContent = filename;
+
+    var copyBtn = document.createElement('button');
+    copyBtn.className = 'r-copy';
+    copyBtn.textContent = 'Copy URL';
+    copyBtn.onclick = (function(url, btn) {
+      return function() {
+        navigator.clipboard.writeText(url).then(function() {
+          btn.textContent = 'Copied!';
+          setTimeout(function() { btn.textContent = 'Copy URL'; }, 2000);
+        });
+      };
+    })(publicUrl, copyBtn);
+
+    row.appendChild(iconEl);
+    row.appendChild(nameEl);
+    row.appendChild(copyBtn);
+  } else {
+    var iconEl2 = document.createElement('span');
+    iconEl2.className = 'r-icon';
+    iconEl2.textContent = '✗';
+    iconEl2.style.color = '#991B1B';
+
+    var nameEl2 = document.createElement('span');
+    nameEl2.className = 'r-filename';
+    nameEl2.textContent = filename;
+
+    var errEl = document.createElement('span');
+    errEl.className = 'r-error';
+    errEl.textContent = errMsg;
+
+    row.appendChild(iconEl2);
+    row.appendChild(nameEl2);
+    row.appendChild(errEl);
+  }
+
+  list.appendChild(row);
+}
+
+function startUpload() {
+  var cfg = getConfig();
+  if (!cfg.supabaseUrl || !cfg.serviceKey) {
+    document.getElementById('config-panel').classList.add('visible');
+    document.getElementById('config-toggle').classList.add('open');
+    return alert('Please configure your Supabase URL and service role key first.');
+  }
+
+  var baseName   = document.getElementById('base-name').value.trim();
+  var descriptor = document.getElementById('descriptor').value;
+
+  if (!baseName)   return alert('Please enter a base name.');
+  if (!descriptor) return alert('Please select a descriptor.');
+  if (!queue.length) return alert('Add at least one photo first.');
+
+  var btn       = document.getElementById('upload-btn');
+  var progress  = document.getElementById('progress-wrap');
+  var fill      = document.getElementById('progress-fill');
+  var label     = document.getElementById('progress-label');
+  var resultsList = document.getElementById('results-list');
+
+  btn.disabled = true;
+  btn.textContent = 'Uploading…';
+  progress.classList.add('visible');
+  resultsList.innerHTML = '';
+  document.getElementById('upload-summary').classList.remove('visible');
+
+  var total     = queue.length;
+  var completed = 0;
+  var succeeded = 0;
+
+  // Chain uploads sequentially
+  var chain = Promise.resolve();
+  queue.forEach(function(entry, idx) {
+    chain = chain.then(function() {
+      label.textContent = 'Uploading ' + (idx + 1) + ' of ' + total + '…';
+      fill.style.width = Math.round((idx / total) * 100) + '%';
+      return uploadOne(cfg, entry, baseName, descriptor, idx).then(function(result) {
+        completed++;
+        if (result.ok) succeeded++;
+        fill.style.width = Math.round((completed / total) * 100) + '%';
+      });
+    });
+  });
+
+  chain.then(function() {
+    btn.disabled = false;
+    btn.textContent = 'Upload to stock-photos';
+    fill.style.width = '100%';
+    label.textContent = 'Done — ' + succeeded + ' of ' + total + ' uploaded successfully.';
+
+    var summaryEl = document.getElementById('upload-summary');
+    var summaryText = document.getElementById('summary-text');
+    summaryText.textContent = succeeded === total
+      ? '✓ All ' + total + ' photo' + (total > 1 ? 's' : '') + ' uploaded!'
+      : succeeded + ' of ' + total + ' succeeded. Check errors above.';
+    summaryEl.classList.add('visible');
+  });
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+
+function resetAll() {
+  queue.forEach(function(e) { URL.revokeObjectURL(e.objectUrl); });
+  queue.length = 0;
+
+  document.getElementById('base-name').value   = '';
+  document.getElementById('descriptor').value  = '';
+  document.getElementById('preview-grid').innerHTML  = '';
+  document.getElementById('results-list').innerHTML  = '';
+  document.getElementById('filename-preview').style.display = 'none';
+  document.getElementById('upload-section').style.display   = 'none';
+  document.getElementById('upload-summary').classList.remove('visible');
+  document.getElementById('progress-wrap').classList.remove('visible');
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('queue-count').textContent   = '';
+
+  // Reset upload button text
+  var btn = document.getElementById('upload-btn');
+  btn.disabled = false;
+  btn.textContent = 'Upload to stock-photos';
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+
+loadConfig();
+
+if (!localStorage.getItem('bebop_supabase_url') || !localStorage.getItem('bebop_supabase_service_key')) {
+  document.getElementById('config-panel').classList.add('visible');
+  document.getElementById('config-toggle').classList.add('open');
+}
+</script>
+
+</body>
+</html>
