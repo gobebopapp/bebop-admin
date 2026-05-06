@@ -601,17 +601,6 @@ header {
   .recent-item { padding: 12px 14px; }
 }
 
-/* ── Time slots ── */
-.time-slots-wrap { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
-.time-slot-row { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:center; background:#F0EBE3; border:1.5px solid #DDD7CF; border-radius:8px; padding:8px 12px; }
-.time-slot-row input[type=datetime-local] { background:#FFFFFF; border:1.5px solid #D4CEC6; border-radius:6px; padding:7px 10px; font-family:'DM Sans',sans-serif; font-size:13px; color:#1A1714; outline:none; transition:border-color 0.15s; width:100%; }
-.time-slot-row input[type=datetime-local]:focus { border-color:#4daabb; }
-.time-slot-row .slot-label { font-family:'DM Mono',monospace; font-size:10px; color:#A09A94; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px; }
-.slot-remove-btn { width:28px; height:28px; background:none; border:1.5px solid #D4CEC6; border-radius:6px; color:#A09A94; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.12s; }
-.slot-remove-btn:hover { background:#FEE2E2; border-color:#FECACA; color:#991B1B; }
-.add-slot-btn { display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 14px; background:#E4DDD3; border:1.5px solid #D4CEC6; border-radius:7px; color:#1A1714; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:500; transition:all 0.12s; margin-top:4px; }
-.add-slot-btn:hover { border-color:#4daabb; background:#dff0f5; }
-
 /* ── Event icon picker ── */
 .icon-picker-grid { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; max-height:260px; overflow-y:auto; padding:4px 2px; }
 .icon-picker-cell { width:56px; height:56px; border-radius:8px; border:1.5px solid #D4CEC6; background:#F0EBE3; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:all 0.12s; flex-shrink:0; position:relative; }
@@ -1040,10 +1029,29 @@ header {
           <textarea id="evt-description" placeholder="What's happening, who it's for, why it's worth going…" style="min-height:80px;"></textarea>
         </div>
 
+        <div class="field">
+          <label>Start date / time <span style="color:#A09A94;font-weight:400;">(one-off or first occurrence)</span></label>
+          <input type="datetime-local" id="evt-start" step="900" />
+        </div>
+
+        <div class="field">
+          <label>End date / time</label>
+          <input type="datetime-local" id="evt-end" step="900" />
+        </div>
+
         <div class="field full">
-          <label>Time slot(s) <span style="color:#E8541A;">*</span> <span style="color:#A09A94;font-weight:400;">— add multiple for shows with several daily performances</span></label>
-          <div class="time-slots-wrap" id="evt-time-slots"></div>
-          <button type="button" class="add-slot-btn" onclick="evtAddSlot()">＋ Add time slot</button>
+          <label>Specific dates <span style="color:#A09A94;font-weight:400;">(for non-sequential occurrences — replaces start date)</span></label>
+          <div id="evt-dates-wrap" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;"></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="date" id="evt-dates-input" style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1714;outline:none;" />
+            <button type="button" onclick="evtAddDate()" class="btn btn-secondary" style="font-size:12px;padding:6px 14px;">＋ Add date</button>
+          </div>
+          <p class="text-muted" style="margin-top:6px;">Use this OR start date above — not both. Click a date chip to remove it.</p>
+        </div>
+
+        <div class="field full">
+          <label>Showtimes <span style="color:#A09A94;font-weight:400;">(for multiple times on the same day)</span></label>
+          <input type="text" id="evt-showtimes" placeholder='e.g. "10:00 &amp; 14:00" or "10:00, 12:30 &amp; 15:00"' />
         </div>
 
         <div class="field">
@@ -2785,7 +2793,6 @@ function setMode(mode) {
   }
   if (isEvents) {
     loadUpcomingEvents();
-    evtInitSlots();
   }
   if (isRefresh) {
     populateRefreshSecCatDropdown();
@@ -3996,7 +4003,6 @@ function setEvtSubMode(mode) {
     if (btn) { btn.style.background = active ? '#4daabb' : '#E4DDD3'; btn.style.color = active ? 'white' : '#1A1714'; }
     if (ui)  ui.style.display = active ? '' : 'none';
   });
-  if (mode === 'new')      evtInitSlots();
   if (mode === 'queue')    loadEvtQueue();
   if (mode === 'upcoming') loadUpcomingEvents();
 }
@@ -4054,8 +4060,8 @@ function evtResetForm() {
   document.getElementById('evt-loc-selected').style.display = 'none';
   document.getElementById('evt-loc-search').value = '';
   document.getElementById('evt-loc-results').innerHTML = '';
-  ['evt-title','evt-address','evt-description',
-   'evt-price','evt-booking-url','evt-age-min','evt-age-max'].forEach(id => {
+  ['evt-title','evt-address','evt-description','evt-start','evt-end',
+   'evt-showtimes','evt-price','evt-booking-url','evt-age-min','evt-age-max'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -4067,7 +4073,7 @@ function evtResetForm() {
   document.getElementById('evt-status').value = 'draft';
   document.getElementById('evt-save-status').textContent = '';
   evtClearIcon();
-  evtInitSlots();
+  evtClearDates();
 }
 
 
@@ -4225,94 +4231,68 @@ function evtFilterIcons(val) {
   evtRenderIconGrid(_evtIconCache, val);
 }
 
-// ── Time slot manager ────────────────────────────────────────────────────────
+// ── Specific dates manager ────────────────────────────────────────────────────
 
-var evtSlotCount = 0;
+var evtSelectedDates = [];  // array of 'YYYY-MM-DD' strings
 
-function evtInitSlots() {
-  evtSlotCount = 0;
-  var wrap = document.getElementById('evt-time-slots');
-  if (wrap) wrap.innerHTML = '';
-  evtAddSlot();
-}
-
-function evtAddSlot() {
-  evtSlotCount++;
-  var wrap = document.getElementById('evt-time-slots');
-  if (!wrap) return;
-  var idx = evtSlotCount;
-  var row = document.createElement('div');
-  row.className = 'time-slot-row evt-slot-row';
-  row.id = 'evt-slot-' + idx;
-
-  var startCol = document.createElement('div');
-  startCol.className = 'field';
-  var startLabel = document.createElement('div');
-  startLabel.className = 'slot-label';
-  startLabel.textContent = 'Start';
-  var startInput = document.createElement('input');
-  startInput.type = 'datetime-local';
-  startInput.step = '900';
-  startInput.className = 'slot-start';
-  startCol.appendChild(startLabel);
-  startCol.appendChild(startInput);
-
-  var endCol = document.createElement('div');
-  endCol.className = 'field';
-  var endLabel = document.createElement('div');
-  endLabel.className = 'slot-label';
-  endLabel.textContent = 'End';
-  var endInput = document.createElement('input');
-  endInput.type = 'datetime-local';
-  endInput.step = '900';
-  endInput.className = 'slot-end';
-  endCol.appendChild(endLabel);
-  endCol.appendChild(endInput);
-
-  var removeBtn = document.createElement('button');
-  removeBtn.type = 'button';
-  removeBtn.className = 'slot-remove-btn';
-  removeBtn.title = 'Remove this slot';
-  removeBtn.textContent = '✕';
-  removeBtn.onclick = function() { evtRemoveSlot(row); };
-
-  row.appendChild(startCol);
-  row.appendChild(endCol);
-  row.appendChild(removeBtn);
-  wrap.appendChild(row);
-
-  // Keep remove button hidden if only one slot
-  evtUpdateSlotRemoveBtns();
-
-  // Auto-copy start date from previous slot when adding new one
-  var allSlots = wrap.querySelectorAll('.evt-slot-row');
-  if (allSlots.length > 1) {
-    var prevSlot = allSlots[allSlots.length - 2];
-    var prevStart = prevSlot.querySelector('.slot-start').value;
-    if (prevStart) {
-      // Keep the same date, clear the time so user fills it in
-      startInput.value = prevStart.slice(0, 10) + 'T';
-    }
+function evtAddDate() {
+  var input = document.getElementById('evt-dates-input');
+  var val = input ? input.value : '';
+  if (!val) return;
+  if (evtSelectedDates.indexOf(val) === -1) {
+    evtSelectedDates.push(val);
+    evtSelectedDates.sort();
   }
+  input.value = '';
+  evtRenderDateChips();
 }
 
-function evtRemoveSlot(row) {
-  var wrap = document.getElementById('evt-time-slots');
-  if (!wrap) return;
-  if (wrap.querySelectorAll('.evt-slot-row').length <= 1) return; // always keep one
-  wrap.removeChild(row);
-  evtUpdateSlotRemoveBtns();
+function evtRemoveDate(dateStr) {
+  var idx = evtSelectedDates.indexOf(dateStr);
+  if (idx > -1) evtSelectedDates.splice(idx, 1);
+  evtRenderDateChips();
 }
 
-function evtUpdateSlotRemoveBtns() {
-  var wrap = document.getElementById('evt-time-slots');
+function evtRenderDateChips() {
+  var wrap = document.getElementById('evt-dates-wrap');
   if (!wrap) return;
-  var rows = wrap.querySelectorAll('.evt-slot-row');
-  rows.forEach(function(r) {
-    var btn = r.querySelector('.slot-remove-btn');
-    if (btn) btn.style.visibility = rows.length > 1 ? 'visible' : 'hidden';
+  wrap.innerHTML = '';
+  evtSelectedDates.forEach(function(d) {
+    var chip = document.createElement('span');
+    chip.style.display = 'inline-flex';
+    chip.style.alignItems = 'center';
+    chip.style.gap = '5px';
+    chip.style.background = '#D8EDDF';
+    chip.style.border = '1.5px solid #2D6A4F';
+    chip.style.borderRadius = '20px';
+    chip.style.padding = '4px 10px';
+    chip.style.fontSize = '12px';
+    chip.style.color = '#2D6A4F';
+    chip.style.fontFamily = 'DM Mono, monospace';
+    chip.style.cursor = 'pointer';;
+    chip.title = 'Click to remove';
+    chip.textContent = d + ' ✕';
+    chip.onclick = (function(date) { return function() { evtRemoveDate(date); }; })(d);
+    wrap.appendChild(chip);
   });
 }
+
+function evtClearDates() {
+  evtSelectedDates = [];
+  evtRenderDateChips();
+  var input = document.getElementById('evt-dates-input');
+  if (input) input.value = '';
+}
+
+// Allow Enter key on date input to add the date
+document.addEventListener('DOMContentLoaded', function() {
+  var dateInput = document.getElementById('evt-dates-input');
+  if (dateInput) {
+    dateInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); evtAddDate(); }
+    });
+  }
+});
 
 // ── Title case helper ────────────────────────────────────────────────────────────
 function toTitleCase(str) {
@@ -4338,25 +4318,28 @@ async function saveEvent() {
   const title = toTitleCase(document.getElementById('evt-title').value.trim());
   if (!title) return alert('Please enter an event title.');
 
-  // Collect time slots
-  const slotRows = document.querySelectorAll('.evt-slot-row');
-  const slots = Array.from(slotRows).map(row => ({
-    start: row.querySelector('.slot-start').value,
-    end:   row.querySelector('.slot-end').value,
-  }));
-  const validSlots = slots.filter(s => s.start);
-  if (!validSlots.length) return alert('Please add at least one time slot with a start date.');
+  const startVal     = document.getElementById('evt-start').value;
+  const hasDates     = evtSelectedDates.length > 0;
+
+  // Must have either a start date or at least one specific date
+  if (!startVal && !hasDates) return alert('Please set a start date or add at least one specific date.');
 
   const btn = document.getElementById('evt-save-btn');
   const statusEl = document.getElementById('evt-save-status');
   btn.disabled = true;
+  btn.textContent = 'Saving…';
+  statusEl.textContent = '';
 
-  // Shared fields — same for every slot
-  const shared = {
+  const payload = {
     title,
     description:      document.getElementById('evt-description').value || null,
     location_id:      evtLinkedLocation ? evtLinkedLocation.id : null,
     address:          document.getElementById('evt-address').value || null,
+    // Dates: if specific dates array is set, use that and leave start_date null
+    start_date:       hasDates ? null : (startVal || null),
+    end_date:         hasDates ? null : (document.getElementById('evt-end').value || null),
+    dates:            hasDates ? evtSelectedDates : null,
+    showtimes:        document.getElementById('evt-showtimes').value.trim() || null,
     recurring:        document.getElementById('evt-recurring').value || null,
     recurring_until:  document.getElementById('evt-recurring-until').value || null,
     price:            document.getElementById('evt-price').value || null,
@@ -4372,53 +4355,30 @@ async function saveEvent() {
     updated_at:       new Date().toISOString(),
   };
 
-  const total = validSlots.length;
-  let saved = 0, errors = 0;
-
-  btn.textContent = total > 1 ? 'Saving 0 / ' + total + '…' : 'Saving…';
-  statusEl.textContent = '';
-
-  for (let i = 0; i < validSlots.length; i++) {
-    if (total > 1) btn.textContent = 'Saving ' + (i + 1) + ' / ' + total + '…';
-    const payload = Object.assign({}, shared, {
-      start_date: validSlots[i].start || null,
-      end_date:   validSlots[i].end   || null,
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': writeKey,
+        'Authorization': `Bearer ${writeKey}`,
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify(payload),
     });
-    try {
-      const res = await fetch(`${supabaseUrl}/rest/v1/events`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': writeKey,
-          'Authorization': `Bearer ${writeKey}`,
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || `HTTP ${res.status}`);
-      }
-      saved++;
-    } catch(e) {
-      errors++;
-      console.error('Slot ' + (i + 1) + ' failed:', e.message);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
     }
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'Save event';
-
-  if (errors === 0) {
-    statusEl.textContent = total > 1 ? '✓ ' + saved + ' time slots saved!' : '✓ Event saved!';
+    statusEl.textContent = '✓ Event saved!';
     statusEl.style.color = '#2D6A4F';
     setTimeout(() => evtResetForm(), 2000);
-  } else if (saved > 0) {
-    statusEl.textContent = saved + ' slots saved, ' + errors + ' failed — check console.';
-    statusEl.style.color = '#854d0e';
-  } else {
-    statusEl.textContent = '✗ All slots failed to save.';
+  } catch(e) {
+    statusEl.textContent = '✗ ' + e.message;
     statusEl.style.color = '#991B1B';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save event';
   }
 }
 
@@ -4489,16 +4449,11 @@ Focus only on events suitable for families with children.`;
     const e0 = events[0];
     if (e0.title)       document.getElementById('evt-title').value       = toTitleCase(e0.title);
     if (e0.description) document.getElementById('evt-description').value = e0.description;
+    if (e0.start_date)  document.getElementById('evt-start').value       = e0.start_date.slice(0, 16);
+    if (e0.end_date)    document.getElementById('evt-end').value         = e0.end_date.slice(0, 16);
     if (e0.price)       document.getElementById('evt-price').value       = e0.price;
     if (e0.booking_url) document.getElementById('evt-booking-url').value = e0.booking_url;
     if (e0.recurring)   document.getElementById('evt-recurring').value   = e0.recurring;
-    if (e0.start_date || e0.end_date) {
-      var s0 = document.querySelector('.evt-slot-row') || (evtAddSlot(), document.querySelector('.evt-slot-row'));
-      if (s0) {
-        if (e0.start_date) s0.querySelector('.slot-start').value = e0.start_date.slice(0, 16);
-        if (e0.end_date)   s0.querySelector('.slot-end').value   = e0.end_date.slice(0, 16);
-      }
-    }
 
     statusEl.textContent = `✓ Found ${events.length} event${events.length > 1 ? 's' : ''}. Form pre-filled with first result.`;
     statusEl.style.color = '#2D6A4F';
@@ -4525,19 +4480,11 @@ Focus only on events suitable for families with children.`;
 function evtFillFromExtracted(ev) {
   if (ev.title)       document.getElementById('evt-title').value       = toTitleCase(ev.title);
   if (ev.description) document.getElementById('evt-description').value = ev.description;
+  if (ev.start_date)  document.getElementById('evt-start').value       = ev.start_date.slice(0, 16);
+  if (ev.end_date)    document.getElementById('evt-end').value         = ev.end_date.slice(0, 16);
   if (ev.price)       document.getElementById('evt-price').value       = ev.price;
   if (ev.booking_url) document.getElementById('evt-booking-url').value = ev.booking_url;
   if (ev.recurring)   document.getElementById('evt-recurring').value   = ev.recurring;
-  // Populate the first time slot
-  if (ev.start_date || ev.end_date) {
-    var slots = document.querySelectorAll('.evt-slot-row');
-    var target = slots.length ? slots[0] : null;
-    if (!target) { evtAddSlot(); target = document.querySelector('.evt-slot-row'); }
-    if (target) {
-      if (ev.start_date) target.querySelector('.slot-start').value = ev.start_date.slice(0, 16);
-      if (ev.end_date)   target.querySelector('.slot-end').value   = ev.end_date.slice(0, 16);
-    }
-  }
 }
 
 // ── Venue queue ───────────────────────────────────────────────────────────────
