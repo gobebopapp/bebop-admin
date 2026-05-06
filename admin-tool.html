@@ -1050,8 +1050,14 @@ header {
         </div>
 
         <div class="field full">
-          <label>Showtimes <span style="color:#A09A94;font-weight:400;">(for multiple times on the same day)</span></label>
-          <input type="text" id="evt-showtimes" placeholder='e.g. "10:00 &amp; 14:00" or "10:00, 12:30 &amp; 15:00"' />
+          <label>Showtimes <span style="color:#A09A94;font-weight:400;">(for multiple performances on the same day — stored as timestamps)</span></label>
+          <div id="evt-showtimes-wrap" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;"></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="datetime-local" id="evt-showtimes-input" step="900"
+              style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1714;outline:none;" />
+            <button type="button" onclick="evtAddShowtime()" class="btn btn-secondary" style="font-size:12px;padding:6px 14px;">＋ Add showtime</button>
+          </div>
+          <p class="text-muted" style="margin-top:6px;">Each showtime is stored as a full timestamp. Click a chip to remove it.</p>
         </div>
 
         <div class="field">
@@ -3994,6 +4000,28 @@ Rules:
 
 let evtLinkedLocation = null; // {id, name, city, website}
 
+// ── Timezone helper ───────────────────────────────────────────────────────────
+// datetime-local inputs give local time with no offset — append the browser's
+// actual UTC offset so Supabase stores the correct UTC value.
+function localToISO(datetimeLocalVal) {
+  if (!datetimeLocalVal) return null;
+  // datetimeLocalVal is "YYYY-MM-DDTHH:MM"
+  // Create a Date object interpreted as local time, then format with offset
+  var d = new Date(datetimeLocalVal);
+  if (isNaN(d.getTime())) return null;
+  // Get offset in minutes (negative = ahead of UTC, e.g. Amsterdam summer = -120)
+  var offsetMin = -d.getTimezoneOffset(); // flip sign: +120 for UTC+2
+  var sign = offsetMin >= 0 ? '+' : '-';
+  var absMin = Math.abs(offsetMin);
+  var hh = String(Math.floor(absMin / 60)).padStart(2, '0');
+  var mm = String(absMin % 60).padStart(2, '0');
+  // Return ISO 8601 with offset
+  return datetimeLocalVal + ':00' + sign + hh + ':' + mm;
+}
+
+// Showtimes state — array of timestamptz strings
+var evtShowtimes = [];
+
 function setEvtSubMode(mode) {
   const modes = ['new', 'queue', 'upcoming'];
   modes.forEach(m => {
@@ -4061,7 +4089,7 @@ function evtResetForm() {
   document.getElementById('evt-loc-search').value = '';
   document.getElementById('evt-loc-results').innerHTML = '';
   ['evt-title','evt-address','evt-description','evt-start','evt-end',
-   'evt-showtimes','evt-price','evt-booking-url','evt-age-min','evt-age-max'].forEach(id => {
+   'evt-price','evt-booking-url','evt-age-min','evt-age-max'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -4074,6 +4102,7 @@ function evtResetForm() {
   document.getElementById('evt-save-status').textContent = '';
   evtClearIcon();
   evtClearDates();
+  evtClearShowtimes();
 }
 
 
@@ -4231,6 +4260,61 @@ function evtFilterIcons(val) {
   evtRenderIconGrid(_evtIconCache, val);
 }
 
+// ── Showtime manager ─────────────────────────────────────────────────────────────────────────────────
+
+function evtAddShowtime() {
+  var input = document.getElementById('evt-showtimes-input');
+  var val = input ? input.value : '';
+  if (!val) return;
+  var iso = localToISO(val);
+  if (!iso) return;
+  if (evtShowtimes.indexOf(iso) === -1) {
+    evtShowtimes.push(iso);
+    evtShowtimes.sort();
+  }
+  input.value = '';
+  evtRenderShowtimeChips();
+}
+
+function evtRemoveShowtime(iso) {
+  var idx = evtShowtimes.indexOf(iso);
+  if (idx > -1) evtShowtimes.splice(idx, 1);
+  evtRenderShowtimeChips();
+}
+
+function evtRenderShowtimeChips() {
+  var wrap = document.getElementById('evt-showtimes-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  evtShowtimes.forEach(function(iso) {
+    var d = new Date(iso);
+    var label = d.toLocaleString('nl-NL', { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    var chip = document.createElement('span');
+    chip.title = 'Click to remove';
+    chip.style.display = 'inline-flex';
+    chip.style.alignItems = 'center';
+    chip.style.gap = '5px';
+    chip.style.background = '#dff0f5';
+    chip.style.border = '1.5px solid #4daabb';
+    chip.style.borderRadius = '20px';
+    chip.style.padding = '4px 10px';
+    chip.style.fontSize = '12px';
+    chip.style.color = '#4daabb';
+    chip.style.fontFamily = 'DM Mono, monospace';
+    chip.style.cursor = 'pointer';
+    chip.textContent = label + ' ✕';
+    chip.onclick = (function(i) { return function() { evtRemoveShowtime(i); }; })(iso);
+    wrap.appendChild(chip);
+  });
+}
+
+function evtClearShowtimes() {
+  evtShowtimes = [];
+  evtRenderShowtimeChips();
+  var input = document.getElementById('evt-showtimes-input');
+  if (input) input.value = '';
+}
+
 // ── Specific dates manager ────────────────────────────────────────────────────
 
 var evtSelectedDates = [];  // array of 'YYYY-MM-DD' strings
@@ -4336,10 +4420,10 @@ async function saveEvent() {
     location_id:      evtLinkedLocation ? evtLinkedLocation.id : null,
     address:          document.getElementById('evt-address').value || null,
     // Dates: if specific dates array is set, use that and leave start_date null
-    start_date:       hasDates ? null : (startVal || null),
-    end_date:         hasDates ? null : (document.getElementById('evt-end').value || null),
+    start_date:       hasDates ? null : localToISO(startVal),
+    end_date:         hasDates ? null : localToISO(document.getElementById('evt-end').value),
     dates:            hasDates ? evtSelectedDates : null,
-    showtimes:        document.getElementById('evt-showtimes').value.trim() || null,
+    showtimes:        evtShowtimes.length ? evtShowtimes : null,
     recurring:        document.getElementById('evt-recurring').value || null,
     recurring_until:  document.getElementById('evt-recurring-until').value || null,
     price:            document.getElementById('evt-price').value || null,
@@ -5139,8 +5223,8 @@ async function importSelectedEvents() {
       description: e.description || null,
       location_id: _importLoc?.id || null,
       address:     _importLoc ? (_importLoc.name + (_importLoc.city ? ', ' + _importLoc.city : '')) : null,
-      start_date:  e.start || null,
-      end_date:    e.end   || null,
+      start_date:  e.start ? localToISO(e.start.slice(0,16)) : null,
+      end_date:    e.end   ? localToISO(e.end.slice(0,16))   : null,
       booking_url: e.url   || null,
       price:       e.price || null,
       status:      'draft',
