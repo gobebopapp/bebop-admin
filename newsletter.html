@@ -508,14 +508,14 @@ header {
 
 <div class="form-section">
   <div class="section-header">
-    <div class="section-title">③ Weekend events <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(3–4 events)</span></div>
+    <div class="section-title">③ Weekend events <span style="font-weight:400;text-transform:none;font-family:\'DM Sans\',sans-serif;font-size:11px;color:#A09A94;">(3–4 events)</span></div>
     <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadWeekendEvents()">↺ Load events</button>
   </div>
   <div class="section-body">
     <p class="text-muted" style="margin-bottom:12px;">Hand-pick 3–4 events for this weekend. Each shows as a tight one-liner: title · date · venue, with a small info link.</p>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <input type="text" id="wknd-evt-search" placeholder="Search events by title…" oninput="searchWeekendEvents(this.value)" autocomplete="off"
-        style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
+        style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:\'DM Sans\',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
     </div>
     <div id="wknd-evt-results" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;max-height:240px;overflow-y:auto;"></div>
     <div id="wknd-evt-selected" style="display:flex;flex-direction:column;gap:6px;"></div>
@@ -526,11 +526,11 @@ header {
 
 <div class="form-section">
   <div class="section-header">
-    <div class="section-title">④ New spot <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(one recently added location)</span></div>
+    <div class="section-title">④ New spot <span style="font-weight:400;text-transform:none;font-family:\'DM Sans\',sans-serif;font-size:11px;color:#A09A94;">(one recently added location)</span></div>
     <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadRecentLocations()">↺ Load recent</button>
   </div>
   <div class="section-body">
-    <p class="text-muted" style="margin-bottom:16px;">Highlight one recently added spot. Framed as a discovery — "We just added this one and it's worth knowing about."</p>
+    <p class="text-muted" style="margin-bottom:16px;">Highlight one recently added spot. Framed as a discovery — "We just added this one and it\'s worth knowing about."</p>
     <div id="recent-locs-display">
       <div style="padding:20px;text-align:center;color:#A09A94;font-size:13px;">Click "Load recent" to see recently added locations.</div>
     </div>
@@ -585,7 +585,7 @@ header {
       <button class="btn btn-secondary" onclick="buildPreview()">👁 Preview email</button>
       <button class="btn btn-primary" onclick="copyEmailHtml('weekly')" id="copy-html-btn">📋 Copy HTML for Mailchimp</button>
     </div>
-    <div id="copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:8px;">✓ HTML copied — paste into Mailchimp's code editor (Content → Edit Design → Code your own)</div>
+    <div id="copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:\'DM Mono\',monospace;margin-bottom:8px;">✓ HTML copied — paste into Mailchimp's code editor (Content → Edit Design → Code your own)</div>
     <div id="preview-panel">
       <div class="section-header" style="background:var(--paper);border-bottom:1.5px solid var(--border);">
         <div class="section-title">Email preview</div>
@@ -651,15 +651,15 @@ We send a hand-picked featured spot, a few events coming up, and a newly added p
 <button class="btn btn-secondary" onclick="buildWelcomePreview()">👁 Preview welcome email</button>
 <button class="btn btn-primary" onclick="copyWelcomeHtml()" id="welcome-copy-btn">📋 Copy HTML for Mailchimp</button>
 </div>
-<div id="welcome-copy-confirm" style="display:none;margin-top:8px;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;">✓ HTML copied — paste into Mailchimp’s code editor</div>
+<div id="welcome-copy-confirm" style="display:none;margin-top:8px;font-size:12px;color:#2D6A4F;font-family:\'DM Mono\',monospace;">✓ HTML copied — paste into Mailchimp’s code editor</div>
 <div id="welcome-preview-panel" style="display:none;margin-top:16px;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;">
 <div style="padding:12px 20px;background:var(--paper);border-bottom:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.07em;">Welcome email preview</span>
+<span style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.07em;">Welcome email preview</span>
 <button onclick="document.getElementById('welcome-preview-panel').style.display='none'" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;">Close ✕</button>
 </div>
 <iframe id="welcome-preview-frame" style="width:100%;border:none;min-height:500px;display:block;" title="Welcome email preview"></iframe>
 </div>
-<div id="welcome-status" style="margin-top:12px;font-size:13px;font-family:'DM Mono',monospace;"></div>
+<div id="welcome-status" style="margin-top:12px;font-size:13px;font-family:\'DM Mono\',monospace;"></div>
 
   </div>
 </div>
@@ -699,7 +699,7 @@ We send a hand-picked featured spot, a few events coming up, and a newly added p
       <div class="field full">
         <label>Intro text <span style="color:#E8541A;">*</span></label>
         <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;">
-          <textarea id="evt-intro-notes" placeholder="Your notes — e.g. Koningsdag is huge, lots of free outdoor stuff, great for all ages, market stalls everywhere…" style="flex:1;min-height:60px;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;resize:vertical;"></textarea>
+          <textarea id="evt-intro-notes" placeholder="Your notes — e.g. Koningsdag is huge, lots of free outdoor stuff, great for all ages, market stalls everywhere…" style="flex:1;min-height:60px;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:\'DM Sans\',sans-serif;font-size:13.5px;color:#1A1714;outline:none;resize:vertical;"></textarea>
           <button class="btn btn-enrich" id="evt-intro-gen-btn" onclick="generateEvtIntro()" style="flex-shrink:0;white-space:nowrap;">✦ Generate</button>
         </div>
         <textarea id="evt-intro" placeholder="The intro text that will appear in the email…" style="min-height:80px;"></textarea>
@@ -728,7 +728,7 @@ We send a hand-picked featured spot, a few events coming up, and a newly added p
 <!-- Step 2: Featured event -->
 <div class="form-section">
   <div class="section-header">
-    <div class="section-title">② Featured event <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(hand-pick one highlight)</span></div>
+    <div class="section-title">② Featured event <span style="font-weight:400;text-transform:none;font-family:\'DM Sans\',sans-serif;font-size:11px;color:#A09A94;">(hand-pick one highlight)</span></div>
     <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadOccasionEvents()">↺ Load events</button>
   </div>
   <div class="section-body">
@@ -737,7 +737,7 @@ We send a hand-picked featured spot, a few events coming up, and a newly added p
     <!-- Event search -->
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <input type="text" id="evt-featured-search" placeholder="Search events by title…" oninput="searchOccasionEvents(this.value)" autocomplete="off"
-        style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
+        style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:\'DM Sans\',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
     </div>
     <div id="evt-featured-results" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;max-height:220px;overflow-y:auto;"></div>
 
@@ -768,14 +768,14 @@ We send a hand-picked featured spot, a few events coming up, and a newly added p
 <!-- Step 3: Additional events -->
 <div class="form-section">
   <div class="section-header">
-    <div class="section-title">③ More events <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(3–5 events — each gets its own link)</span></div>
+    <div class="section-title">③ More events <span style="font-weight:400;text-transform:none;font-family:\'DM Sans\',sans-serif;font-size:11px;color:#A09A94;">(3–5 events — each gets its own link)</span></div>
     <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadAllOccasionEventsForList()">↺ Load events</button>
   </div>
   <div class="section-body">
     <p class="text-muted" style="margin-bottom:12px;">Pick up to 5 more events. After selecting, paste the event page URL for each one.</p>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <input type="text" id="evt-list-search" placeholder="Or search by title…" oninput="searchOccasionEventsForList(this.value)" autocomplete="off"
-        style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
+        style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:\'DM Sans\',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
     </div>
     <div id="evt-list-results" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;max-height:300px;overflow-y:auto;"></div>
     <div id="evt-list-selected" style="display:flex;flex-direction:column;gap:6px;"></div>
@@ -809,10 +809,10 @@ We send a hand-picked featured spot, a few events coming up, and a newly added p
         <input type="email" id="evt-test-addr" placeholder="your@email.com" style="font-size:13px;" />
       </div>
     </div>
-    <div id="evt-copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:8px;">✓ HTML copied to clipboard — paste into Mailchimp's HTML editor</div>
+    <div id="evt-copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:\'DM Mono\',monospace;margin-bottom:8px;">✓ HTML copied to clipboard — paste into Mailchimp's HTML editor</div>
     <div id="evt-preview-panel" style="display:none;border:1.5px solid #D4CEC6;border-radius:10px;overflow:hidden;margin-bottom:16px;">
       <div style="padding:12px 20px;background:#E4DDD3;border-bottom:1.5px solid #D4CEC6;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:#6B6560;text-transform:uppercase;letter-spacing:0.07em;">Events email preview</span>
+        <span style="font-family:\'DM Mono\',monospace;font-size:11px;color:#6B6560;text-transform:uppercase;letter-spacing:0.07em;">Events email preview</span>
         <button onclick="document.getElementById('evt-preview-panel').style.display='none'" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;">Close ✕</button>
       </div>
       <iframe id="evt-preview-frame" style="width:100%;border:none;min-height:500px;display:block;" title="Events email preview"></iframe>
@@ -821,7 +821,7 @@ We send a hand-picked featured spot, a few events coming up, and a newly added p
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 6-12 6V8.5l8-1.5-8-1.5V1z" fill="white"/></svg>
       Send to all subscribers
     </button>
-    <div id="evt-send-status" style="margin-top:10px;font-size:13px;font-family:'DM Mono',monospace;"></div>
+    <div id="evt-send-status" style="margin-top:10px;font-size:13px;font-family:\'DM Mono\',monospace;"></div>
   </div>
 </div>
 ```
@@ -1037,7 +1037,7 @@ async function loadActiveRec() {
     const rows = await res.json();
 
     if (!Array.isArray(rows) || !rows.length) {
-      el.innerHTML = '<div style="padding:20px;background:#FEE2E2;border-radius:8px;font-size:13px;color:#991B1B;">No active recommendation found. Activate one in the admin tool's Recs tab first.</div>';
+      el.innerHTML = '<div style="padding:20px;background:#FEE2E2;border-radius:8px;font-size:13px;color:#991B1B;">No active recommendation found. Activate one in the admin tool\'s Recs tab first.</div>';
       activeRec = null;
       document.getElementById('rec-overrides').style.display = 'none';
       return;
@@ -1103,7 +1103,7 @@ async function searchWeekendEvents(query) {
           return '<div onclick="addWeekendEvent(' + JSON.stringify(ev).replace(/"/g, '&quot;') + ')" ' +
             'style="padding:10px 14px;border-radius:8px;border:1.5px solid #D4CEC6;background:#FFFFFF;cursor:pointer;">' +
             '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + ev.title + '</div>' +
-            '<div style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;margin-top:2px;">' +
+            '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;margin-top:2px;">' +
               dateStr + (loc.name ? ' · ' + loc.name : '') +
             '</div>' +
           '</div>';
@@ -1143,15 +1143,15 @@ function renderWeekendEvents() {
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + ev.title + '</div>' +
-          '<div style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;margin-top:2px;">' +
+          '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;margin-top:2px;">' +
             [dateStr, loc.name ? loc.name + (loc.city ? ', ' + loc.city : '') : ''].filter(Boolean).join(' · ') +
           '</div>' +
         '</div>' +
-        '<button onclick="removeWeekendEvent('' + ev.id + '')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;flex-shrink:0;">✕</button>' +
+        '<button onclick="removeWeekendEvent(\'' + ev.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;flex-shrink:0;">✕</button>' +
       '</div>' +
       '<input type="text" value="' + (ev._url || '') + '" placeholder="Event page URL (e.g. https://gobebop.app/...)"' +
-        ' oninput="updateWeekendEventUrl('' + ev.id + '', this.value)"' +
-        ' style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;color:#1A1714;outline:none;" />' +
+        ' oninput="updateWeekendEventUrl(\'' + ev.id + '\', this.value)"' +
+        ' style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;" />' +
     '</div>';
   }).join('');
 }
@@ -1187,25 +1187,33 @@ async function loadRecentLocations() {
 
 function renderRecentLocations() {
   const el = document.getElementById('recent-locs-display');
-  el.innerHTML = '<p class="text-muted" style="margin-bottom:10px;">Select one to highlight as this week's new spot:</p>' +
-    '<div class="recent-loc-list">' +
-    recentLocations.map(r => {
-      const dateStr = new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-      const isSelected = selectedRecentId === r.id;
-      return '<div class="recent-loc-item ' + (isSelected ? 'selected' : '') + '" onclick="selectNewSpot('' + r.id + '')" id="rloc-' + r.id + '">' +
-        (r.thumbUrl ?
-          '<img src="' + r.thumbUrl + '" style="width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;" />' :
-          '<div style="width:40px;height:40px;border-radius:6px;background:#D4CEC6;flex-shrink:0;"></div>') +
-        '<div style="flex:1;min-width:0;">' +
-          '<div class="recent-loc-name">' + r.name + '</div>' +
-          '<div class="recent-loc-meta">' + (r.city || '—') + (r.secondary_category_lead ? ' · ' + r.secondary_category_lead : '') + ' · Added ' + dateStr + '</div>' +
-        '</div>' +
-        (isSelected ? '<span style="font-size:11px;color:#2D6A4F;font-family:'DM Mono',monospace;font-weight:600;">✓ Selected</span>' : '') +
-      '</div>';
-    }).join('') +
-    '</div>';
-
-  // Show/hide URL fields
+  el.innerHTML = '';
+  const intro = document.createElement('p');
+  intro.className = 'text-muted';
+  intro.style.marginBottom = '10px';
+  intro.textContent = "Select one to highlight as this week\'s new spot:";
+  el.appendChild(intro);
+  const list = document.createElement('div');
+  list.className = 'recent-loc-list';
+  recentLocations.forEach(r => {
+    const dateStr = new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const isSelected = selectedRecentId === r.id;
+    const div = document.createElement('div');
+    div.className = 'recent-loc-item' + (isSelected ? ' selected' : '');
+    div.id = 'rloc-' + r.id;
+    div.innerHTML =
+      (r.thumbUrl ?
+        '<img src="' + r.thumbUrl + '" style="width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;" />' :
+        '<div style="width:40px;height:40px;border-radius:6px;background:#D4CEC6;flex-shrink:0;"></div>') +
+      '<div style="flex:1;min-width:0;">' +
+        '<div class="recent-loc-name">' + r.name + '</div>' +
+        '<div class="recent-loc-meta">' + (r.city || '—') + (r.secondary_category_lead ? ' · ' + r.secondary_category_lead : '') + ' · Added ' + dateStr + '</div>' +
+      '</div>' +
+      (isSelected ? '<span style="font-size:11px;color:#2D6A4F;font-weight:600;">&#10003; Selected</span>' : '');
+    div.addEventListener('click', () => selectNewSpot(r.id));
+    list.appendChild(div);
+  });
+  el.appendChild(list);
   document.getElementById('new-spot-url-field').style.display = selectedRecentId ? 'block' : 'none';
 }
 
@@ -1347,8 +1355,8 @@ function buildEmailHtml(opts) {
       '</td></tr>' +
       '<tr><td style="padding:36px 32px 20px;background:' + cardBg + ';">' +
         '<p style="font-family:' + fontBody + ';font-size:16px;font-weight:600;color:' + ink + ';margin:0 0 16px;line-height:1.5;">' + (welcomeOpener || 'Welcome to GoBebop!') + '</p>' +
-        '<p style="font-family:' + fontBody + ';font-size:15px;color:' + inkSoft + ';margin:0 0 28px;line-height:1.7;">' + (welcomeBody || '').replace(/
-/g, '<br>') + '</p>' +
+        '<p style="font-family:' + fontBody + ';font-size:15px;color:' + inkSoft + ';margin:0 0 28px;line-height:1.7;">' + (welcomeBody || '').replace(/\n/g, '<br>') + '</p>' +
+
         '<table cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:10px;background:' + teal + ';">' +
           '<a href="' + (welcomeCtaUrl || 'https://gobebop.app') + '" style="display:inline-block;padding:14px 28px;font-family:' + fontBody + ';font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:10px;">' + (welcomeCtaText || 'Explore the map') + '</a>' +
         '</td></tr></table>' +
@@ -1387,7 +1395,7 @@ function buildEmailHtml(opts) {
     if (recName) {
       bodyRows +=
         '<tr><td style="padding:28px 32px 0;">' +
-          '<p style="' + eyebrow + '">⭐ This week's pick</p>' +
+          '<p style="' + eyebrow + '">⭐ This week\'s pick</p>' +
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">' +
             (recPhotoUrl ?
               '<div style="width:100%;height:220px;overflow:hidden;">' +
@@ -1412,7 +1420,7 @@ function buildEmailHtml(opts) {
     if (weekendEvts.length) {
       bodyRows +=
         '<tr><td style="padding:28px 32px 0;">' +
-          '<p style="' + eyebrow + '">🗓 This weekend's events</p>' +
+          '<p style="' + eyebrow + '">🗓 This weekend\'s events</p>' +
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:12px;overflow:hidden;">' +
             weekendEvts.map((ev, i) => {
               const loc = ev.locations || {};
@@ -1440,7 +1448,7 @@ function buildEmailHtml(opts) {
         '<tr><td style="padding:28px 32px 0;">' +
           '<p style="' + eyebrow + '">🆕 New on GoBebop</p>' +
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:12px;padding:18px 20px;">' +
-            '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkMuted + ';margin:0 0 10px;line-height:1.6;font-style:italic;">We just added this one and it's worth knowing about.</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkMuted + ';margin:0 0 10px;line-height:1.6;font-style:italic;">We just added this one and it\'s worth knowing about.</p>' +
             '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
               (newSpot.thumbUrl ? '<td style="width:64px;padding-right:14px;vertical-align:middle;">' +
                 '<img src="' + newSpot.thumbUrl + '" width="64" height="64" style="width:64px;height:64px;border-radius:10px;object-fit:cover;display:block;" />' +
@@ -1680,7 +1688,7 @@ function evtResultCard(ev, onClickFn, isSelected) {
   return '<div onclick="' + onClickFn + '(' + JSON.stringify(ev).replace(/"/g, '&quot;') + ')" ' +
     'style="padding:10px 14px;border-radius:8px;border:1.5px solid ' + (isSelected ? '#4daabb' : '#D4CEC6') + ';background:' + (isSelected ? '#dff0f5' : '#FFFFFF') + ';cursor:pointer;' + (isSelected ? 'pointer-events:none;' : '') + '">' +
     '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + ev.title + '</div>' +
-    '<div style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;margin-top:2px;">' +
+    '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;margin-top:2px;">' +
       dateStr + (loc.name ? ' · ' + loc.name : '') + (ev.price ? ' · ' + ev.price : '') +
     '</div>' +
   '</div>';
@@ -1709,7 +1717,7 @@ function selectFeaturedEvent(ev) {
   const loc = ev.locations || {};
   document.getElementById('evt-featured-card').innerHTML =
     '<div style="font-size:14px;font-weight:600;color:#1A1714;margin-bottom:4px;">' + ev.title + '</div>' +
-    '<div style="font-size:11px;color:#4daabb;font-family:'DM Mono',monospace;margin-bottom:6px;">' +
+    '<div style="font-size:11px;color:#4daabb;font-family:\'DM Mono\',monospace;margin-bottom:6px;">' +
       formatEvtDate(ev.start_date) + (loc.name ? ' · ' + loc.name + (loc.city ? ', ' + loc.city : '') : '') +
     '</div>' +
     (ev.description ? '<div style="font-size:13px;color:#6B6560;line-height:1.6;">' + ev.description.slice(0, 200) + (ev.description.length > 200 ? '…' : '') + '</div>' : '') +
@@ -1763,22 +1771,22 @@ function renderEvtList() {
     const icon = ev.icon || ev.emoji || null;
     const { supabaseUrl } = getConfig();
     const iconHtml = icon && supabaseUrl
-      ? '<img src="' + supabaseUrl + '/storage/v1/object/public/icons/' + icon + '" style="width:28px;height:28px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'" />'
+      ? '<img src="' + supabaseUrl + '/storage/v1/object/public/icons/' + icon + '" style="width:28px;height:28px;object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'" />'
       : '<span style="font-size:22px;flex-shrink:0;">📅</span>';
     return '<div style="background:#FFFFFF;border:1.5px solid #D4CEC6;border-radius:8px;padding:10px 12px;">' +
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">' +
         iconHtml +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + ev.title + '</div>' +
-          '<div style="font-size:11px;color:#A09A94;font-family:'DM Mono',monospace;">' +
+          '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;">' +
             [ev.event_type, formatEvtDate(ev.start_date), loc.name].filter(Boolean).join(' · ') +
           '</div>' +
         '</div>' +
-        '<button onclick="removeEvtListEvent('' + ev.id + '')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;flex-shrink:0;">✕</button>' +
+        '<button onclick="removeEvtListEvent(\'' + ev.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;flex-shrink:0;">✕</button>' +
       '</div>' +
       '<input type="text" value="' + (ev._url || '') + '" placeholder="Event page URL (optional — e.g. https://gobebop.app/...)"' +
-        ' oninput="updateEvtListUrl('' + ev.id + '', this.value)"' +
-        ' style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;color:#1A1714;outline:none;" />' +
+        ' oninput="updateEvtListUrl(\'' + ev.id + '\', this.value)"' +
+        ' style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;" />' +
     '</div>';
   }).join('');
 }
@@ -1972,7 +1980,7 @@ function buildEvtEmailHtml() {
   const ctaHtml =
     '<tr><td style="padding:20px 20px 0;">' +
       '<div style="background:' + teal + ';border-radius:14px;padding:24px 20px;text-align:center;">' +
-        '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.8px;">Don't miss out</p>' +
+        '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.8px;">Don\'t miss out</p>' +
         '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.85);margin:0 0 18px;line-height:1.5;">See the full programme on GoBebop</p>' +
         '<a href="' + pageUrl + '" style="display:block;background:#ffffff;color:' + teal + ';font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:14px 20px;border-radius:10px;text-decoration:none;">' + ctaText + '</a>' +
       '</div>' +
