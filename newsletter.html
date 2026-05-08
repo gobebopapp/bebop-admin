@@ -933,15 +933,17 @@ async function loadWeather() {
     const getDay = (dateStr) => {
       const readings = data.list.filter(r => r.dt_txt.startsWith(dateStr));
       if (!readings.length) return null;
-      // Prefer the reading closest to local noon. Amsterdam is UTC+1/+2.
-      // Try 10:00:00 UTC (noon Amsterdam summer), then 09:00, then 12:00 UTC, then first reading.
-      return readings.find(r => r.dt_txt.includes('10:00:00'))
-          || readings.find(r => r.dt_txt.includes('09:00:00'))
-          || readings.find(r => r.dt_txt.includes('11:00:00'))
-          || readings.find(r => r.dt_txt.includes('12:00:00'))
-          || readings.find(r => r.dt_txt.includes('13:00:00'))
-          // Fallback: pick reading with highest temp (most representative of daytime)
-          || readings.reduce((best, r) => r.main.temp > best.main.temp ? r : best, readings[0]);
+      // Daytime = 06:00–20:00 Amsterdam (04:00–18:00 UTC in summer, UTC+2)
+      const daytime = readings.filter(r => {
+        const hour = parseInt(r.dt_txt.slice(11, 13), 10);
+        return hour >= 4 && hour <= 18;
+      });
+      const pool = daytime.length ? daytime : readings;
+      // Pick the reading with the highest temp_max — this is the forecasted day high
+      const hottest = pool.reduce((best, r) =>
+        (r.main.temp_max || r.main.temp) > (best.main.temp_max || best.main.temp) ? r : best, pool[0]);
+      // Return a copy with temp set to temp_max so display shows the high
+      return { ...hottest, main: { ...hottest.main, temp: hottest.main.temp_max || hottest.main.temp } };
     };
 
     const sat = getDay(satStr);
@@ -1444,28 +1446,27 @@ function buildEmailHtml(opts) {
 
     // ── Section 4: New spot ──
     if (newSpot) {
+      const newSpotMeta = [newSpot.city, newSpot.cat].filter(Boolean).join(' · ');
       bodyRows +=
         '<tr><td style="padding:28px 32px 0;">' +
-          '<p style="' + eyebrow + '">🆕 New on GoBebop</p>' +
-          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:12px;padding:18px 20px;">' +
-            '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkMuted + ';margin:0 0 10px;line-height:1.6;font-style:italic;">We just added this one and it\'s worth knowing about.</p>' +
+          '<p style="' + eyebrow + '">Just added</p>' +
+          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:12px;overflow:hidden;">' +
             '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
-              (newSpot.thumbUrl ? '<td style="width:64px;padding-right:14px;vertical-align:middle;">' +
-                '<img src="' + newSpot.thumbUrl + '" width="64" height="64" style="width:64px;height:64px;border-radius:10px;object-fit:cover;display:block;" />' +
-              '</td>' : '') +
-              '<td style="vertical-align:middle;">' +
-                '<p style="font-family:' + fontDisplay + ';font-size:18px;font-weight:700;color:' + ink + ';margin:0 0 3px;line-height:1.2;">' + newSpot.name + '</p>' +
-                '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0;letter-spacing:0.4px;">' + [newSpot.city, newSpot.cat].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
+              (newSpot.thumbUrl ?
+                '<td style="width:100px;vertical-align:top;">' +
+                  '<img src="' + newSpot.thumbUrl + '" width="100" height="100" style="width:100px;height:100px;object-fit:cover;display:block;" />' +
+                '</td>' : '') +
+              '<td style="vertical-align:middle;padding:16px 18px;">' +
+                '<p style="font-family:' + fontBody + ';font-size:15px;font-weight:700;color:' + ink + ';margin:0 0 3px;line-height:1.3;">' + newSpot.name + '</p>' +
+                (newSpotMeta ? '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0 0 10px;">' + newSpotMeta + '</p>' : '') +
+                (newSpot.url ?
+                  '<a href="' + newSpot.url + '" style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:' + ink + ';text-decoration:none;border-bottom:1.5px solid ' + borderStrong + ';padding-bottom:1px;">View on GoBebop &#8594;</a>' : '') +
               '</td>' +
             '</tr></table>' +
-            (newSpot.url ?
-              '<p style="font-family:' + fontBody + ';font-size:14px;margin:14px 0 0;">' +
-                '<a href="' + newSpot.url + '" style="color:' + teal + ';text-decoration:underline;font-weight:600;">' + newSpot.name + ' on GoBebop</a>' +
-              '</p>' : '') +
             (newSpot.allUrl ?
-              '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:8px 0 0;">' +
-                '<a href="' + newSpot.allUrl + '" style="color:' + inkMuted + ';text-decoration:underline;">Explore all recently added spots →</a>' +
-              '</p>' : '') +
+              '<div style="border-top:1px solid ' + border + ';padding:10px 18px;">' +
+                '<a href="' + newSpot.allUrl + '" style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';text-decoration:none;">Browse all recently added spots &#8594;</a>' +
+              '</div>' : '') +
           '</div>' +
         '</td></tr>';
     }
@@ -1912,7 +1913,7 @@ function buildEvtEmailHtml() {
   const eyebrow = 'font-family:' + fontBody + ';font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 12px;';
 
   const logoHtml =
-    '<tr><td align="center" style="padding:24px 20px 16px;background:' + pageBg + ';">' +
+    '<tr><td align="center" style="padding:20px 14px 12px;background:' + pageBg + ';">' +
       '<a href="https://gobebop.app" style="text-decoration:none;">' +
         '<img src="' + logoUrl + '" alt="GoBebop" height="40" style="height:40px;display:block;margin:0 auto;" />' +
       '</a>' +
@@ -1922,13 +1923,13 @@ function buildEvtEmailHtml() {
     ? '<tr><td style="padding:0;line-height:0;">' +
         '<img src="' + heroImage + '" width="100%" style="width:100%;height:220px;object-fit:cover;object-position:center;display:block;" alt="' + occasion + '" />' +
       '</td></tr>' +
-      '<tr><td style="padding:28px 20px 24px;background:' + teal + ';">' +
+      '<tr><td style="padding:24px 14px 20px;background:' + teal + ';">' +
         '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 6px;">GoBebop Events</p>' +
         '<p style="font-family:' + fontDisplay + ';font-size:30px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
         (dateRange ? '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin:0 0 14px;">' + dateRange + '</p>' : '<div style="margin-bottom:14px;"></div>') +
         (intro ? '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.92);margin:0;line-height:1.7;">' + intro + '</p>' : '') +
       '</td></tr>'
-    : '<tr><td style="padding:32px 20px 28px;background:' + teal + ';">' +
+    : '<tr><td style="padding:28px 14px 24px;background:' + teal + ';">' +
         '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 6px;">GoBebop Events</p>' +
         '<p style="font-family:' + fontDisplay + ';font-size:30px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
         (dateRange ? '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin:0 0 14px;">' + dateRange + '</p>' : '<div style="margin-bottom:14px;"></div>') +
@@ -1936,11 +1937,11 @@ function buildEvtEmailHtml() {
       '</td></tr>';
 
   const featuredHtml = evtFeaturedEvent ?
-    '<tr><td style="padding:20px 20px 0;">' +
+    '<tr><td style="padding:20px 14px 0;">' +
       '<p style="' + eyebrow + '">⭐ Featured</p>' +
       '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
         '<div style="height:3px;background:linear-gradient(90deg,' + teal + ',' + tealDark + ');"></div>' +
-        '<div style="padding:18px 18px 20px;">' +
+        '<div style="padding:16px 14px 18px;">' +
           (featType ? '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;background:' + orangeBg + ';color:' + orange + ';display:inline-block;padding:2px 9px;border-radius:20px;margin:0 0 10px;">' + featType + '</p>' : '') +
           '<p style="font-family:' + fontDisplay + ';font-size:20px;font-weight:700;color:' + ink + ';margin:0 0 6px;line-height:1.2;">' + featTitle + '</p>' +
           '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:' + teal + ';margin:0 0 12px;">' +
@@ -1953,7 +1954,7 @@ function buildEvtEmailHtml() {
     '</td></tr>' : '';
 
   const moreHtml = evtListEvents.length ?
-    '<tr><td style="padding:20px 20px 0;">' +
+    '<tr><td style="padding:20px 14px 0;">' +
       '<p style="' + eyebrow + '">More events coming up</p>' +
       '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
         evtListEvents.map((ev, i) => {
@@ -1963,7 +1964,7 @@ function buildEvtEmailHtml() {
             ? '<img src="' + iconBaseUrl + iconFile + '" width="36" height="36" style="width:36px;height:36px;object-fit:contain;display:block;flex-shrink:0;" />'
             : '<span style="font-size:28px;line-height:1;flex-shrink:0;">📅</span>';
           const meta = [formatEvtDate(ev.start_date), loc.name ? loc.name + (loc.city ? ', ' + loc.city : '') : ''].filter(Boolean).join(' · ');
-          return '<div style="padding:16px 18px;' + (i < evtListEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
+          return '<div style="padding:14px 14px;' + (i < evtListEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
             '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
               '<td style="width:44px;vertical-align:top;padding-right:12px;padding-top:2px;">' + iconImg + '</td>' +
               '<td style="vertical-align:top;">' +
@@ -1978,8 +1979,8 @@ function buildEvtEmailHtml() {
     '</td></tr>' : '';
 
   const ctaHtml =
-    '<tr><td style="padding:20px 20px 0;">' +
-      '<div style="background:' + teal + ';border-radius:14px;padding:24px 20px;text-align:center;">' +
+    '<tr><td style="padding:20px 14px 0;">' +
+      '<div style="background:' + teal + ';border-radius:10px;padding:20px 14px;text-align:center;">' +
         '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.8px;">Don\'t miss out</p>' +
         '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.85);margin:0 0 18px;line-height:1.5;">See the full programme on GoBebop</p>' +
         '<a href="' + pageUrl + '" style="display:block;background:#ffffff;color:' + teal + ';font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:14px 20px;border-radius:10px;text-decoration:none;">' + ctaText + '</a>' +
@@ -1987,14 +1988,14 @@ function buildEvtEmailHtml() {
     '</td></tr>';
 
   const tipHtml = tip ?
-    '<tr><td style="padding:16px 20px 0;">' +
+    '<tr><td style="padding:14px 14px 0;">' +
       '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 16px;">' +
         '<p style="font-family:' + fontBody + ';font-size:13px;color:' + amberText + ';margin:0;line-height:1.6;">💡 ' + tip + '</p>' +
       '</div>' +
     '</td></tr>' : '';
 
   const footerHtml =
-    '<tr><td style="padding:28px 20px;border-top:1px solid ' + border + ';margin-top:20px;">' +
+    '<tr><td style="padding:22px 14px;border-top:1px solid ' + border + ';margin-top:20px;">' +
       '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:600;color:' + inkMuted + ';margin:0 0 6px;text-align:center;">GoBebop · Family guide to Amsterdam &amp; the Netherlands</p>' +
       '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;text-align:center;">' +
         '<a href="https://gobebop.app" style="color:' + teal + ';text-decoration:none;font-weight:600;">gobebop.app</a>' +
