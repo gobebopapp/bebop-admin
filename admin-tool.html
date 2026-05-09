@@ -601,6 +601,32 @@ header {
   .recent-item { padding: 12px 14px; }
 }
 
+/* ── Photo sub-tabs ── */
+.photo-sub-toggle { display:flex; gap:0; margin-bottom:24px; border:1.5px solid #D4CEC6; border-radius:10px; overflow:hidden; width:fit-content; }
+.photo-sub-btn { padding:9px 20px; font-size:13px; font-family:'DM Sans',sans-serif; font-weight:500; background:#E4DDD3; color:#1A1714; border:none; cursor:pointer; transition:all 0.15s; }
+.photo-sub-btn + .photo-sub-btn { border-left:1.5px solid #D4CEC6; }
+.photo-sub-btn.active { background:#4daabb; color:white; }
+
+/* ── Wikimedia results grid ── */
+.wm-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-top:16px; }
+.wm-card { background:#FFFFFF; border:2px solid #D4CEC6; border-radius:10px; overflow:hidden; cursor:pointer; transition:all 0.15s; position:relative; }
+.wm-card:hover { border-color:#4daabb; transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+.wm-card.selected { border-color:#2D6A4F; border-width:2px; }
+.wm-card img { width:100%; height:120px; object-fit:cover; display:block; background:#E4DDD3; }
+.wm-card .wm-card-body { padding:8px 10px 10px; }
+.wm-card .wm-license { display:inline-block; font-family:'DM Mono',monospace; font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.04em; }
+.wm-license.ok  { background:#D8EDDF; color:#2D6A4F; }
+.wm-license.bad { background:#FEE2E2; color:#991B1B; }
+.wm-license.cc0 { background:#dff0f5; color:#4daabb; }
+.wm-card .wm-author { font-size:11px; color:#6B6560; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wm-card .wm-title { font-size:11px; color:#1A1714; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px; }
+.wm-card .wm-unusable-overlay { position:absolute; inset:0; background:rgba(255,255,255,0.7); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#991B1B; font-family:'DM Mono',monospace; pointer-events:none; }
+.wm-selected-preview { background:#D8EDDF; border:1.5px solid #A7D7BB; border-radius:10px; padding:14px 16px; margin-top:16px; display:flex; gap:14px; align-items:flex-start; }
+.wm-selected-preview img { width:80px; height:60px; object-fit:cover; border-radius:6px; flex-shrink:0; }
+.wm-selected-preview .wm-preview-meta { flex:1; min-width:0; }
+.wm-selected-preview .wm-preview-title { font-size:13px; font-weight:600; color:#1A1714; margin-bottom:4px; }
+.wm-selected-preview .wm-preview-credit { font-size:11px; color:#2D6A4F; font-family:'DM Mono',monospace; line-height:1.5; }
+
 /* ── Event icon picker ── */
 .icon-picker-grid { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; max-height:260px; overflow-y:auto; padding:4px 2px; }
 .icon-picker-cell { width:56px; height:56px; border-radius:8px; border:1.5px solid #D4CEC6; background:#F0EBE3; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:all 0.12s; flex-shrink:0; position:relative; }
@@ -797,49 +823,128 @@ header {
   <!-- Photo mode -->
 
   <div id="photo-mode-ui" style="display:none;">
-    <div class="page-title">Add photos to a location</div>
-    <p class="page-sub">Search for an existing location in your database, then upload photos. No API calls needed.</p>
+    <div class="page-title">Photos</div>
+    <p class="page-sub">Upload location photos or find images on Wikimedia Commons.</p>
 
 ```
-<div id="recent-section" class="recent-section" style="display:none;visibility:hidden;height:0;overflow:hidden;margin:0;padding:0;">
-  <div class="recent-label">Recent</div>
-  <div class="recent-list" id="recent-list"></div>
+<div class="photo-sub-toggle">
+  <button class="photo-sub-btn active" id="psub-upload" onclick="setPhotoSubMode('upload')">📷 Upload</button>
+  <button class="photo-sub-btn" id="psub-wikimedia" onclick="setPhotoSubMode('wikimedia')">🌐 Wikimedia</button>
 </div>
 
-<div class="lookup-bar" style="flex-direction:column;gap:8px;">
-  <div class="field-wrap" style="width:100%;">
-    <label>Search locations</label>
-    <input type="text" id="photo-search-input" placeholder="Start typing a name…" oninput="searchLocations(this.value)" autocomplete="off" style="font-size:16px;" />
-  </div>
-  <div class="photo-search-results" id="photo-search-results"></div>
-</div>
+<!-- Upload panel -->
+<div id="photo-upload-panel">
 
-<div id="photo-mode-upload-panel" style="display:none;">
-  <div class="photo-mode-upload">
-    <div class="photo-mode-selected" id="photo-mode-selected"></div>
-    <div id="existing-photos-warning" style="display:none;background:#fef9c3;border:1.5px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:14px;"></div>
-    <p class="text-muted" style="margin-bottom:14px;">Saved as WebP, max 1200px long edge (display) + max 400px (thumb). Pick a descriptor and add alt text for SEO. Filename pattern: <code style="font-family:'DM Mono',monospace;font-size:11px;background:#E4DDD3;padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.webp</code></p>
-    <div class="photo-drop-zone" id="photo-mode-drop-zone" ondragover="event.preventDefault()" ondrop="handlePhotoModeFiles(event.dataTransfer.files)">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:#A09A94;margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-      <p style="font-size:13px;color:#A09A94;margin-bottom:6px;">Drag photos here or</p>
-      <label class="btn btn-secondary" style="cursor:pointer;font-size:13px;">
-        Choose files
-        <input type="file" id="photo-mode-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoModeFiles(this.files)" />
-      </label>
+  <div id="recent-section" class="recent-section" style="display:none;visibility:hidden;height:0;overflow:hidden;margin:0;padding:0;">
+    <div class="recent-label">Recent</div>
+    <div class="recent-list" id="recent-list"></div>
+  </div>
+
+  <div class="lookup-bar" style="flex-direction:column;gap:8px;">
+    <div class="field-wrap" style="width:100%;">
+      <label>Search locations</label>
+      <input type="text" id="photo-search-input" placeholder="Start typing a name…" oninput="searchLocations(this.value)" autocomplete="off" style="font-size:16px;" />
     </div>
-    <div id="photo-mode-previews" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;"></div>
-    <div style="margin-top:16px;">
-      <button class="btn btn-save" id="pm-upload-btn" onclick="uploadPhotoMode()">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 4l3.5-3.5L10 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Upload Photos
-      </button>
-    </div>
-    <div class="next-location-bar hidden" id="next-location-bar">
-      <p>✓ Photos uploaded! Ready for next location?</p>
-      <button onclick="startNextLocation()">Next location →</button>
+    <div class="photo-search-results" id="photo-search-results"></div>
+  </div>
+
+  <div id="photo-mode-upload-panel" style="display:none;">
+    <div class="photo-mode-upload">
+      <div class="photo-mode-selected" id="photo-mode-selected"></div>
+      <div id="existing-photos-warning" style="display:none;background:#fef9c3;border:1.5px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:14px;"></div>
+      <p class="text-muted" style="margin-bottom:14px;">Saved as WebP, max 1200px long edge (display) + max 400px (thumb). Pick a descriptor and add alt text for SEO. Filename pattern: <code style="font-family:'DM Mono',monospace;font-size:11px;background:#E4DDD3;padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.webp</code></p>
+      <div class="photo-drop-zone" id="photo-mode-drop-zone" ondragover="event.preventDefault()" ondrop="handlePhotoModeFiles(event.dataTransfer.files)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:#A09A94;margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <p style="font-size:13px;color:#A09A94;margin-bottom:6px;">Drag photos here or</p>
+        <label class="btn btn-secondary" style="cursor:pointer;font-size:13px;">
+          Choose files
+          <input type="file" id="photo-mode-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoModeFiles(this.files)" />
+        </label>
+      </div>
+      <div id="photo-mode-previews" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;"></div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-save" id="pm-upload-btn" onclick="uploadPhotoMode()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 4l3.5-3.5L10 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Upload Photos
+        </button>
+      </div>
+      <div class="next-location-bar hidden" id="next-location-bar">
+        <p>✓ Photos uploaded! Ready for next location?</p>
+        <button onclick="startNextLocation()">Next location →</button>
+      </div>
     </div>
   </div>
-</div>
+
+</div><!-- /photo-upload-panel -->
+
+<!-- Wikimedia panel -->
+<div id="photo-wikimedia-panel" style="display:none;">
+
+  <!-- Step 1: Location search -->
+  <div class="lookup-bar" style="flex-direction:column;gap:8px;margin-bottom:16px;">
+    <div class="field-wrap" style="width:100%;">
+      <label>Search locations</label>
+      <input type="text" id="wm-loc-search" placeholder="Start typing a location name…" oninput="wmSearchLocations(this.value)" autocomplete="off" style="font-size:16px;" />
+    </div>
+    <div class="photo-search-results" id="wm-loc-results"></div>
+    <div id="wm-loc-selected" style="display:none;"></div>
+  </div>
+
+  <!-- Step 2: Wikimedia search (shown after location picked) -->
+  <div id="wm-search-panel" style="display:none;">
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">🌐 Search Wikimedia Commons</div>
+      </div>
+      <div class="section-body">
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:4px;">
+          <div class="field" style="flex:1;min-width:200px;">
+            <label>Search term</label>
+            <input type="text" id="wm-query" placeholder="e.g. Artis Amsterdam zoo" style="font-size:16px;"
+              onkeydown="if(event.key==='Enter') wmSearch()" />
+          </div>
+          <button class="btn btn-primary" onclick="wmSearch()" id="wm-search-btn">Search</button>
+        </div>
+        <p class="text-muted">Only CC BY, CC BY-SA, and CC0 / Public Domain photos can be used. NC and ND licenses are flagged.</p>
+
+        <div id="wm-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;margin-top:8px;"></div>
+        <div class="wm-grid" id="wm-grid"></div>
+
+        <!-- Selected photo preview + descriptor + save -->
+        <div id="wm-selected-wrap" style="display:none;margin-top:20px;">
+          <div class="wm-selected-preview" id="wm-selected-preview"></div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;align-items:flex-end;">
+            <div class="field" style="min-width:180px;">
+              <label>Descriptor <span style="color:#E8541A;">*</span></label>
+              <select id="wm-descriptor" style="font-size:14px;">
+                <option value="">— select —</option>
+                <option value="interior">interior</option>
+                <option value="exterior">exterior</option>
+                <option value="play-area">play-area</option>
+                <option value="kids-cafe">kids-cafe</option>
+                <option value="entrance">entrance</option>
+                <option value="playground">playground</option>
+                <option value="activity">activity</option>
+                <option value="overview">overview</option>
+                <option value="hero">hero</option>
+                <option value="detail">detail</option>
+              </select>
+            </div>
+            <div class="field" style="flex:1;min-width:200px;">
+              <label>Alt text</label>
+              <input type="text" id="wm-alt-text" placeholder="e.g. Children playing at Artis zoo Amsterdam" />
+            </div>
+            <button class="btn btn-save" id="wm-save-btn" onclick="wmSavePhoto()" style="width:auto;padding:10px 24px;">
+              Save to location
+            </button>
+          </div>
+          <div id="wm-save-status" style="margin-top:10px;font-size:13px;font-family:'DM Mono',monospace;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /photo-wikimedia-panel -->
 ```
 
   </div>
@@ -2793,6 +2898,8 @@ function setMode(mode) {
     document.getElementById('photo-search-results').innerHTML = '';
     document.getElementById('photo-mode-upload-panel').style.display = 'none';
     document.getElementById('photo-mode-previews').innerHTML = '';
+    setPhotoSubMode('upload');
+    wmReset();
   }
   if (isRecs) {
     loadRecommendations();
@@ -2803,6 +2910,352 @@ function setMode(mode) {
   if (isRefresh) {
     populateRefreshSecCatDropdown();
   }
+}
+
+
+// ── Photo sub-tab toggle ──────────────────────────────────────────────────────
+
+function setPhotoSubMode(mode) {
+  var isUpload = mode === 'upload';
+  document.getElementById('psub-upload').classList.toggle('active', isUpload);
+  document.getElementById('psub-wikimedia').classList.toggle('active', !isUpload);
+  document.getElementById('photo-upload-panel').style.display    = isUpload ? '' : 'none';
+  document.getElementById('photo-wikimedia-panel').style.display = isUpload ? 'none' : '';
+}
+
+// ── Wikimedia Commons integration ─────────────────────────────────────────────
+
+var wmSelectedRecord  = null;  // location record
+var wmSelectedPhoto   = null;  // {title, url, thumbUrl, author, license, creditLine}
+
+var WM_USABLE_LICENSES = ['cc-by', 'cc-by-sa', 'cc0', 'pd', 'public domain'];
+
+function wmLicenseInfo(licenseStr) {
+  if (!licenseStr) return { label: 'Unknown', cls: 'bad', usable: false };
+  var l = licenseStr.toLowerCase();
+  if (l.includes('cc0') || l.includes('public domain') || l === 'pd') {
+    return { label: 'CC0 / PD', cls: 'cc0', usable: true };
+  }
+  if ((l.includes('cc-by') || l.includes('cc by')) && !l.includes('nc') && !l.includes('nd')) {
+    var ver = l.match(/[\d.]+/);
+    return { label: 'CC BY' + (l.includes('sa') ? '-SA' : '') + (ver ? ' ' + ver[0] : ''), cls: 'ok', usable: true };
+  }
+  if (l.includes('nc') || l.includes('nd')) {
+    var raw = licenseStr.replace(/^cc[\s-]*/i, '').toUpperCase().slice(0, 12);
+    return { label: raw, cls: 'bad', usable: false };
+  }
+  return { label: licenseStr.slice(0, 12), cls: 'bad', usable: false };
+}
+
+function wmBuildCreditLine(author, licenseLabel, title) {
+  var parts = [];
+  if (author) parts.push(author);
+  parts.push(licenseLabel + ' / Wikimedia Commons');
+  return parts.join(' / ');
+}
+
+function wmSearchLocations(query) {
+  var cfg = getConfig();
+  var resultsEl = document.getElementById('wm-loc-results');
+  if (query.length < 2) { resultsEl.innerHTML = ''; return; }
+  fetch(
+    cfg.supabaseUrl + '/rest/v1/' + cfg.supabaseTable + '?name=ilike.*' + encodeURIComponent(query) + '*&select=id,name,city,google_place_id&limit=8',
+    { headers: { 'apikey': cfg.supabaseKey, 'Authorization': 'Bearer ' + cfg.supabaseKey } }
+  ).then(function(res) { return res.json(); })
+  .then(function(rows) {
+    if (!rows.length) { resultsEl.innerHTML = '<div style="padding:10px 14px;font-size:13px;color:#A09A94;">No results</div>'; return; }
+    resultsEl.innerHTML = rows.map(function(r) {
+      var data = JSON.stringify(r).replace(/"/g, '&quot;');
+      return '<div class="photo-search-result" onclick="wmSelectLocation(' + data + ')">' +
+        '<div class="res-name">' + r.name + '</div>' +
+        '<div class="res-meta">' + (r.city || '') + '</div>' +
+      '</div>';
+    }).join('');
+  }).catch(function(e) {
+    resultsEl.innerHTML = '<div style="padding:10px;font-size:12px;color:#991B1B;">Error: ' + e.message + '</div>';
+  });
+}
+
+function wmSelectLocation(loc) {
+  wmSelectedRecord = loc;
+  document.getElementById('wm-loc-search').value = '';
+  document.getElementById('wm-loc-results').innerHTML = '';
+  var selEl = document.getElementById('wm-loc-selected');
+  selEl.style.display = '';
+  selEl.innerHTML =
+    '<div class="photo-mode-selected" style="margin-bottom:0;">' +
+      '<div>' +
+        '<div class="sel-name">' + loc.name + '</div>' +
+        '<div class="sel-meta">' + (loc.city || '') + '</div>' +
+      '</div>' +
+      '<span class="sel-change" onclick="wmClearLocation()">Change</span>' +
+    '</div>';
+  document.getElementById('wm-search-panel').style.display = '';
+  // Pre-fill search with location name
+  document.getElementById('wm-query').value = loc.name;
+}
+
+function wmClearLocation() {
+  wmSelectedRecord = null;
+  document.getElementById('wm-loc-selected').style.display = 'none';
+  document.getElementById('wm-loc-selected').innerHTML = '';
+  document.getElementById('wm-search-panel').style.display = 'none';
+  document.getElementById('wm-grid').innerHTML = '';
+  document.getElementById('wm-status').textContent = '';
+  wmClearSelection();
+}
+
+function wmSearch() {
+  var query = document.getElementById('wm-query').value.trim();
+  if (!query) return;
+  var btn = document.getElementById('wm-search-btn');
+  var statusEl = document.getElementById('wm-status');
+  var grid = document.getElementById('wm-grid');
+  btn.disabled = true;
+  btn.textContent = 'Searching…';
+  statusEl.textContent = 'Searching Wikimedia Commons…';
+  grid.innerHTML = '';
+  wmClearSelection();
+
+  var apiUrl = 'https://commons.wikimedia.org/w/api.php' +
+    '?action=query&format=json&origin=*' +
+    '&generator=search&gsrnamespace=6&gsrlimit=24' +
+    '&gsrsearch=' + encodeURIComponent(query) +
+    '&prop=imageinfo&iiprop=url|extmetadata|size' +
+    '&iiurlwidth=400';
+
+  fetch(apiUrl)
+    .then(function(res) {
+      if (!res.ok) throw new Error('API error: ' + res.status);
+      return res.json();
+    })
+    .then(function(data) {
+      var pages = data.query ? Object.values(data.query.pages) : [];
+      if (!pages.length) {
+        statusEl.textContent = 'No results found. Try a different search term.';
+        return;
+      }
+      var photos = pages.map(function(page) {
+        var ii = page.imageinfo ? page.imageinfo[0] : null;
+        if (!ii) return null;
+        var meta = ii.extmetadata || {};
+        var licenseRaw = (meta.LicenseShortName || meta.License || {}).value || '';
+        var authorRaw  = (meta.Artist || {}).value || '';
+        var author = authorRaw.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+        var licInfo = wmLicenseInfo(licenseRaw);
+        return {
+          title:      page.title.replace(/^File:/, ''),
+          pageTitle:  page.title,
+          url:        ii.url,
+          thumbUrl:   ii.thumburl || ii.url,
+          author:     author,
+          license:    licenseRaw,
+          licInfo:    licInfo,
+          creditLine: wmBuildCreditLine(author, licInfo.label, page.title),
+          width:      ii.width,
+          height:     ii.height,
+        };
+      }).filter(Boolean);
+      statusEl.textContent = photos.length + ' results — only CC BY, CC BY-SA, and CC0 photos can be used.';
+      wmRenderGrid(photos);
+    })
+    .catch(function(e) {
+      statusEl.textContent = 'Search failed: ' + e.message;
+    })
+    .then(function() {
+      btn.disabled = false;
+      btn.textContent = 'Search';
+    });
+}
+
+function wmRenderGrid(photos) {
+  var grid = document.getElementById('wm-grid');
+  grid.innerHTML = '';
+  photos.forEach(function(photo) {
+    var card = document.createElement('div');
+    card.className = 'wm-card' + (photo.licInfo.usable ? '' : ' wm-unusable');
+    if (!photo.licInfo.usable) card.style.opacity = '0.6';
+
+    var img = document.createElement('img');
+    img.src = photo.thumbUrl;
+    img.alt = photo.title.slice(0, 40);
+    img.loading = 'lazy';
+    img.onerror = function() { this.style.background = '#E4DDD3'; };
+    img.style.width = '100%';
+    img.style.height = '120px';
+    img.style.objectFit = 'cover';
+    img.style.display = 'block';
+    img.style.background = '#E4DDD3';
+    card.appendChild(img);
+
+    if (!photo.licInfo.usable) {
+      var ov = document.createElement('div');
+      ov.className = 'wm-unusable-overlay';
+      ov.textContent = 'Cannot use';
+      card.appendChild(ov);
+    }
+
+    var body = document.createElement('div');
+    body.className = 'wm-card-body';
+
+    var badge = document.createElement('span');
+    badge.className = 'wm-license ' + photo.licInfo.cls;
+    badge.textContent = photo.licInfo.label;
+
+    var titleEl = document.createElement('div');
+    titleEl.className = 'wm-title';
+    titleEl.textContent = photo.title.slice(0, 40);
+
+    var authorEl = document.createElement('div');
+    authorEl.className = 'wm-author';
+    authorEl.textContent = photo.author || 'Unknown';
+
+    body.appendChild(badge);
+    body.appendChild(titleEl);
+    body.appendChild(authorEl);
+    card.appendChild(body);
+
+    if (photo.licInfo.usable) {
+      card.onclick = (function(p, c) { return function() { wmSelectPhoto(p, c); }; })(photo, card);
+    }
+    grid.appendChild(card);
+  });
+}
+function wmSelectPhoto(photo, card) {
+  wmSelectedPhoto = photo;
+  // Highlight selected card
+  document.querySelectorAll('.wm-card').forEach(function(c) { c.classList.remove('selected'); });
+  card.classList.add('selected');
+
+  // Show preview
+  var wrap = document.getElementById('wm-selected-wrap');
+  var preview = document.getElementById('wm-selected-preview');
+  wrap.style.display = '';
+  preview.innerHTML =
+    '<img src="' + photo.thumbUrl + '" alt="preview" />' +
+    '<div class="wm-preview-meta">' +
+      '<div class="wm-preview-title">' + photo.title + '</div>' +
+      '<div class="wm-preview-credit">Credit: ' + photo.creditLine + '</div>' +
+      '<div style="font-size:11px;color:#A09A94;margin-top:4px;">' + (photo.width || '?') + ' × ' + (photo.height || '?') + 'px · ' + photo.license + '</div>' +
+    '</div>';
+
+  // Scroll to preview
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function wmClearSelection() {
+  wmSelectedPhoto = null;
+  document.querySelectorAll('.wm-card').forEach(function(c) { c.classList.remove('selected'); });
+  var wrap = document.getElementById('wm-selected-wrap');
+  if (wrap) wrap.style.display = 'none';
+  var statusEl = document.getElementById('wm-save-status');
+  if (statusEl) statusEl.textContent = '';
+}
+
+function wmSavePhoto() {
+  if (!wmSelectedRecord) return alert('Please select a location first.');
+  if (!wmSelectedPhoto)  return alert('Please select a photo from the results.');
+  var descriptor = document.getElementById('wm-descriptor').value;
+  if (!descriptor) return alert('Please select a descriptor.');
+
+  var cfg = getConfig();
+  var writeKey = cfg.serviceKey || cfg.supabaseKey;
+  var btn = document.getElementById('wm-save-btn');
+  var statusEl = document.getElementById('wm-save-status');
+  var loc = wmSelectedRecord;
+  var photo = wmSelectedPhoto;
+
+  btn.disabled = true;
+  btn.textContent = 'Downloading…';
+  statusEl.textContent = '';
+  statusEl.style.color = '#A09A94';
+
+  var displayBlob, thumbBlob, photoNum;
+
+  fetch(photo.url)
+    .then(function(imgRes) {
+      if (!imgRes.ok) throw new Error('Could not download image: ' + imgRes.status);
+      return imgRes.blob();
+    })
+    .then(function(blob) {
+      var file = new File([blob], 'wikimedia.jpg', { type: blob.type });
+      btn.textContent = 'Resizing…';
+      return resizeImage(file, 1200).then(function(db) {
+        displayBlob = db;
+        return resizeImage(file, 400);
+      });
+    })
+    .then(function(tb) {
+      thumbBlob = tb;
+      return getExistingPhotoCount(loc.id);
+    })
+    .then(function(existingCount) {
+      photoNum = existingCount + 1;
+      var filename      = buildPhotoFilename(loc.id, loc.city || '', descriptor, photoNum);
+      var thumbFilename = buildPhotoFilename(loc.id, loc.city || '', descriptor + '-thumb', photoNum);
+      var displayPath   = loc.id + '/' + filename;
+      var thumbPath     = loc.id + '/' + thumbFilename;
+      var headers = {
+        'apikey': writeKey, 'Authorization': 'Bearer ' + writeKey,
+        'Content-Type': 'image/webp', 'x-upsert': 'true',
+      };
+      btn.textContent = 'Uploading…';
+      return fetch(cfg.supabaseUrl + '/storage/v1/object/photos/' + displayPath, { method: 'POST', headers: headers, body: displayBlob })
+        .then(function(r1) {
+          if (!r1.ok) return r1.json().catch(function(){return {};}).then(function(e1){ throw new Error(e1.message || 'Upload failed'); });
+          return fetch(cfg.supabaseUrl + '/storage/v1/object/photos/' + thumbPath, { method: 'POST', headers: headers, body: thumbBlob });
+        })
+        .then(function(r2) {
+          if (r2 && !r2.ok) return r2.json().catch(function(){return {};}).then(function(e2){ throw new Error('Thumb: ' + (e2.message || 'failed')); });
+          var publicUrl = cfg.supabaseUrl + '/storage/v1/object/public/photos/' + displayPath;
+          var altText   = document.getElementById('wm-alt-text').value.trim() || null;
+          return fetch(cfg.supabaseUrl + '/rest/v1/photos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': writeKey, 'Authorization': 'Bearer ' + writeKey, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({
+              location_id: loc.id, path: displayPath, url: publicUrl,
+              sort_order: photoNum, alt_text: altText,
+              credit: photo.creditLine, source: 'wikimedia',
+            }),
+          });
+        })
+        .then(function(r3) {
+          if (r3 && !r3.ok) return r3.json().catch(function(){return {};}).then(function(e3){ throw new Error('DB: ' + (e3.message || 'failed')); });
+          delete _existingCountCache[loc.id];
+          statusEl.textContent = '✓ Saved! Credit: ' + photo.creditLine;
+          statusEl.style.color = '#2D6A4F';
+          wmClearSelection();
+          document.getElementById('wm-descriptor').value = '';
+          document.getElementById('wm-alt-text').value = '';
+        });
+    })
+    .catch(function(e) {
+      statusEl.textContent = '✗ ' + e.message;
+      statusEl.style.color = '#991B1B';
+    })
+    .then(function() {
+      btn.disabled = false;
+      btn.textContent = 'Save to location';
+    });
+}
+
+function wmReset() {
+  wmSelectedRecord = null;
+  wmSelectedPhoto  = null;
+  var locSearch = document.getElementById('wm-loc-search');
+  if (locSearch) locSearch.value = '';
+  var locResults = document.getElementById('wm-loc-results');
+  if (locResults) locResults.innerHTML = '';
+  var locSel = document.getElementById('wm-loc-selected');
+  if (locSel) { locSel.style.display = 'none'; locSel.innerHTML = ''; }
+  var searchPanel = document.getElementById('wm-search-panel');
+  if (searchPanel) searchPanel.style.display = 'none';
+  var grid = document.getElementById('wm-grid');
+  if (grid) grid.innerHTML = '';
+  var statusEl = document.getElementById('wm-status');
+  if (statusEl) statusEl.textContent = '';
+  var selWrap = document.getElementById('wm-selected-wrap');
+  if (selWrap) selWrap.style.display = 'none';
 }
 
 // ─── Photo mode state ─────────────────────────────────────────────────────────
