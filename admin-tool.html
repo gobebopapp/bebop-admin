@@ -2926,7 +2926,7 @@ function setPhotoSubMode(mode) {
 // ── Wikimedia Commons integration ─────────────────────────────────────────────
 
 var wmSelectedRecord  = null;  // location record
-var wmSelectedPhoto   = null;  // {title, url, thumbUrl, author, license, creditLine}
+var wmSelectedPhoto   = null;  // {title, url, thumbUrl, author, license, licInfo, credit}
 
 var WM_USABLE_LICENSES = ['cc-by', 'cc-by-sa', 'cc0', 'pd', 'public domain'];
 
@@ -2947,11 +2947,29 @@ function wmLicenseInfo(licenseStr) {
   return { label: licenseStr.slice(0, 12), cls: 'bad', usable: false };
 }
 
-function wmBuildCreditLine(author, licenseLabel, title) {
-  var parts = [];
-  if (author) parts.push(author);
-  parts.push(licenseLabel + ' / Wikimedia Commons');
-  return parts.join(' / ');
+function wmLicenseUrl(licenseLabel) {
+  // Map license label to canonical CC deed URL
+  var l = licenseLabel.toLowerCase().replace(/\s+/g, '-');
+  if (l.includes('cc0') || l.includes('public-domain') || l === 'pd') {
+    return 'https://creativecommons.org/publicdomain/zero/1.0/';
+  }
+  // Extract type and version: "cc by-sa 4.0" -> "by-sa/4.0"
+  var m = licenseLabel.match(/CC\s+(BY[\w-]*)\s+([\d.]+)/i);
+  if (m) {
+    return 'https://creativecommons.org/licenses/' + m[1].toLowerCase() + '/' + m[2] + '/';
+  }
+  return 'https://creativecommons.org/licenses/';
+}
+
+function wmBuildCredit(author, licenseLabel, pageTitle) {
+  // Returns a structured object — stored as JSON in the credit column
+  return {
+    author:      author || 'Wikimedia Commons',
+    license:     licenseLabel,
+    license_url: wmLicenseUrl(licenseLabel),
+    file_url:    'https://commons.wikimedia.org/wiki/' + encodeURIComponent(pageTitle),
+    source:      'Wikimedia Commons',
+  };
 }
 
 function wmSearchLocations(query) {
@@ -3051,7 +3069,7 @@ function wmSearch() {
           author:     author,
           license:    licenseRaw,
           licInfo:    licInfo,
-          creditLine: wmBuildCreditLine(author, licInfo.label, page.title),
+          credit:     wmBuildCredit(author, licInfo.label, page.title),
           width:      ii.width,
           height:     ii.height,
         };
@@ -3131,11 +3149,18 @@ function wmSelectPhoto(photo, card) {
   var wrap = document.getElementById('wm-selected-wrap');
   var preview = document.getElementById('wm-selected-preview');
   wrap.style.display = '';
+  var c = photo.credit || {};
+  var creditHtml =
+    '<div class="wm-preview-credit">' +
+      '<strong>Author:</strong> ' + (c.author || 'Unknown') + '<br>' +
+      '<strong>License:</strong> ' + (c.license || '') + '<br>' +
+      '<strong>File page:</strong> ' + (c.file_url ? c.file_url.replace('https://commons.wikimedia.org/wiki/', '') : '') +
+    '</div>';
   preview.innerHTML =
     '<img src="' + photo.thumbUrl + '" alt="preview" />' +
     '<div class="wm-preview-meta">' +
       '<div class="wm-preview-title">' + photo.title + '</div>' +
-      '<div class="wm-preview-credit">Credit: ' + photo.creditLine + '</div>' +
+      creditHtml +
       '<div style="font-size:11px;color:#A09A94;margin-top:4px;">' + (photo.width || '?') + ' × ' + (photo.height || '?') + 'px · ' + photo.license + '</div>' +
     '</div>';
 
@@ -3215,14 +3240,14 @@ function wmSavePhoto() {
             body: JSON.stringify({
               location_id: loc.id, path: displayPath, url: publicUrl,
               sort_order: photoNum, alt_text: altText,
-              credit: photo.creditLine, source: 'wikimedia',
+              credit: JSON.stringify(photo.credit), source: 'wikimedia',
             }),
           });
         })
         .then(function(r3) {
           if (r3 && !r3.ok) return r3.json().catch(function(){return {};}).then(function(e3){ throw new Error('DB: ' + (e3.message || 'failed')); });
           delete _existingCountCache[loc.id];
-          statusEl.textContent = '✓ Saved! Credit: ' + photo.creditLine;
+          statusEl.textContent = '✓ Saved! Credit: ' + (photo.credit ? photo.credit.author + ' / ' + photo.credit.license : 'saved');
           statusEl.style.color = '#2D6A4F';
           wmClearSelection();
           document.getElementById('wm-descriptor').value = '';
