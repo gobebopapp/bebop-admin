@@ -1463,7 +1463,7 @@ async function loadRecentLocations() {
 
   try {
     const res = await fetch(
-      supabaseUrl + '/rest/v1/locations?select=id,name,city,secondary_category_lead,created_at&order=created_at.desc&limit=12',
+      supabaseUrl + '/rest/v1/locations?select=id,name,city,secondary_category_lead,description,created_at&order=created_at.desc&limit=12',
       { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }
     );
     const rows = await res.json();
@@ -1627,17 +1627,39 @@ function buildEmailHtml(opts) {
   } else {
     // ── WEEKLY NEWSLETTER ──────────────────────────────────────────────────
 
-    // 1. Weather opener — amber tip box, no weather grid (just the text)
-    if (weatherIntro) {
+    // 1. Weather opener — written intro first, then Sat/Sun forecast tiles below
+    if (weatherIntro || satTemp || sunTemp) {
+      const showTiles = satTemp || sunTemp;
+      const satTile = satTemp ?
+        '<td style="width:50%;padding-right:6px;">' +
+          '<div style="background:#ffffff;border:1px solid ' + border + ';border-radius:10px;padding:14px 10px;text-align:center;">' +
+            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;color:' + inkMuted + ';text-transform:uppercase;letter-spacing:0.8px;margin:0 0 6px;">' + satLabel + '</p>' +
+            '<p style="font-size:26px;margin:0 0 4px;line-height:1;">' + satEmoji + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:18px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + satTemp + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:11px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + satDesc + '</p>' +
+          '</div>' +
+        '</td>' : '';
+      const sunTile = sunTemp ?
+        '<td style="width:50%;padding-left:6px;">' +
+          '<div style="background:#ffffff;border:1px solid ' + border + ';border-radius:10px;padding:14px 10px;text-align:center;">' +
+            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;color:' + inkMuted + ';text-transform:uppercase;letter-spacing:0.8px;margin:0 0 6px;">' + sunLabel + '</p>' +
+            '<p style="font-size:26px;margin:0 0 4px;line-height:1;">' + sunEmoji + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:18px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + sunTemp + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:11px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + sunDesc + '</p>' +
+          '</div>' +
+        '</td>' : '';
       bodyRows +=
         '<tr><td style="padding:20px 20px 0;">' +
           '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:16px 18px;">' +
-            '<p style="font-family:' + fontBody + ';font-size:15px;color:' + amberText + ';margin:0;line-height:1.7;">⛅ ' + weatherIntro + '</p>' +
+            (weatherIntro ? '<p style="font-family:' + fontBody + ';font-size:15px;color:' + amberText + ';margin:0' + (showTiles ? ' 14px' : '') + ' 0 0;line-height:1.7;">⛅ ' + weatherIntro + '</p>' : '') +
+            (showTiles ?
+              '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' + satTile + sunTile + '</tr></table>'
+              : '') +
           '</div>' +
         '</td></tr>';
     }
 
-    // 2. GoBebop Recommends — primary CTA "See full details →" button
+    // 2. GoBebop Recommends — primary CTA
     if (recName) {
       bodyRows +=
         '<tr><td style="padding:20px 20px 0;">' +
@@ -1657,8 +1679,9 @@ function buildEmailHtml(opts) {
         '</td></tr>';
     }
 
-    // 3. This weekend's events — compact list with icon + "Info →" text link
+    // 3. This weekend's events — compact list, single "See all events" link at bottom
     if (weeklyEvents.length) {
+      const evtPageUrl = 'https://gobebop.app';
       const evRows = weeklyEvents.map((ev, i) => {
         const loc = ev.locations || {};
         const iconFile = ev.icon || null;
@@ -1672,8 +1695,7 @@ function buildEmailHtml(opts) {
             '<td style="width:40px;vertical-align:top;padding-right:12px;padding-top:2px;">' + iconImg + '</td>' +
             '<td style="vertical-align:top;">' +
               '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:700;color:' + ink + ';margin:0 0 3px;line-height:1.3;">' + ev.title + '</p>' +
-              '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0 0 8px;line-height:1.5;">' + meta + '</p>' +
-              (ev._url ? '<a href="' + ev._url + '" style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';text-decoration:none;">Info →</a>' : '') +
+              '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;line-height:1.5;">' + meta + '</p>' +
             '</td>' +
           '</tr></table>' +
         '</div>';
@@ -1684,28 +1706,26 @@ function buildEmailHtml(opts) {
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
             evRows +
           '</div>' +
+          '<p style="font-family:' + fontBody + ';font-size:13px;text-align:center;margin:10px 0 0;">' +
+            '<a href="' + evtPageUrl + '" style="color:' + teal + ';text-decoration:none;font-weight:600;">See all upcoming events →</a>' +
+          '</p>' +
         '</td></tr>';
     }
 
-    // 4. Just discovered — one spot, text link to page, "See all recently added →" below
+    // 4. Just discovered — text-only card (Option A): name as link, category, description teaser
     if (recentSpot) {
       const spotUrl = recentSpot._url || 'https://gobebop.app';
+      const desc = recentSpot.description
+        ? (recentSpot.description.length > 120 ? recentSpot.description.slice(0, 120) + '…' : recentSpot.description)
+        : null;
       bodyRows +=
         '<tr><td style="padding:20px 20px 0;">' +
           '<p style="' + eyebrow + '">🆕 Just discovered</p>' +
-          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
-            '<div style="padding:16px 18px;">' +
-              '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
-                (recentSpot.thumbUrl ?
-                  '<td style="width:60px;padding-right:14px;vertical-align:top;">' +
-                    '<img src="' + recentSpot.thumbUrl + '" width="60" height="60" style="width:60px;height:60px;border-radius:8px;object-fit:cover;display:block;" />' +
-                  '</td>' : '') +
-                '<td style="vertical-align:top;">' +
-                  '<a href="' + spotUrl + '" style="font-family:' + fontDisplay + ';font-size:18px;font-weight:700;color:' + ink + ';text-decoration:none;line-height:1.2;display:block;margin-bottom:4px;">' + recentSpot.name + '</a>' +
-                  '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0;letter-spacing:0.5px;">' + [recentSpot.city, recentSpot.secondary_category_lead].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
-                '</td>' +
-              '</tr></table>' +
-            '</div>' +
+          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;padding:18px 18px 20px;">' +
+            '<a href="' + spotUrl + '" style="font-family:' + fontDisplay + ';font-size:19px;font-weight:700;color:' + ink + ';text-decoration:none;line-height:1.2;display:block;margin-bottom:4px;">' + recentSpot.name + '</a>' +
+            '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0 0 10px;letter-spacing:0.5px;">' + [recentSpot.city, recentSpot.secondary_category_lead].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
+            (desc ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 14px;line-height:1.65;">' + desc + '</p>' : '') +
+            '<a href="' + spotUrl + '" style="font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;">Find out more →</a>' +
           '</div>' +
           '<p style="font-family:' + fontBody + ';font-size:13px;text-align:center;margin:10px 0 0;">' +
             '<a href="https://gobebop.app" style="color:' + teal + ';text-decoration:none;font-weight:600;">See all recently added spots →</a>' +
