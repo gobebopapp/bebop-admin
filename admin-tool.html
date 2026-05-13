@@ -1140,34 +1140,37 @@ header {
         </div>
 
         <div class="field">
-          <label>End date / time</label>
+          <label>End date / time <span style="color:#A09A94;font-weight:400;">(end of a single session, not the series)</span></label>
           <input type="datetime-local" id="evt-end" step="900" />
         </div>
 
         <div class="field full">
-          <label>Specific dates <span style="color:#A09A94;font-weight:400;">(for non-sequential occurrences — replaces start date)</span></label>
+          <label>Specific dates <span style="color:#A09A94;font-weight:400;">(non-sequential occurrences — replaces start date. Disables recurring.)</span></label>
           <div id="evt-dates-wrap" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;"></div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input type="date" id="evt-dates-input" style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1714;outline:none;" />
+            <input type="datetime-local" id="evt-dates-input" step="900" style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1714;outline:none;" />
             <button type="button" onclick="evtAddDate()" class="btn btn-secondary" style="font-size:12px;padding:6px 14px;">＋ Add date</button>
           </div>
-          <p class="text-muted" style="margin-top:6px;">Use this OR start date above — not both. Click a date chip to remove it.</p>
+          <p class="text-muted" style="margin-top:6px;">Each entry stores a full timestamp (date + time). Click a chip to remove it.</p>
         </div>
 
         <div class="field full">
-          <label>Showtimes <span style="color:#A09A94;font-weight:400;">(for multiple performances on the same day — stored as timestamps)</span></label>
+          <label>Showtimes <span style="color:#A09A94;font-weight:400;">(multiple performances same day — stored as {start, end?} objects)</span></label>
           <div id="evt-showtimes-wrap" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;"></div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input type="datetime-local" id="evt-showtimes-input" step="900"
-              style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1714;outline:none;" />
-            <button type="button" onclick="evtAddShowtime()" class="btn btn-secondary" style="font-size:12px;padding:6px 14px;">＋ Add showtime</button>
+            <input type="datetime-local" id="evt-showtimes-start" step="900"
+              style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1714;outline:none;" placeholder="Start" />
+            <span style="font-size:12px;color:#A09A94;">to</span>
+            <input type="datetime-local" id="evt-showtimes-end" step="900"
+              style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:#1A1714;outline:none;" placeholder="End (optional)" />
+            <button type="button" onclick="evtAddShowtime()" class="btn btn-secondary" style="font-size:12px;padding:6px 14px;">＋ Add</button>
           </div>
-          <p class="text-muted" style="margin-top:6px;">Each showtime is stored as a full timestamp. Click a chip to remove it.</p>
+          <p class="text-muted" style="margin-top:6px;">End time is optional. Click a chip to remove it.</p>
         </div>
 
         <div class="field">
           <label>Recurring</label>
-          <select id="evt-recurring">
+          <select id="evt-recurring" onchange="evtOnRecurringChange()">
             <option value="">One-off</option>
             <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
@@ -1229,10 +1232,9 @@ header {
           <label>Language</label>
           <select id="evt-language">
             <option value="">— not specified —</option>
-            <option value="Dutch">Dutch</option>
-            <option value="English">English</option>
-            <option value="Bilingual">Bilingual (NL/EN)</option>
-            <option value="Other">Other</option>
+            <option value="nl">Dutch (nl)</option>
+            <option value="en">English (en)</option>
+            <option value="multi">Multilingual (multi)</option>
           </select>
         </div>
 
@@ -4741,22 +4743,31 @@ function evtFilterIcons(val) {
 // ── Showtime manager ─────────────────────────────────────────────────────────────────────────────────
 
 function evtAddShowtime() {
-  var input = document.getElementById('evt-showtimes-input');
-  var val = input ? input.value : '';
-  if (!val) return;
-  var iso = localToISO(val);
-  if (!iso) return;
-  if (evtShowtimes.indexOf(iso) === -1) {
-    evtShowtimes.push(iso);
-    evtShowtimes.sort();
+  var startInput = document.getElementById('evt-showtimes-start');
+  var endInput   = document.getElementById('evt-showtimes-end');
+  var startVal   = startInput ? startInput.value : '';
+  var endVal     = endInput   ? endInput.value   : '';
+  if (!startVal) return;
+  var startISO = localToISO(startVal);
+  if (!startISO) return;
+  var entry = { start: startISO };
+  if (endVal) {
+    var endISO = localToISO(endVal);
+    if (endISO) entry.end = endISO;
   }
-  input.value = '';
+  // Deduplicate by start
+  var exists = evtShowtimes.some(function(s) { return s.start === startISO; });
+  if (!exists) {
+    evtShowtimes.push(entry);
+    evtShowtimes.sort(function(a, b) { return a.start < b.start ? -1 : 1; });
+  }
+  startInput.value = '';
+  endInput.value = '';
   evtRenderShowtimeChips();
 }
 
-function evtRemoveShowtime(iso) {
-  var idx = evtShowtimes.indexOf(iso);
-  if (idx > -1) evtShowtimes.splice(idx, 1);
+function evtRemoveShowtime(startISO) {
+  evtShowtimes = evtShowtimes.filter(function(s) { return s.start !== startISO; });
   evtRenderShowtimeChips();
 }
 
@@ -4764,9 +4775,16 @@ function evtRenderShowtimeChips() {
   var wrap = document.getElementById('evt-showtimes-wrap');
   if (!wrap) return;
   wrap.innerHTML = '';
-  evtShowtimes.forEach(function(iso) {
-    var d = new Date(iso);
-    var label = d.toLocaleString('nl-NL', { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+  evtShowtimes.forEach(function(entry) {
+    var startD = new Date(entry.start);
+    var fmt = { timeZone: 'Europe/Amsterdam', weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' };
+    var startLabel = new Intl.DateTimeFormat('nl-NL', fmt).format(startD);
+    var label = startLabel;
+    if (entry.end) {
+      var endD = new Date(entry.end);
+      var endLabel = new Intl.DateTimeFormat('nl-NL', { timeZone:'Europe/Amsterdam', hour:'2-digit', minute:'2-digit' }).format(endD);
+      label = startLabel + ' – ' + endLabel;
+    }
     var chip = document.createElement('span');
     chip.title = 'Click to remove';
     chip.style.display = 'inline-flex';
@@ -4781,7 +4799,7 @@ function evtRenderShowtimeChips() {
     chip.style.fontFamily = 'DM Mono, monospace';
     chip.style.cursor = 'pointer';
     chip.textContent = label + ' ✕';
-    chip.onclick = (function(i) { return function() { evtRemoveShowtime(i); }; })(iso);
+    chip.onclick = (function(s) { return function() { evtRemoveShowtime(s); }; })(entry.start);
     wrap.appendChild(chip);
   });
 }
@@ -4789,8 +4807,10 @@ function evtRenderShowtimeChips() {
 function evtClearShowtimes() {
   evtShowtimes = [];
   evtRenderShowtimeChips();
-  var input = document.getElementById('evt-showtimes-input');
-  if (input) input.value = '';
+  var s = document.getElementById('evt-showtimes-start');
+  var e = document.getElementById('evt-showtimes-end');
+  if (s) s.value = '';
+  if (e) e.value = '';
 }
 
 // ── Specific dates manager ────────────────────────────────────────────────────
@@ -4801,12 +4821,16 @@ function evtAddDate() {
   var input = document.getElementById('evt-dates-input');
   var val = input ? input.value : '';
   if (!val) return;
-  if (evtSelectedDates.indexOf(val) === -1) {
-    evtSelectedDates.push(val);
+  var iso = localToISO(val);  // convert to real UTC for storage
+  if (!iso) return;
+  if (evtSelectedDates.indexOf(iso) === -1) {
+    evtSelectedDates.push(iso);
     evtSelectedDates.sort();
   }
   input.value = '';
   evtRenderDateChips();
+  // Dates array takes priority — disable recurring fields
+  if (evtSelectedDates.length) evtSetRecurringDisabled(true);
 }
 
 function evtRemoveDate(dateStr) {
@@ -4819,8 +4843,14 @@ function evtRenderDateChips() {
   var wrap = document.getElementById('evt-dates-wrap');
   if (!wrap) return;
   wrap.innerHTML = '';
-  evtSelectedDates.forEach(function(d) {
+  evtSelectedDates.forEach(function(iso) {
+    var d = new Date(iso);
+    var label = new Intl.DateTimeFormat('nl-NL', {
+      timeZone: 'Europe/Amsterdam',
+      weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+    }).format(d);
     var chip = document.createElement('span');
+    chip.title = 'Click to remove';
     chip.style.display = 'inline-flex';
     chip.style.alignItems = 'center';
     chip.style.gap = '5px';
@@ -4831,10 +4861,9 @@ function evtRenderDateChips() {
     chip.style.fontSize = '12px';
     chip.style.color = '#2D6A4F';
     chip.style.fontFamily = 'DM Mono, monospace';
-    chip.style.cursor = 'pointer';;
-    chip.title = 'Click to remove';
-    chip.textContent = d + ' ✕';
-    chip.onclick = (function(date) { return function() { evtRemoveDate(date); }; })(d);
+    chip.style.cursor = 'pointer';
+    chip.textContent = label + ' ✕';
+    chip.onclick = (function(i) { return function() { evtRemoveDate(i); }; })(iso);
     wrap.appendChild(chip);
   });
 }
@@ -4844,6 +4873,27 @@ function evtClearDates() {
   evtRenderDateChips();
   var input = document.getElementById('evt-dates-input');
   if (input) input.value = '';
+  // Re-enable recurring fields
+  evtSetRecurringDisabled(false);
+}
+
+function evtSetRecurringDisabled(disabled) {
+  var rec     = document.getElementById('evt-recurring');
+  var recUntil = document.getElementById('evt-recurring-until');
+  if (rec)     { rec.disabled = disabled; rec.style.opacity = disabled ? '0.4' : '1'; }
+  if (recUntil){ recUntil.disabled = disabled; recUntil.style.opacity = disabled ? '0.4' : '1'; }
+}
+
+function evtOnRecurringChange() {
+  // If recurring is set, clear dates array
+  var rec = document.getElementById('evt-recurring');
+  if (rec && rec.value && evtSelectedDates.length) {
+    if (confirm('Setting a recurrence rule will clear your specific dates. Continue?')) {
+      evtClearDates();
+    } else {
+      rec.value = '';
+    }
+  }
 }
 
 // Allow Enter key on date input to add the date
