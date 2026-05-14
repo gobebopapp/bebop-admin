@@ -1783,219 +1783,212 @@ function buildEmailHtml(opts) {
       '</p>' +
     '</td></tr>';
 
-  const mobileStyles = '<style>@media only screen and (max-width:480px){.spot-thumb-cell{width:100%!important;display:block!important}.spot-thumb{width:100%!important;height:180px!important}}</style>';
-
-return ‘<!DOCTYPE html><html lang="en"><head>’ +
-‘<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">’ +
-‘<meta name="x-apple-disable-message-reformatting"><title>GoBebop</title>’ +
-‘<link href="' + gFonts + '" rel="stylesheet">’ +
-mobileStyles +
-(previewText ? ‘<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">’ + previewText + ‘ ͏‌ ͏‌ ͏‌ </div>’ : ‘’) +
-‘</head>’ +
-‘<body style="margin:0;padding:0;background:' + pageBg + ';-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">’ +
-‘<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + pageBg + ';width:100%;">’ +
-headerHtml +
-‘<tr><td style="padding:0 0 28px;">’ +
-‘<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;margin:0 auto;background:' + cardBg + ';border-radius:0;overflow:hidden;">’ +
-bodyRows +
-‘<tr><td style="padding:12px 0 0;"></td></tr>’ +
-footerHtml +
-‘</table>’ +
-‘</td></tr>’ +
-‘</table>’ +
-‘</body></html>’;
+  const mobileStyles = '<style>@media only screen and (max-width:480px){.spot-thumb-cell{width:100%!important;display:block!important}.spot-thumb{width:100%!important;height:180px!important}}<\/style>';
+  return '<!DOCTYPE html><html lang="en"><head>' +
+    '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<meta name="x-apple-disable-message-reformatting"><title>GoBebop</title>' +
+    '<link href="' + gFonts + '" rel="stylesheet">' +
+    mobileStyles +
+    (previewText ? '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">' + previewText + '&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>' : '') +
+    '</head>' +
+    '<body style="margin:0;padding:0;background:' + pageBg + ';-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">' +
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + pageBg + ';width:100%;">' +
+        headerHtml +
+        '<tr><td style="padding:0 0 28px;">' +
+          '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;margin:0 auto;background:' + cardBg + ';border-radius:0;overflow:hidden;">' +
+            bodyRows +
+            '<tr><td style="padding:12px 0 0;"></td></tr>' +
+            footerHtml +
+          '</table>' +
+        '</td></tr>' +
+      '</table>' +
+    '</body></html>';
 }
 
 // ─── Preview ─────────────────────────────────────────────────────────────────
 
 function getEmailOpts() {
-const loc = activeRec?.locations || {};
-const satR = weatherData?.sat;
-const sunR = weatherData?.sun;
-return {
-previewText:    document.getElementById(‘email-preview-text’).value,
-recName:        loc.name || ‘’,
-recCity:        loc.city || ‘’,
-recCat:         loc.secondary_category_lead || ‘’,
-recHeadline:    document.getElementById(‘rec-headline-override’).value || activeRec?.headline || ‘’,
-recBody:        document.getElementById(‘rec-body-override’).value || activeRec?.body || ‘’,
-recPageUrl:     document.getElementById(‘rec-page-url’)?.value || ‘https://gobebop.app’,
-recPhotoUrl:    activeRec?._photoUrl || null,
-weatherIntro:   document.getElementById(‘weather-intro’).value,
-satLabel:       weatherData ? weatherData.satStr : ‘’,
-satEmoji:       satR ? getWeatherEmoji(satR.weather[0].id) : ‘’,
-satTemp:        satR ? Math.round(satR.main.temp) + ‘°C’ : ‘’,
-satDesc:        satR ? satR.weather[0].description : ‘’,
-sunLabel:       weatherData ? weatherData.sunStr : ‘’,
-sunEmoji:       sunR ? getWeatherEmoji(sunR.weather[0].id) : ‘’,
-sunTemp:        sunR ? Math.round(sunR.main.temp) + ‘°C’ : ‘’,
-sunDesc:        sunR ? sunR.weather[0].description : ‘’,
-weeklyEvents:   weeklyEvents,
-recentSpot:     recentSinglePick || null,
-};
+  const loc = activeRec?.locations || {};
+  const satR = weatherData?.sat;
+  const sunR = weatherData?.sun;
+  return {
+    previewText:    document.getElementById('email-preview-text').value,
+    recName:        loc.name || '',
+    recCity:        loc.city || '',
+    recCat:         loc.secondary_category_lead || '',
+    recHeadline:    document.getElementById('rec-headline-override').value || activeRec?.headline || '',
+    recBody:        document.getElementById('rec-body-override').value || activeRec?.body || '',
+    recPageUrl:     document.getElementById('rec-page-url')?.value || 'https://gobebop.app',
+    recPhotoUrl:    activeRec?._photoUrl || null,
+    weatherIntro:   document.getElementById('weather-intro').value,
+    satLabel:       weatherData ? weatherData.satStr : '',
+    satEmoji:       satR ? getWeatherEmoji(satR.weather[0].id) : '',
+    satTemp:        satR ? Math.round(satR.main.temp) + '°C' : '',
+    satDesc:        satR ? satR.weather[0].description : '',
+    sunLabel:       weatherData ? weatherData.sunStr : '',
+    sunEmoji:       sunR ? getWeatherEmoji(sunR.weather[0].id) : '',
+    sunTemp:        sunR ? Math.round(sunR.main.temp) + '°C' : '',
+    sunDesc:        sunR ? sunR.weather[0].description : '',
+    weeklyEvents:   weeklyEvents,
+    recentSpot:     recentSinglePick || null,
+  };
 }
 
 function buildPreview() {
-const html = buildEmailHtml(getEmailOpts());
-const panel = document.getElementById(‘preview-panel’);
-panel.style.display = ‘block’;
-const frame = document.getElementById(‘preview-frame’);
-frame.srcdoc = html;
-panel.scrollIntoView({ behavior: ‘smooth’, block: ‘start’ });
+  const html = buildEmailHtml(getEmailOpts());
+  const panel = document.getElementById('preview-panel');
+  panel.style.display = 'block';
+  const frame = document.getElementById('preview-frame');
+  frame.srcdoc = html;
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function buildWelcomePreview() {
-const html = buildEmailHtml({
-isWelcome: true,
-welcomeOpener:  document.getElementById(‘welcome-opener’).value,
-welcomeBody:    document.getElementById(‘welcome-body’).value,
-welcomeCtaText: document.getElementById(‘welcome-cta-text’).value,
-welcomeCtaUrl:  document.getElementById(‘welcome-cta-url’).value,
-welcomeClosing: document.getElementById(‘welcome-closing’).value,
-});
-const panel = document.getElementById(‘welcome-preview-panel’);
-panel.style.display = ‘block’;
-document.getElementById(‘welcome-preview-frame’).srcdoc = html;
-panel.scrollIntoView({ behavior: ‘smooth’, block: ‘start’ });
+  const html = buildEmailHtml({
+    isWelcome: true,
+    welcomeOpener:  document.getElementById('welcome-opener').value,
+    welcomeBody:    document.getElementById('welcome-body').value,
+    welcomeCtaText: document.getElementById('welcome-cta-text').value,
+    welcomeCtaUrl:  document.getElementById('welcome-cta-url').value,
+    welcomeClosing: document.getElementById('welcome-closing').value,
+  });
+  const panel = document.getElementById('welcome-preview-panel');
+  panel.style.display = 'block';
+  document.getElementById('welcome-preview-frame').srcdoc = html;
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ─── Manual welcome send (kept for future Loops integration) ─────────────────
 
 async function sendManualWelcome() {
-const { loopsKey } = getConfig();
-if (!loopsKey) return alert(‘Add your Loops API key in the config panel.’);
-const email = document.getElementById(‘manual-welcome-email’).value.trim();
-if (!email) return alert(‘Enter an email address.’);
+  const { loopsKey } = getConfig();
+  if (!loopsKey) return alert('Add your Loops API key in the config panel.');
+  const email = document.getElementById('manual-welcome-email').value.trim();
+  if (!email) return alert('Enter an email address.');
 
-const firstName = document.getElementById(‘manual-welcome-name’).value.trim() || null;
-const statusEl = document.getElementById(‘manual-welcome-status’);
-statusEl.textContent = ‘Sending…’;
-statusEl.style.color = ‘#A09A94’;
+  const firstName = document.getElementById('manual-welcome-name').value.trim() || null;
+  const statusEl = document.getElementById('manual-welcome-status');
+  statusEl.textContent = 'Sending…';
+  statusEl.style.color = '#A09A94';
 
-try {
-await sendLoopsTransactional(loopsKey, email, document.getElementById(‘welcome-subject’).value || ‘Welcome to GoBebop 👋’, ‘’, { firstName: firstName || ‘there’ });
-statusEl.textContent = ’✓ Welcome email sent to ’ + email;
-statusEl.style.color = ‘#2D6A4F’;
-document.getElementById(‘manual-welcome-email’).value = ‘’;
-document.getElementById(‘manual-welcome-name’).value = ‘’;
-} catch(e) {
-statusEl.textContent = ’✗ Failed: ’ + e.message;
-statusEl.style.color = ‘#991B1B’;
-}
+  try {
+    await sendLoopsTransactional(loopsKey, email, document.getElementById('welcome-subject').value || 'Welcome to GoBebop 👋', '', { firstName: firstName || 'there' });
+    statusEl.textContent = '✓ Welcome email sent to ' + email;
+    statusEl.style.color = '#2D6A4F';
+    document.getElementById('manual-welcome-email').value = '';
+    document.getElementById('manual-welcome-name').value = '';
+  } catch(e) {
+    statusEl.textContent = '✗ Failed: ' + e.message;
+    statusEl.style.color = '#991B1B';
+  }
 }
 
 // ─── Subscribers ─────────────────────────────────────────────────────────────
 
 async function loadSubscribers() {
-const { loopsKey } = getConfig();
-if (!loopsKey) {
-document.getElementById(‘config-panel’).classList.add(‘visible’);
-document.getElementById(‘config-toggle’).classList.add(‘open’);
-return;
-}
+  const { loopsKey } = getConfig();
+  if (!loopsKey) {
+    document.getElementById('config-panel').classList.add('visible');
+    document.getElementById('config-toggle').classList.add('open');
+    return;
+  }
 
-const listEl = document.getElementById(‘sub-list’);
-listEl.innerHTML = ‘<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;"><div class="spinner"></div> Loading from Loops…</div>’;
+  const listEl = document.getElementById('sub-list');
+  listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;"><div class="spinner"></div> Loading from Loops…</div>';
 
-try {
-const res = await fetch(‘https://app.loops.so/api/v1/contacts?limit=500’, {
-method: ‘GET’,
-headers: { ‘Authorization’: ’Bearer ’ + loopsKey },
-});
-const data = await res.json();
+  try {
+    const res = await fetch('https://app.loops.so/api/v1/contacts?limit=500', {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + loopsKey },
+    });
+    const data = await res.json();
 
-```
-if (!res.ok) throw new Error(data.message || 'Loops error');
+    if (!res.ok) throw new Error(data.message || 'Loops error');
 
-allSubscribers = Array.isArray(data) ? data : (data.contacts || data.data || []);
+    allSubscribers = Array.isArray(data) ? data : (data.contacts || data.data || []);
 
-const total = allSubscribers.length;
-const subscribed = allSubscribers.filter(s => s.subscribed !== false).length;
-const unsub = total - subscribed;
+    const total = allSubscribers.length;
+    const subscribed = allSubscribers.filter(s => s.subscribed !== false).length;
+    const unsub = total - subscribed;
 
-document.getElementById('stat-total').textContent = total;
-document.getElementById('stat-subscribed').textContent = subscribed;
-document.getElementById('stat-unsub').textContent = unsub;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-subscribed').textContent = subscribed;
+    document.getElementById('stat-unsub').textContent = unsub;
 
-renderSubscriberList(allSubscribers);
-```
-
-} catch(e) {
-listEl.innerHTML = ’<div style="padding:24px;color:#991B1B;font-size:13px;">Error loading subscribers: ’ + e.message + ‘</div>’;
-}
+    renderSubscriberList(allSubscribers);
+  } catch(e) {
+    listEl.innerHTML = '<div style="padding:24px;color:#991B1B;font-size:13px;">Error loading subscribers: ' + e.message + '</div>';
+  }
 }
 
 function filterSubscribers(query) {
-if (!allSubscribers.length) return;
-const q = query.toLowerCase();
-const filtered = q ? allSubscribers.filter(s => (s.email || ‘’).toLowerCase().includes(q)) : allSubscribers;
-renderSubscriberList(filtered);
+  if (!allSubscribers.length) return;
+  const q = query.toLowerCase();
+  const filtered = q ? allSubscribers.filter(s => (s.email || '').toLowerCase().includes(q)) : allSubscribers;
+  renderSubscriberList(filtered);
 }
 
 function renderSubscriberList(subscribers) {
-const listEl = document.getElementById(‘sub-list’);
-if (!subscribers.length) {
-listEl.innerHTML = ‘<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No subscribers found.</div>’;
-return;
-}
+  const listEl = document.getElementById('sub-list');
+  if (!subscribers.length) {
+    listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#A09A94;font-size:13px;">No subscribers found.</div>';
+    return;
+  }
 
-listEl.innerHTML = subscribers.slice(0, 100).map(s => {
-const isSubbed = s.subscribed !== false;
-const name = [s.firstName, s.lastName].filter(Boolean).join(’ ‘);
-return ‘<div style="padding:12px 24px;border-bottom:1px solid #E8E3DC;display:flex;align-items:center;gap:14px;">’ +
-‘<div style="flex:1;min-width:0;">’ +
-‘<div style="font-size:13px;font-weight:600;color:#1A1714;">’ + (s.email || ‘—’) + ‘</div>’ +
-(name ? ‘<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;margin-top:2px;">’ + name + ‘</div>’ : ‘’) +
-‘</div>’ +
-‘<span style="background:' + (isSubbed ? '#D8EDDF' : '#E4DDD3') + ';color:' + (isSubbed ? '#2D6A4F' : '#A09A94') + ';font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;font-family:\'DM Mono\',monospace;">’ + (isSubbed ? ‘Subscribed’ : ‘Unsubscribed’) + ‘</span>’ +
-‘</div>’;
-}).join(’’) +
-(subscribers.length > 100 ? ’<div style="padding:12px 24px;text-align:center;font-size:12px;color:#A09A94;">Showing first 100 of ’ + subscribers.length + ‘</div>’ : ‘’);
+  listEl.innerHTML = subscribers.slice(0, 100).map(s => {
+    const isSubbed = s.subscribed !== false;
+    const name = [s.firstName, s.lastName].filter(Boolean).join(' ');
+    return '<div style="padding:12px 24px;border-bottom:1px solid #E8E3DC;display:flex;align-items:center;gap:14px;">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + (s.email || '—') + '</div>' +
+        (name ? '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;margin-top:2px;">' + name + '</div>' : '') +
+      '</div>' +
+      '<span style="background:' + (isSubbed ? '#D8EDDF' : '#E4DDD3') + ';color:' + (isSubbed ? '#2D6A4F' : '#A09A94') + ';font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;font-family:\'DM Mono\',monospace;">' + (isSubbed ? 'Subscribed' : 'Unsubscribed') + '</span>' +
+    '</div>';
+  }).join('') +
+  (subscribers.length > 100 ? '<div style="padding:12px 24px;text-align:center;font-size:12px;color:#A09A94;">Showing first 100 of ' + subscribers.length + '</div>' : '');
 }
 
 async function addSubscriber(sendWelcome) {
-const { loopsKey } = getConfig();
-if (!loopsKey) return alert(‘Add your Loops API key in the config panel.’);
-const email = document.getElementById(‘add-sub-email’).value.trim();
-if (!email) return alert(‘Enter an email address.’);
+  const { loopsKey } = getConfig();
+  if (!loopsKey) return alert('Add your Loops API key in the config panel.');
+  const email = document.getElementById('add-sub-email').value.trim();
+  if (!email) return alert('Enter an email address.');
 
-const statusEl = document.getElementById(‘add-sub-status’);
-statusEl.textContent = ‘Adding…’;
-statusEl.style.color = ‘#A09A94’;
+  const statusEl = document.getElementById('add-sub-status');
+  statusEl.textContent = 'Adding…';
+  statusEl.style.color = '#A09A94';
 
-const payload = { email, subscribed: true };
-const fn = document.getElementById(‘add-sub-firstname’).value.trim();
-const ln = document.getElementById(‘add-sub-lastname’).value.trim();
-if (fn) payload.firstName = fn;
-if (ln) payload.lastName = ln;
+  const payload = { email, subscribed: true };
+  const fn = document.getElementById('add-sub-firstname').value.trim();
+  const ln = document.getElementById('add-sub-lastname').value.trim();
+  if (fn) payload.firstName = fn;
+  if (ln) payload.lastName = ln;
 
-try {
-const res = await fetch(‘https://app.loops.so/api/v1/contacts/create’, {
-method: ‘POST’,
-headers: { ‘Content-Type’: ‘application/json’, ‘Authorization’: ’Bearer ’ + loopsKey },
-body: JSON.stringify(payload),
-});
-const data = await res.json();
-if (!res.ok) throw new Error(data.message || ‘Loops error’);
+  try {
+    const res = await fetch('https://app.loops.so/api/v1/contacts/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + loopsKey },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Loops error');
 
-```
-if (sendWelcome) {
-  await sendLoopsTransactional(loopsKey, email, document.getElementById('welcome-subject').value || 'Welcome to GoBebop 👋', '', { firstName: fn || 'there' });
-  statusEl.textContent = '✓ ' + email + ' added and welcome email sent.';
-} else {
-  statusEl.textContent = '✓ ' + email + ' added to Loops.';
-}
-statusEl.style.color = '#2D6A4F';
-document.getElementById('add-sub-email').value = '';
-document.getElementById('add-sub-firstname').value = '';
-document.getElementById('add-sub-lastname').value = '';
-loadSubscribers();
-```
-
-} catch(e) {
-statusEl.textContent = ’✗ Failed: ’ + e.message;
-statusEl.style.color = ‘#991B1B’;
-}
+    if (sendWelcome) {
+      await sendLoopsTransactional(loopsKey, email, document.getElementById('welcome-subject').value || 'Welcome to GoBebop 👋', '', { firstName: fn || 'there' });
+      statusEl.textContent = '✓ ' + email + ' added and welcome email sent.';
+    } else {
+      statusEl.textContent = '✓ ' + email + ' added to Loops.';
+    }
+    statusEl.style.color = '#2D6A4F';
+    document.getElementById('add-sub-email').value = '';
+    document.getElementById('add-sub-firstname').value = '';
+    document.getElementById('add-sub-lastname').value = '';
+    loadSubscribers();
+  } catch(e) {
+    statusEl.textContent = '✗ Failed: ' + e.message;
+    statusEl.style.color = '#991B1B';
+  }
 }
 
 // ─── Events email tab ─────────────────────────────────────────────────────────
@@ -2008,564 +2001,561 @@ let _evtListTimeout   = null;
 
 // Occasion → slug mapping for URL helper
 const OCCASION_SLUGS = {
-‘Easter’:       ‘easter’,
-‘Koningsdag’:   ‘koningsdag’,
-‘Meivakantie’:  ‘meivakantie’,
-‘Zomervakantie’:‘zomervakantie’,
-‘Halloween’:    ‘halloween’,
-‘Sinterklaas’:  ‘sinterklaas’,
-‘Kerstvakantie’:‘kerstvakantie’,
-‘Herfstvakantie’:‘herfstvakantie’,
+  'Easter':       'easter',
+  'Koningsdag':   'koningsdag',
+  'Meivakantie':  'meivakantie',
+  'Zomervakantie':'zomervakantie',
+  'Halloween':    'halloween',
+  'Sinterklaas':  'sinterklaas',
+  'Kerstvakantie':'kerstvakantie',
+  'Herfstvakantie':'herfstvakantie',
 };
 
 function updateEvtOccasionUrl() {
-const occasion = document.getElementById(‘evt-occasion-select’).value;
-const slug = OCCASION_SLUGS[occasion] || ‘’;
-const urlEl = document.getElementById(‘evt-page-url’);
-// Only pre-fill if field is empty or was previously auto-filled
-if (slug && (!urlEl.value || urlEl.dataset.autofilled === ‘true’)) {
-urlEl.value = ‘https://gobebop.app/kids-activities/amsterdam/events/’ + slug + ‘/index.html’;
-urlEl.dataset.autofilled = ‘true’;
-}
-// Update subject placeholder
-if (occasion) {
-document.getElementById(‘evt-subject’).placeholder = ‘e.g. Things to do with kids this ’ + occasion + ’ 🎉’;
-}
+  const occasion = document.getElementById('evt-occasion-select').value;
+  const slug = OCCASION_SLUGS[occasion] || '';
+  const urlEl = document.getElementById('evt-page-url');
+  // Only pre-fill if field is empty or was previously auto-filled
+  if (slug && (!urlEl.value || urlEl.dataset.autofilled === 'true')) {
+    urlEl.value = 'https://gobebop.app/kids-activities/amsterdam/events/' + slug + '/index.html';
+    urlEl.dataset.autofilled = 'true';
+  }
+  // Update subject placeholder
+  if (occasion) {
+    document.getElementById('evt-subject').placeholder = 'e.g. Things to do with kids this ' + occasion + ' 🎉';
+  }
 }
 
 // ── Search events from DB ─────────────────────────────────────────────────────
 
 async function _searchEventsDb(query) {
-const { supabaseUrl, supabaseKey } = getConfig();
-if (!supabaseUrl || !supabaseKey) return [];
-const occasion = document.getElementById(‘evt-occasion-select’).value;
-let url = supabaseUrl + ‘/rest/v1/events?select=id,title,description,start_date,end_date,price,event_type,occasion,address,icon,location_id,locations(name,city)&order=start_date.asc&limit=20’;
-if (occasion) url += ‘&occasion=eq.’ + encodeURIComponent(occasion);
-if (query && query.length >= 2) url += ‘&title=ilike.*’ + encodeURIComponent(query) + ’*’;
-try {
-const res = await fetch(url, { headers: { ‘apikey’: supabaseKey, ‘Authorization’: ’Bearer ’ + supabaseKey } });
-const rows = await res.json();
-return Array.isArray(rows) ? rows : [];
-} catch(e) { return []; }
+  const { supabaseUrl, supabaseKey } = getConfig();
+  if (!supabaseUrl || !supabaseKey) return [];
+  const occasion = document.getElementById('evt-occasion-select').value;
+  let url = supabaseUrl + '/rest/v1/events?select=id,title,description,start_date,end_date,price,event_type,occasion,address,icon,location_id,locations(name,city)&order=start_date.asc&limit=20';
+  if (occasion) url += '&occasion=eq.' + encodeURIComponent(occasion);
+  if (query && query.length >= 2) url += '&title=ilike.*' + encodeURIComponent(query) + '*';
+  try {
+    const res = await fetch(url, { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } });
+    const rows = await res.json();
+    return Array.isArray(rows) ? rows : [];
+  } catch(e) { return []; }
 }
 
 function formatEvtDate(dateStr) {
-if (!dateStr) return ‘Date TBC’;
-const d = new Date(dateStr);
-return d.toLocaleDateString(‘en-GB’, { weekday: ‘short’, day: ‘numeric’, month: ‘short’ }) +
-(dateStr.includes(‘T’) ? ’ · ’ + d.toLocaleTimeString(‘en-GB’, { hour: ‘2-digit’, minute: ‘2-digit’ }) : ‘’);
+  if (!dateStr) return 'Date TBC';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) +
+    (dateStr.includes('T') ? ' · ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '');
 }
 
 function evtResultCard(ev, onClickFn, isSelected) {
-const loc = ev.locations || {};
-const dateStr = formatEvtDate(ev.start_date);
-return ‘<div onclick=”’ + onClickFn + ‘(’ + JSON.stringify(ev).replace(/”/g, ‘"’) + ’)” ’ +
-’style=“padding:10px 14px;border-radius:8px;border:1.5px solid ’ + (isSelected ? ‘#4daabb’ : ‘#D4CEC6’) + ‘;background:’ + (isSelected ? ‘#dff0f5’ : ‘#FFFFFF’) + ‘;cursor:pointer;’ + (isSelected ? ‘pointer-events:none;’ : ‘’) + ‘”>’ +
-‘<div style="font-size:13px;font-weight:600;color:#1A1714;">’ + ev.title + ‘</div>’ +
-‘<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;margin-top:2px;">’ +
-dateStr + (loc.name ? ’ · ’ + loc.name : ‘’) + (ev.price ? ’ · ’ + ev.price : ‘’) +
-‘</div>’ +
-‘</div>’;
+  const loc = ev.locations || {};
+  const dateStr = formatEvtDate(ev.start_date);
+  return '<div onclick="' + onClickFn + '(' + JSON.stringify(ev).replace(/"/g, '&quot;') + ')" ' +
+    'style="padding:10px 14px;border-radius:8px;border:1.5px solid ' + (isSelected ? '#4daabb' : '#D4CEC6') + ';background:' + (isSelected ? '#dff0f5' : '#FFFFFF') + ';cursor:pointer;' + (isSelected ? 'pointer-events:none;' : '') + '">' +
+    '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + ev.title + '</div>' +
+    '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;margin-top:2px;">' +
+      dateStr + (loc.name ? ' · ' + loc.name : '') + (ev.price ? ' · ' + ev.price : '') +
+    '</div>' +
+  '</div>';
 }
 
 // ── Featured event search ─────────────────────────────────────────────────────
 
 async function searchOccasionEvents(query) {
-const resultsEl = document.getElementById(‘evt-featured-results’);
-clearTimeout(_evtSearchTimeout);
-_evtSearchTimeout = setTimeout(async () => {
-const rows = await _searchEventsDb(query);
-if (!rows.length) { resultsEl.innerHTML = ‘<div style="font-size:12px;color:#A09A94;padding:8px;">No events found — make sure the Occasion is selected above.</div>’; return; }
-resultsEl.innerHTML = rows.map(ev => evtResultCard(ev, ‘selectFeaturedEvent’, evtFeaturedEvent?.id === ev.id)).join(’’);
-}, 250);
+  const resultsEl = document.getElementById('evt-featured-results');
+  clearTimeout(_evtSearchTimeout);
+  _evtSearchTimeout = setTimeout(async () => {
+    const rows = await _searchEventsDb(query);
+    if (!rows.length) { resultsEl.innerHTML = '<div style="font-size:12px;color:#A09A94;padding:8px;">No events found — make sure the Occasion is selected above.</div>'; return; }
+    resultsEl.innerHTML = rows.map(ev => evtResultCard(ev, 'selectFeaturedEvent', evtFeaturedEvent?.id === ev.id)).join('');
+  }, 250);
 }
 
 function loadOccasionEvents() {
-searchOccasionEvents(’’);
-searchOccasionEventsForList(’’);
+  searchOccasionEvents('');
+  searchOccasionEventsForList('');
 }
 
 function selectFeaturedEvent(ev) {
-evtFeaturedEvent = ev;
-document.getElementById(‘evt-featured-results’).innerHTML = ‘’;
-document.getElementById(‘evt-featured-search’).value = ‘’;
-document.getElementById(‘evt-featured-selected’).style.display = ‘block’;
-const loc = ev.locations || {};
-document.getElementById(‘evt-featured-card’).innerHTML =
-‘<div style="font-size:14px;font-weight:600;color:#1A1714;margin-bottom:4px;">’ + ev.title + ‘</div>’ +
-‘<div style="font-size:11px;color:#4daabb;font-family:\'DM Mono\',monospace;margin-bottom:6px;">’ +
-formatEvtDate(ev.start_date) + (loc.name ? ’ · ’ + loc.name + (loc.city ? ’, ’ + loc.city : ‘’) : ‘’) +
-‘</div>’ +
-(ev.description ? ‘<div style="font-size:13px;color:#6B6560;line-height:1.6;">’ + ev.description.slice(0, 200) + (ev.description.length > 200 ? ‘…’ : ‘’) + ‘</div>’ : ‘’) +
-‘<span onclick="clearFeaturedEvent()" style="display:inline-block;margin-top:10px;font-size:12px;color:#4daabb;cursor:pointer;text-decoration:underline;">Change</span>’;
+  evtFeaturedEvent = ev;
+  document.getElementById('evt-featured-results').innerHTML = '';
+  document.getElementById('evt-featured-search').value = '';
+  document.getElementById('evt-featured-selected').style.display = 'block';
+  const loc = ev.locations || {};
+  document.getElementById('evt-featured-card').innerHTML =
+    '<div style="font-size:14px;font-weight:600;color:#1A1714;margin-bottom:4px;">' + ev.title + '</div>' +
+    '<div style="font-size:11px;color:#4daabb;font-family:\'DM Mono\',monospace;margin-bottom:6px;">' +
+      formatEvtDate(ev.start_date) + (loc.name ? ' · ' + loc.name + (loc.city ? ', ' + loc.city : '') : '') +
+    '</div>' +
+    (ev.description ? '<div style="font-size:13px;color:#6B6560;line-height:1.6;">' + ev.description.slice(0, 200) + (ev.description.length > 200 ? '…' : '') + '</div>' : '') +
+    '<span onclick="clearFeaturedEvent()" style="display:inline-block;margin-top:10px;font-size:12px;color:#4daabb;cursor:pointer;text-decoration:underline;">Change</span>';
 }
 
 function clearFeaturedEvent() {
-evtFeaturedEvent = null;
-document.getElementById(‘evt-featured-selected’).style.display = ‘none’;
-document.getElementById(‘evt-featured-title-override’).value = ‘’;
-document.getElementById(‘evt-featured-desc-override’).value = ‘’;
+  evtFeaturedEvent = null;
+  document.getElementById('evt-featured-selected').style.display = 'none';
+  document.getElementById('evt-featured-title-override').value = '';
+  document.getElementById('evt-featured-desc-override').value = '';
 }
 
 // ── Additional events list search ─────────────────────────────────────────────
 
 async function searchOccasionEventsForList(query) {
-const resultsEl = document.getElementById(‘evt-list-results’);
-clearTimeout(_evtListTimeout);
-_evtListTimeout = setTimeout(async () => {
-const rows = await _searchEventsDb(query);
-if (!rows.length) { resultsEl.innerHTML = ‘<div style="font-size:12px;color:#A09A94;padding:8px;">No events found.</div>’; return; }
-resultsEl.innerHTML = rows
-.filter(ev => !evtFeaturedEvent || ev.id !== evtFeaturedEvent.id)
-.map(ev => evtResultCard(ev, ‘addEvtListEvent’, evtListEvents.some(e => e.id === ev.id)))
-.join(’’);
-}, 250);
+  const resultsEl = document.getElementById('evt-list-results');
+  clearTimeout(_evtListTimeout);
+  _evtListTimeout = setTimeout(async () => {
+    const rows = await _searchEventsDb(query);
+    if (!rows.length) { resultsEl.innerHTML = '<div style="font-size:12px;color:#A09A94;padding:8px;">No events found.</div>'; return; }
+    resultsEl.innerHTML = rows
+      .filter(ev => !evtFeaturedEvent || ev.id !== evtFeaturedEvent.id)
+      .map(ev => evtResultCard(ev, 'addEvtListEvent', evtListEvents.some(e => e.id === ev.id)))
+      .join('');
+  }, 250);
 }
 
 function addEvtListEvent(ev) {
-if (evtListEvents.some(e => e.id === ev.id)) return;
-if (evtListEvents.length >= 5) return alert(‘Maximum 5 events in the list.’);
-evtListEvents.push({ …ev, _url: ‘’ }); // _url = event page URL, entered manually
-document.getElementById(‘evt-list-search’).value = ‘’;
-document.getElementById(‘evt-list-results’).innerHTML = ‘’;
-renderEvtList();
+  if (evtListEvents.some(e => e.id === ev.id)) return;
+  if (evtListEvents.length >= 5) return alert('Maximum 5 events in the list.');
+  evtListEvents.push({ ...ev, _url: '' }); // _url = event page URL, entered manually
+  document.getElementById('evt-list-search').value = '';
+  document.getElementById('evt-list-results').innerHTML = '';
+  renderEvtList();
 }
 
 function removeEvtListEvent(id) {
-evtListEvents = evtListEvents.filter(e => e.id !== id);
-renderEvtList();
+  evtListEvents = evtListEvents.filter(e => e.id !== id);
+  renderEvtList();
 }
 
 function updateEvtListUrl(id, url) {
-const ev = evtListEvents.find(e => e.id === id);
-if (ev) ev._url = url;
+  const ev = evtListEvents.find(e => e.id === id);
+  if (ev) ev._url = url;
 }
 
 function renderEvtList() {
-const el = document.getElementById(‘evt-list-selected’);
-if (!evtListEvents.length) { el.innerHTML = ‘’; return; }
-el.innerHTML = evtListEvents.map(ev => {
-const loc = ev.locations || {};
-const icon = ev.icon || ev.emoji || null;
-const { supabaseUrl } = getConfig();
-const iconHtml = icon && supabaseUrl
-? ‘<img src="' + supabaseUrl + '/storage/v1/object/public/icons/' + icon + '" style="width:28px;height:28px;object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'" />’
-: ‘<span style="font-size:22px;flex-shrink:0;">📅</span>’;
-return ‘<div style="background:#FFFFFF;border:1.5px solid #D4CEC6;border-radius:8px;padding:10px 12px;">’ +
-‘<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">’ +
-iconHtml +
-‘<div style="flex:1;min-width:0;">’ +
-‘<div style="font-size:13px;font-weight:600;color:#1A1714;">’ + ev.title + ‘</div>’ +
-‘<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;">’ +
-[ev.event_type, formatEvtDate(ev.start_date), loc.name].filter(Boolean).join(’ · ‘) +
-‘</div>’ +
-‘</div>’ +
-‘<button onclick="removeEvtListEvent(\'' + ev.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;flex-shrink:0;">✕</button>’ +
-‘</div>’ +
-‘<input type=“text” value=”’ + (ev._url || ‘’) + ‘” placeholder=“Event page URL (optional — e.g. https://gobebop.app/…)”’ +
-’ oninput=“updateEvtListUrl('’ + ev.id + ‘', this.value)”’ +
-’ style=“width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;color:#1A1714;outline:none;” />’ +
-‘</div>’;
-}).join(’’);
+  const el = document.getElementById('evt-list-selected');
+  if (!evtListEvents.length) { el.innerHTML = ''; return; }
+  el.innerHTML = evtListEvents.map(ev => {
+    const loc = ev.locations || {};
+    const icon = ev.icon || ev.emoji || null;
+    const { supabaseUrl } = getConfig();
+    const iconHtml = icon && supabaseUrl
+      ? '<img src="' + supabaseUrl + '/storage/v1/object/public/icons/' + icon + '" style="width:28px;height:28px;object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'" />'
+      : '<span style="font-size:22px;flex-shrink:0;">📅</span>';
+    return '<div style="background:#FFFFFF;border:1.5px solid #D4CEC6;border-radius:8px;padding:10px 12px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">' +
+        iconHtml +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + ev.title + '</div>' +
+          '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;">' +
+            [ev.event_type, formatEvtDate(ev.start_date), loc.name].filter(Boolean).join(' · ') +
+          '</div>' +
+        '</div>' +
+        '<button onclick="removeEvtListEvent(\'' + ev.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;flex-shrink:0;">✕</button>' +
+      '</div>' +
+      '<input type="text" value="' + (ev._url || '') + '" placeholder="Event page URL (optional — e.g. https://gobebop.app/...)"' +
+        ' oninput="updateEvtListUrl(\'' + ev.id + '\', this.value)"' +
+        ' style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;" />' +
+    '</div>';
+  }).join('');
 }
 
 // ── AI intro generator ────────────────────────────────────────────────────────
 
 async function generateEvtIntro() {
-const anthropicKey = localStorage.getItem(‘bebop_anthropic_key’) || ‘’;
-if (!anthropicKey) return alert(‘Add your Anthropic API key in the admin tool config panel first.’);
-const occasion  = document.getElementById(‘evt-occasion-select’).value || ‘this occasion’;
-const dateRange = document.getElementById(‘evt-date-range’).value;
-const notes     = document.getElementById(‘evt-intro-notes’).value.trim();
-const btn = document.getElementById(‘evt-intro-gen-btn’);
-btn.disabled = true; btn.textContent = ‘✦ Writing…’;
-try {
-const res = await fetch(‘https://api.anthropic.com/v1/messages’, {
-method: ‘POST’,
-headers: { ‘Content-Type’: ‘application/json’, ‘x-api-key’: anthropicKey,
-‘anthropic-version’: ‘2023-06-01’, ‘anthropic-dangerous-direct-browser-access’: ‘true’ },
-body: JSON.stringify({
-model: ‘claude-haiku-4-5-20251001’, max_tokens: 250,
-messages: [{ role: ‘user’, content:
-‘Write a short, warm 2–3 sentence intro paragraph for a family events email about ’ + occasion +
-(dateRange ? ’ (’ + dateRange + ‘)’ : ‘’) + ’ in the Netherlands. ’ +
-(notes ? ’Editor notes: ’ + notes + ’. ’ : ‘’) +
-’Tone: friendly local parent, excited but not over the top. ’ +
-‘Plain text only, no markdown, no HTML. Return only the intro, nothing else.’
-}]
-})
-});
-const data = await res.json();
-const text = data.content?.[0]?.text?.trim();
-if (text) document.getElementById(‘evt-intro’).value = text;
-} catch(e) { alert(’Failed: ’ + e.message); }
-finally { btn.disabled = false; btn.textContent = ‘✦ Generate’; }
+  const anthropicKey = localStorage.getItem('bebop_anthropic_key') || '';
+  if (!anthropicKey) return alert('Add your Anthropic API key in the admin tool config panel first.');
+  const occasion  = document.getElementById('evt-occasion-select').value || 'this occasion';
+  const dateRange = document.getElementById('evt-date-range').value;
+  const notes     = document.getElementById('evt-intro-notes').value.trim();
+  const btn = document.getElementById('evt-intro-gen-btn');
+  btn.disabled = true; btn.textContent = '✦ Writing…';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001', max_tokens: 250,
+        messages: [{ role: 'user', content:
+          'Write a short, warm 2–3 sentence intro paragraph for a family events email about ' + occasion +
+          (dateRange ? ' (' + dateRange + ')' : '') + ' in the Netherlands. ' +
+          (notes ? 'Editor notes: ' + notes + '. ' : '') +
+          'Tone: friendly local parent, excited but not over the top. ' +
+          'Plain text only, no markdown, no HTML. Return only the intro, nothing else.'
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text?.trim();
+    if (text) document.getElementById('evt-intro').value = text;
+  } catch(e) { alert('Failed: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = '✦ Generate'; }
 }
 
 // ── Load all occasion events for the list ────────────────────────────────────
 
 async function loadAllOccasionEventsForList() {
-const resultsEl = document.getElementById(‘evt-list-results’);
-resultsEl.innerHTML = ‘<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#A09A94;padding:8px;"><div class="spinner"></div> Loading…</div>’;
-const rows = await _searchEventsDb(’’);
-const filtered = rows.filter(ev => !evtFeaturedEvent || ev.id !== evtFeaturedEvent.id);
-if (!filtered.length) {
-resultsEl.innerHTML = ‘<div style="font-size:12px;color:#A09A94;padding:8px;">No events found — select an occasion above first.</div>’;
-return;
-}
-resultsEl.innerHTML = filtered.map(ev => evtResultCard(ev, ‘addEvtListEvent’, evtListEvents.some(e => e.id === ev.id))).join(’’);
+  const resultsEl = document.getElementById('evt-list-results');
+  resultsEl.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#A09A94;padding:8px;"><div class="spinner"></div> Loading…</div>';
+  const rows = await _searchEventsDb('');
+  const filtered = rows.filter(ev => !evtFeaturedEvent || ev.id !== evtFeaturedEvent.id);
+  if (!filtered.length) {
+    resultsEl.innerHTML = '<div style="font-size:12px;color:#A09A94;padding:8px;">No events found — select an occasion above first.</div>';
+    return;
+  }
+  resultsEl.innerHTML = filtered.map(ev => evtResultCard(ev, 'addEvtListEvent', evtListEvents.some(e => e.id === ev.id))).join('');
 }
 
 // ── Subject line + preview text generator (both at once) ──────────────────────
 
 async function generateEvtSubject() {
-const anthropicKey = localStorage.getItem(‘bebop_anthropic_key’) || ‘’;
-if (!anthropicKey) return alert(‘Add your Anthropic API key in the admin tool config panel first.’);
-const occasion = document.getElementById(‘evt-occasion-select’).value;
-const intro = document.getElementById(‘evt-intro’).value;
-const featuredTitle = evtFeaturedEvent?.title || ‘’;
-const btn = document.getElementById(‘evt-subject-generate-btn’);
-btn.disabled = true; btn.textContent = ‘✦ …’;
-try {
-const res = await fetch(‘https://api.anthropic.com/v1/messages’, {
-method: ‘POST’,
-headers: { ‘Content-Type’: ‘application/json’, ‘x-api-key’: anthropicKey,
-‘anthropic-version’: ‘2023-06-01’, ‘anthropic-dangerous-direct-browser-access’: ‘true’ },
-body: JSON.stringify({
-model: ‘claude-haiku-4-5-20251001’, max_tokens: 150,
-messages: [{ role: ‘user’, content:
-‘Write an email subject line and preview text for a family events newsletter about ’ + (occasion || ‘a Dutch holiday’) + ‘. ’ +
-(featuredTitle ? ‘Featured event: ’ + featuredTitle + ‘. ’ : ‘’) +
-(intro ? ‘Intro tone: ’ + intro.slice(0, 120) + ‘. ’ : ‘’) +
-‘Subject: max 55 chars, warm, specific, may include one emoji. ’ +
-‘Preview text: max 90 chars, complements the subject, adds a teaser detail. ’ +
-‘Return ONLY valid JSON like: {“subject”:”…”,“preview”:”…”} — no markdown, no preamble.’
-}]
-})
-});
-const data = await res.json();
-const raw = data.content?.[0]?.text?.trim() || ‘’;
-const first = raw.indexOf(’{’), last = raw.lastIndexOf(’}’);
-if (first === -1) throw new Error(‘No JSON in response’);
-const result = JSON.parse(raw.slice(first, last + 1));
-if (result.subject) {
-document.getElementById(‘evt-subject’).value = result.subject.replace(/^[”’]|[”’]$/g, ‘’);
-}
-if (result.preview) {
-document.getElementById(‘evt-preview-text’).value = result.preview.replace(/^[”’]|[”’]$/g, ‘’);
-}
-} catch(e) { alert(’Failed: ’ + e.message); }
-finally { btn.disabled = false; btn.textContent = ‘✦ Generate’; }
+  const anthropicKey = localStorage.getItem('bebop_anthropic_key') || '';
+  if (!anthropicKey) return alert('Add your Anthropic API key in the admin tool config panel first.');
+  const occasion = document.getElementById('evt-occasion-select').value;
+  const intro = document.getElementById('evt-intro').value;
+  const featuredTitle = evtFeaturedEvent?.title || '';
+  const btn = document.getElementById('evt-subject-generate-btn');
+  btn.disabled = true; btn.textContent = '✦ …';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001', max_tokens: 150,
+        messages: [{ role: 'user', content:
+          'Write an email subject line and preview text for a family events newsletter about ' + (occasion || 'a Dutch holiday') + '. ' +
+          (featuredTitle ? 'Featured event: ' + featuredTitle + '. ' : '') +
+          (intro ? 'Intro tone: ' + intro.slice(0, 120) + '. ' : '') +
+          'Subject: max 55 chars, warm, specific, may include one emoji. ' +
+          'Preview text: max 90 chars, complements the subject, adds a teaser detail. ' +
+          'Return ONLY valid JSON like: {"subject":"...","preview":"..."} — no markdown, no preamble.'
+        }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.[0]?.text?.trim() || '';
+    const first = raw.indexOf('{'), last = raw.lastIndexOf('}');
+    if (first === -1) throw new Error('No JSON in response');
+    const result = JSON.parse(raw.slice(first, last + 1));
+    if (result.subject) {
+      document.getElementById('evt-subject').value = result.subject.replace(/^["']|["']$/g, '');
+    }
+    if (result.preview) {
+      document.getElementById('evt-preview-text').value = result.preview.replace(/^["']|["']$/g, '');
+    }
+  } catch(e) { alert('Failed: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = '✦ Generate'; }
 }
 
 // ── Email HTML builder for events ─────────────────────────────────────────────
 
 function buildEvtEmailHtml() {
-const occasion    = document.getElementById(‘evt-occasion-select’).value || ‘Upcoming Events’;
-const dateRange   = document.getElementById(‘evt-date-range’).value;
-const intro       = document.getElementById(‘evt-intro’).value;
-const heroImage   = document.getElementById(‘evt-hero-image’).value.trim();
-const pageUrl     = document.getElementById(‘evt-page-url’).value || ‘https://gobebop.app’;
-const ctaText     = document.getElementById(‘evt-cta-text’).value || ‘See all events on GoBebop →’;
-const tip         = document.getElementById(‘evt-tip’).value;
-const previewText = document.getElementById(‘evt-preview-text’).value;
-const featuredUrl = document.getElementById(‘evt-featured-url’).value.trim() || pageUrl;
+  const occasion    = document.getElementById('evt-occasion-select').value || 'Upcoming Events';
+  const dateRange   = document.getElementById('evt-date-range').value;
+  const intro       = document.getElementById('evt-intro').value;
+  const heroImage   = document.getElementById('evt-hero-image').value.trim();
+  const pageUrl     = document.getElementById('evt-page-url').value || 'https://gobebop.app';
+  const ctaText     = document.getElementById('evt-cta-text').value || 'See all events on GoBebop →';
+  const tip         = document.getElementById('evt-tip').value;
+  const previewText = document.getElementById('evt-preview-text').value;
+  const featuredUrl = document.getElementById('evt-featured-url').value.trim() || pageUrl;
 
-const featTitle = document.getElementById(‘evt-featured-title-override’).value || evtFeaturedEvent?.title || ‘’;
-const featDesc  = document.getElementById(‘evt-featured-desc-override’).value || evtFeaturedEvent?.description || ‘’;
-const featLoc   = evtFeaturedEvent?.locations || {};
-const featDate  = formatEvtDate(evtFeaturedEvent?.start_date);
-const featType  = evtFeaturedEvent?.event_type || ‘’;
+  const featTitle = document.getElementById('evt-featured-title-override').value || evtFeaturedEvent?.title || '';
+  const featDesc  = document.getElementById('evt-featured-desc-override').value || evtFeaturedEvent?.description || '';
+  const featLoc   = evtFeaturedEvent?.locations || {};
+  const featDate  = formatEvtDate(evtFeaturedEvent?.start_date);
+  const featType  = evtFeaturedEvent?.event_type || '';
 
-const { supabaseUrl } = getConfig();
-const iconBaseUrl = supabaseUrl ? supabaseUrl + ‘/storage/v1/object/public/icons/’ : ‘’;
+  const { supabaseUrl } = getConfig();
+  const iconBaseUrl = supabaseUrl ? supabaseUrl + '/storage/v1/object/public/icons/' : '';
 
-// Design tokens
-const fontBody    = “‘Quicksand’, ‘Trebuchet MS’, Arial, sans-serif”;
-const fontDisplay = “‘Outfit’, ‘Trebuchet MS’, Arial, sans-serif”;
-const teal        = ‘#4daabb’;
-const tealDark    = ‘#3d8a99’;
-const ink         = ‘#111111’;
-const inkSoft     = ‘#555555’;
-const inkMuted    = ‘#888888’;
-const pageBg      = ‘#f5f6f8’;
-const cardBg      = ‘#ffffff’;
-const border      = ‘#ebebeb’;
-const borderStrong = ‘#e0e0e0’;
-const amberBg     = ‘#fff8e6’;
-const amberBorder = ‘#f0d78c’;
-const amberText   = ‘#8a7235’;
-const orange      = ‘#c07a20’;
-const orangeBg    = ‘rgba(200,130,30,0.1)’;
-const gFonts = ‘https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap’;
-const logoUrl = ‘https://gobebop.app/gobebop-logo.png’;
-const eyebrow = ‘font-family:’ + fontBody + ‘;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:’ + inkMuted + ‘;margin:0 0 12px;’;
+  // Design tokens
+  const fontBody    = "'Quicksand', 'Trebuchet MS', Arial, sans-serif";
+  const fontDisplay = "'Outfit', 'Trebuchet MS', Arial, sans-serif";
+  const teal        = '#4daabb';
+  const tealDark    = '#3d8a99';
+  const ink         = '#111111';
+  const inkSoft     = '#555555';
+  const inkMuted    = '#888888';
+  const pageBg      = '#f5f6f8';
+  const cardBg      = '#ffffff';
+  const border      = '#ebebeb';
+  const borderStrong = '#e0e0e0';
+  const amberBg     = '#fff8e6';
+  const amberBorder = '#f0d78c';
+  const amberText   = '#8a7235';
+  const orange      = '#c07a20';
+  const orangeBg    = 'rgba(200,130,30,0.1)';
+  const gFonts = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap';
+  const logoUrl = 'https://gobebop.app/gobebop-logo.png';
+  const eyebrow = 'font-family:' + fontBody + ';font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 12px;';
 
-// ── Logo header — sits on page background ──
-const logoHtml =
-‘<tr><td align="center" style="padding:24px 20px 16px;background:' + pageBg + ';">’ +
-‘<a href="https://gobebop.app" style="text-decoration:none;">’ +
-‘<img src="' + logoUrl + '" alt="GoBebop" height="40" style="height:40px;display:block;margin:0 auto;" />’ +
-‘</a>’ +
-‘</td></tr>’;
+  // ── Logo header — sits on page background ──
+  const logoHtml =
+    '<tr><td align="center" style="padding:24px 20px 16px;background:' + pageBg + ';">' +
+      '<a href="https://gobebop.app" style="text-decoration:none;">' +
+        '<img src="' + logoUrl + '" alt="GoBebop" height="40" style="height:40px;display:block;margin:0 auto;" />' +
+      '</a>' +
+    '</td></tr>';
 
-// ── Hero: photo strip (fixed height) then teal title/intro below — fully separated ──
-// This way the photo is purely decorative and intro text is always legible
-const heroHtml = heroImage
-?
-// Photo strip — fixed height, no text overlay
-‘<tr><td style="padding:0;line-height:0;">’ +
-‘<img src="' + heroImage + '" width="100%" style="width:100%;height:220px;object-fit:cover;object-position:center;display:block;" alt="' + occasion + '" />’ +
-‘</td></tr>’ +
-// Teal title + intro block below the photo
-‘<tr><td style="padding:28px 20px 24px;background:' + teal + ';">’ +
-‘<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 6px;">GoBebop Events</p>’ +
-‘<p style="font-family:' + fontDisplay + ';font-size:30px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">’ + occasion + ‘</p>’ +
-(dateRange ? ‘<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin:0 0 14px;">’ + dateRange + ‘</p>’ : ‘<div style="margin-bottom:14px;"></div>’) +
-(intro ? ‘<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.92);margin:0;line-height:1.7;">’ + intro + ‘</p>’ : ‘’) +
-‘</td></tr>’
-:
-// No photo — just teal block
-‘<tr><td style="padding:32px 20px 28px;background:' + teal + ';">’ +
-‘<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 6px;">GoBebop Events</p>’ +
-‘<p style="font-family:' + fontDisplay + ';font-size:30px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">’ + occasion + ‘</p>’ +
-(dateRange ? ‘<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin:0 0 14px;">’ + dateRange + ‘</p>’ : ‘<div style="margin-bottom:14px;"></div>’) +
-(intro ? ‘<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.92);margin:0;line-height:1.7;">’ + intro + ‘</p>’ : ‘’) +
-‘</td></tr>’;
+  // ── Hero: photo strip (fixed height) then teal title/intro below — fully separated ──
+  // This way the photo is purely decorative and intro text is always legible
+  const heroHtml = heroImage
+    ?
+      // Photo strip — fixed height, no text overlay
+      '<tr><td style="padding:0;line-height:0;">' +
+        '<img src="' + heroImage + '" width="100%" style="width:100%;height:220px;object-fit:cover;object-position:center;display:block;" alt="' + occasion + '" />' +
+      '</td></tr>' +
+      // Teal title + intro block below the photo
+      '<tr><td style="padding:28px 20px 24px;background:' + teal + ';">' +
+        '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 6px;">GoBebop Events</p>' +
+        '<p style="font-family:' + fontDisplay + ';font-size:30px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
+        (dateRange ? '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin:0 0 14px;">' + dateRange + '</p>' : '<div style="margin-bottom:14px;"></div>') +
+        (intro ? '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.92);margin:0;line-height:1.7;">' + intro + '</p>' : '') +
+      '</td></tr>'
+    :
+      // No photo — just teal block
+      '<tr><td style="padding:32px 20px 28px;background:' + teal + ';">' +
+        '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 6px;">GoBebop Events</p>' +
+        '<p style="font-family:' + fontDisplay + ';font-size:30px;font-weight:700;color:#ffffff;margin:0 0 6px;line-height:1.1;">' + occasion + '</p>' +
+        (dateRange ? '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin:0 0 14px;">' + dateRange + '</p>' : '<div style="margin-bottom:14px;"></div>') +
+        (intro ? '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.92);margin:0;line-height:1.7;">' + intro + '</p>' : '') +
+      '</td></tr>';
 
-// ── Featured event card — clean, mobile-optimised ──
-const featuredHtml = evtFeaturedEvent ?
-‘<tr><td style="padding:20px 20px 0;">’ +
-‘<p style="' + eyebrow + '">⭐ Featured</p>’ +
-‘<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">’ +
-‘<div style="height:3px;background:linear-gradient(90deg,' + teal + ',' + tealDark + ');"></div>’ +
-‘<div style="padding:18px 18px 20px;">’ +
-(featType ? ‘<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;background:' + orangeBg + ';color:' + orange + ';display:inline-block;padding:2px 9px;border-radius:20px;margin:0 0 10px;">’ + featType + ‘</p>’ : ‘’) +
-‘<p style="font-family:' + fontDisplay + ';font-size:20px;font-weight:700;color:' + ink + ';margin:0 0 6px;line-height:1.2;">’ + featTitle + ‘</p>’ +
-‘<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:' + teal + ';margin:0 0 12px;">’ +
-[featDate, featLoc.name ? featLoc.name + (featLoc.city ? ‘, ’ + featLoc.city : ‘’) : ‘’].filter(Boolean).join(’ · ’) +
-‘</p>’ +
-(featDesc ? ‘<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 18px;line-height:1.65;">’ + featDesc.slice(0, 280) + (featDesc.length > 280 ? ‘…’ : ‘’) + ‘</p>’ : ‘’) +
-// Full-width button — easy tap target on mobile
-‘<a href="' + featuredUrl + '" style="display:block;background:' + teal + ';color:#ffffff;font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:13px 20px;border-radius:10px;text-decoration:none;">See more →</a>’ +
-‘</div>’ +
-‘</div>’ +
-‘</td></tr>’ : ‘’;
+  // ── Featured event card — clean, mobile-optimised ──
+  const featuredHtml = evtFeaturedEvent ?
+    '<tr><td style="padding:20px 20px 0;">' +
+      '<p style="' + eyebrow + '">⭐ Featured</p>' +
+      '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
+        '<div style="height:3px;background:linear-gradient(90deg,' + teal + ',' + tealDark + ');"></div>' +
+        '<div style="padding:18px 18px 20px;">' +
+          (featType ? '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;background:' + orangeBg + ';color:' + orange + ';display:inline-block;padding:2px 9px;border-radius:20px;margin:0 0 10px;">' + featType + '</p>' : '') +
+          '<p style="font-family:' + fontDisplay + ';font-size:20px;font-weight:700;color:' + ink + ';margin:0 0 6px;line-height:1.2;">' + featTitle + '</p>' +
+          '<p style="font-family:' + fontBody + ';font-size:13px;font-weight:600;color:' + teal + ';margin:0 0 12px;">' +
+            [featDate, featLoc.name ? featLoc.name + (featLoc.city ? ', ' + featLoc.city : '') : ''].filter(Boolean).join(' · ') +
+          '</p>' +
+          (featDesc ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 18px;line-height:1.65;">' + featDesc.slice(0, 280) + (featDesc.length > 280 ? '…' : '') + '</p>' : '') +
+          // Full-width button — easy tap target on mobile
+          '<a href="' + featuredUrl + '" style="display:block;background:' + teal + ';color:#ffffff;font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:13px 20px;border-radius:10px;text-decoration:none;">See more →</a>' +
+        '</div>' +
+      '</div>' +
+    '</td></tr>' : '';
 
-// ── More events list ──
-// Mobile-first: icon + title/meta stacked, Info button full-width on its own line
-// No event type, no price
-const moreHtml = evtListEvents.length ?
-‘<tr><td style="padding:20px 20px 0;">’ +
-‘<p style="' + eyebrow + '">More events coming up</p>’ +
-‘<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">’ +
-evtListEvents.map((ev, i) => {
-const loc = ev.locations || {};
-const iconFile = ev.icon || ev.emoji || null;
-const iconImg = (iconFile && iconBaseUrl)
-? ‘<img src="' + iconBaseUrl + iconFile + '" width="36" height="36" style="width:36px;height:36px;object-fit:contain;display:block;flex-shrink:0;" />’
-: ‘<span style="font-size:28px;line-height:1;flex-shrink:0;">📅</span>’;
-// Date + location only — no event type, no price
-const meta = [formatEvtDate(ev.start_date), loc.name ? loc.name + (loc.city ? ‘, ’ + loc.city : ‘’) : ‘’].filter(Boolean).join(’ · ‘);
-return ‘<div style="padding:16px 18px;' + (i < evtListEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">’ +
-// Row 1: icon + title + meta
-‘<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>’ +
-‘<td style="width:44px;vertical-align:top;padding-right:12px;padding-top:2px;">’ + iconImg + ‘</td>’ +
-‘<td style="vertical-align:top;">’ +
-‘<p style="font-family:' + fontBody + ';font-size:15px;font-weight:700;color:' + ink + ';margin:0 0 4px;line-height:1.3;">’ + ev.title + ‘</p>’ +
-‘<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkMuted + ';margin:0;line-height:1.5;">’ + meta + ‘</p>’ +
-‘</td>’ +
-‘</tr></table>’ +
-// Row 2: Info button on its own line — full width, easy tap target
-(ev._url
-? ‘<a href="' + ev._url + '" style="display:block;margin-top:12px;text-align:center;font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;border:1.5px solid ' + teal + ';border-radius:8px;padding:9px 16px;">More info →</a>’
-: ‘’) +
-‘</div>’;
-}).join(’’) +
-‘</div>’ +
-‘</td></tr>’ : ‘’;
+  // ── More events list ──
+  // Mobile-first: icon + title/meta stacked, Info button full-width on its own line
+  // No event type, no price
+  const moreHtml = evtListEvents.length ?
+    '<tr><td style="padding:20px 20px 0;">' +
+      '<p style="' + eyebrow + '">More events coming up</p>' +
+      '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
+        evtListEvents.map((ev, i) => {
+          const loc = ev.locations || {};
+          const iconFile = ev.icon || ev.emoji || null;
+          const iconImg = (iconFile && iconBaseUrl)
+            ? '<img src="' + iconBaseUrl + iconFile + '" width="36" height="36" style="width:36px;height:36px;object-fit:contain;display:block;flex-shrink:0;" />'
+            : '<span style="font-size:28px;line-height:1;flex-shrink:0;">📅</span>';
+          // Date + location only — no event type, no price
+          const meta = [formatEvtDate(ev.start_date), loc.name ? loc.name + (loc.city ? ', ' + loc.city : '') : ''].filter(Boolean).join(' · ');
+          return '<div style="padding:16px 18px;' + (i < evtListEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
+            // Row 1: icon + title + meta
+            '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
+              '<td style="width:44px;vertical-align:top;padding-right:12px;padding-top:2px;">' + iconImg + '</td>' +
+              '<td style="vertical-align:top;">' +
+                '<p style="font-family:' + fontBody + ';font-size:15px;font-weight:700;color:' + ink + ';margin:0 0 4px;line-height:1.3;">' + ev.title + '</p>' +
+                '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkMuted + ';margin:0;line-height:1.5;">' + meta + '</p>' +
+              '</td>' +
+            '</tr></table>' +
+            // Row 2: Info button on its own line — full width, easy tap target
+            (ev._url
+              ? '<a href="' + ev._url + '" style="display:block;margin-top:12px;text-align:center;font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;border:1.5px solid ' + teal + ';border-radius:8px;padding:9px 16px;">More info →</a>'
+              : '') +
+          '</div>';
+        }).join('') +
+      '</div>' +
+    '</td></tr>' : '';
 
-// ── CTA banner — full width, generous padding ──
-const ctaHtml =
-‘<tr><td style="padding:20px 20px 0;">’ +
-‘<div style="background:' + teal + ';border-radius:14px;padding:24px 20px;text-align:center;">’ +
-‘<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.8px;">Don't miss out</p>’ +
-‘<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.85);margin:0 0 18px;line-height:1.5;">See the full programme on GoBebop</p>’ +
-‘<a href="' + pageUrl + '" style="display:block;background:#ffffff;color:' + teal + ';font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:14px 20px;border-radius:10px;text-decoration:none;">’ + ctaText + ‘</a>’ +
-‘</div>’ +
-‘</td></tr>’;
+  // ── CTA banner — full width, generous padding ──
+  const ctaHtml =
+    '<tr><td style="padding:20px 20px 0;">' +
+      '<div style="background:' + teal + ';border-radius:14px;padding:24px 20px;text-align:center;">' +
+        '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);margin:0 0 4px;text-transform:uppercase;letter-spacing:0.8px;">Don\'t miss out</p>' +
+        '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.85);margin:0 0 18px;line-height:1.5;">See the full programme on GoBebop</p>' +
+        '<a href="' + pageUrl + '" style="display:block;background:#ffffff;color:' + teal + ';font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:14px 20px;border-radius:10px;text-decoration:none;">' + ctaText + '</a>' +
+      '</div>' +
+    '</td></tr>';
 
-// ── Tip box ──
-const tipHtml = tip ?
-‘<tr><td style="padding:16px 20px 0;">’ +
-‘<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 16px;">’ +
-’<p style="font-family:' + fontBody + ';font-size:13px;color:' + amberText + ';margin:0;line-height:1.6;">💡 ’ + tip + ‘</p>’ +
-‘</div>’ +
-‘</td></tr>’ : ‘’;
+  // ── Tip box ──
+  const tipHtml = tip ?
+    '<tr><td style="padding:16px 20px 0;">' +
+      '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 16px;">' +
+        '<p style="font-family:' + fontBody + ';font-size:13px;color:' + amberText + ';margin:0;line-height:1.6;">💡 ' + tip + '</p>' +
+      '</div>' +
+    '</td></tr>' : '';
 
-// ── Footer ──
-const footerHtml =
-‘<tr><td style="padding:28px 20px;border-top:1px solid ' + border + ';margin-top:20px;">’ +
-‘<p style="font-family:' + fontBody + ';font-size:12px;font-weight:600;color:' + inkMuted + ';margin:0 0 6px;text-align:center;">GoBebop · Family guide to Amsterdam & the Netherlands</p>’ +
-‘<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;text-align:center;">’ +
-‘<a href="https://gobebop.app" style="color:' + teal + ';text-decoration:none;font-weight:600;">gobebop.app</a>’ +
-’  ·  <a href="{{unsubscribeUrl}}" style="color:' + inkMuted + ';text-decoration:underline;">Unsubscribe</a>’ +
-‘</p>’ +
-‘</td></tr>’;
+  // ── Footer ──
+  const footerHtml =
+    '<tr><td style="padding:28px 20px;border-top:1px solid ' + border + ';margin-top:20px;">' +
+      '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:600;color:' + inkMuted + ';margin:0 0 6px;text-align:center;">GoBebop · Family guide to Amsterdam &amp; the Netherlands</p>' +
+      '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;text-align:center;">' +
+        '<a href="https://gobebop.app" style="color:' + teal + ';text-decoration:none;font-weight:600;">gobebop.app</a>' +
+        ' &nbsp;·&nbsp; <a href="{{unsubscribeUrl}}" style="color:' + inkMuted + ';text-decoration:underline;">Unsubscribe</a>' +
+      '</p>' +
+    '</td></tr>';
 
-// ── Outer wrapper — no horizontal padding, fills screen width on mobile ──
-return ‘<!DOCTYPE html><html lang="en"><head>’ +
-‘<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">’ +
-’<meta name="x-apple-disable-message-reformatting"><title>GoBebop — ’ + occasion + ‘</title>’ +
-‘<link href="' + gFonts + '" rel="stylesheet">’ +
-(previewText ? ‘<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">’ + previewText + ‘ ͏‌ ͏‌ </div>’ : ‘’) +
-‘</head>’ +
-‘<body style="margin:0;padding:0;background:' + pageBg + ';-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">’ +
-‘<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + pageBg + ';width:100%;">’ +
-// Logo above the card, centred on the grey background
-logoHtml +
-// Main card — no side padding on mobile, rounded corners only on wider screens via max-width
-‘<tr><td style="padding:0 0 28px;">’ +
-‘<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;margin:0 auto;background:' + cardBg + ';border-radius:0;overflow:hidden;">’ +
-heroHtml + featuredHtml + moreHtml + ctaHtml + tipHtml +
-‘<tr><td style="padding:16px 0 0;"></td></tr>’ +
-footerHtml +
-‘</table>’ +
-‘</td></tr>’ +
-‘</table>’ +
-‘</body></html>’;
+  // ── Outer wrapper — no horizontal padding, fills screen width on mobile ──
+  return '<!DOCTYPE html><html lang="en"><head>' +
+    '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<meta name="x-apple-disable-message-reformatting"><title>GoBebop — ' + occasion + '</title>' +
+    '<link href="' + gFonts + '" rel="stylesheet">' +
+    (previewText ? '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">' + previewText + '&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>' : '') +
+    '</head>' +
+    '<body style="margin:0;padding:0;background:' + pageBg + ';-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">' +
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + pageBg + ';width:100%;">' +
+        // Logo above the card, centred on the grey background
+        logoHtml +
+        // Main card — no side padding on mobile, rounded corners only on wider screens via max-width
+        '<tr><td style="padding:0 0 28px;">' +
+          '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;margin:0 auto;background:' + cardBg + ';border-radius:0;overflow:hidden;">' +
+            heroHtml + featuredHtml + moreHtml + ctaHtml + tipHtml +
+            '<tr><td style="padding:16px 0 0;"></td></tr>' +
+            footerHtml +
+          '</table>' +
+        '</td></tr>' +
+      '</table>' +
+    '</body></html>';
 }
 
 // ── Preview & send ────────────────────────────────────────────────────────────
 
 function buildEvtPreview() {
-const html = buildEvtEmailHtml();
-const panel = document.getElementById(‘evt-preview-panel’);
-panel.style.display = ‘block’;
-document.getElementById(‘evt-preview-frame’).srcdoc = html;
-panel.scrollIntoView({ behavior: ‘smooth’, block: ‘start’ });
+  const html = buildEvtEmailHtml();
+  const panel = document.getElementById('evt-preview-panel');
+  panel.style.display = 'block';
+  document.getElementById('evt-preview-frame').srcdoc = html;
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function sendEvtTest() {
-const { loopsKey } = getConfig();
-if (!loopsKey) return alert(‘Add your Loops API key in the config panel.’);
-const toEmail = document.getElementById(‘evt-test-addr’).value.trim();
-if (!toEmail) return alert(‘Enter a test email address.’);
-const subject = document.getElementById(‘evt-subject’).value.trim() || ‘[TEST] GoBebop Events’;
-const html = buildEvtEmailHtml();
-const btn = document.getElementById(‘evt-test-btn’);
-btn.disabled = true; btn.textContent = ‘Sending…’;
-try {
-await sendLoopsTestEmail(loopsKey, toEmail, subject, html);
-document.getElementById(‘evt-send-status’).textContent = ’✓ Test sent to ’ + toEmail;
-document.getElementById(‘evt-send-status’).style.color = ‘#2D6A4F’;
-} catch(e) {
-document.getElementById(‘evt-send-status’).textContent = ’✗ ’ + e.message;
-document.getElementById(‘evt-send-status’).style.color = ‘#991B1B’;
-} finally { btn.disabled = false; btn.textContent = ‘✉ Send test’; }
+  const { loopsKey } = getConfig();
+  if (!loopsKey) return alert('Add your Loops API key in the config panel.');
+  const toEmail = document.getElementById('evt-test-addr').value.trim();
+  if (!toEmail) return alert('Enter a test email address.');
+  const subject = document.getElementById('evt-subject').value.trim() || '[TEST] GoBebop Events';
+  const html = buildEvtEmailHtml();
+  const btn = document.getElementById('evt-test-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await sendLoopsTestEmail(loopsKey, toEmail, subject, html);
+    document.getElementById('evt-send-status').textContent = '✓ Test sent to ' + toEmail;
+    document.getElementById('evt-send-status').style.color = '#2D6A4F';
+  } catch(e) {
+    document.getElementById('evt-send-status').textContent = '✗ ' + e.message;
+    document.getElementById('evt-send-status').style.color = '#991B1B';
+  } finally { btn.disabled = false; btn.textContent = '✉ Send test'; }
 }
 
 async function sendEvtCampaign() {
-const { loopsKey, loopsAudienceId } = getConfig();
-if (!loopsKey) return alert(‘Add your Loops API key in the config panel.’);
-const subject = document.getElementById(‘evt-subject’).value.trim();
-if (!subject) return alert(‘Please add a subject line before sending.’);
-if (!document.getElementById(‘evt-intro’).value.trim()) return alert(‘Please add intro text before sending.’);
-if (!confirm(‘Send this events email to ALL subscribers now? This cannot be undone.’)) return;
+  const { loopsKey, loopsAudienceId } = getConfig();
+  if (!loopsKey) return alert('Add your Loops API key in the config panel.');
+  const subject = document.getElementById('evt-subject').value.trim();
+  if (!subject) return alert('Please add a subject line before sending.');
+  if (!document.getElementById('evt-intro').value.trim()) return alert('Please add intro text before sending.');
+  if (!confirm('Send this events email to ALL subscribers now? This cannot be undone.')) return;
 
-const btn = document.getElementById(‘evt-send-btn’);
-const statusEl = document.getElementById(‘evt-send-status’);
-btn.disabled = true; btn.textContent = ‘Sending…’;
-statusEl.textContent = ‘’;
+  const btn = document.getElementById('evt-send-btn');
+  const statusEl = document.getElementById('evt-send-status');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  statusEl.textContent = '';
 
-try {
-const html = buildEvtEmailHtml();
-const occasion = document.getElementById(‘evt-occasion-select’).value || ‘Events’;
-const payload = {
-name: ’GoBebop ’ + occasion + ’ — ’ + new Date().toLocaleDateString(‘en-GB’, { day: ‘numeric’, month: ‘short’, year: ‘numeric’ }),
-subject,
-previewText: document.getElementById(‘evt-preview-text’).value || ‘’,
-html,
-from: { email: ‘hello@gobebop.app’, name: ‘GoBebop’ },
-};
-if (loopsAudienceId) payload.audienceId = loopsAudienceId;
+  try {
+    const html = buildEvtEmailHtml();
+    const occasion = document.getElementById('evt-occasion-select').value || 'Events';
+    const payload = {
+      name: 'GoBebop ' + occasion + ' — ' + new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+      subject,
+      previewText: document.getElementById('evt-preview-text').value || '',
+      html,
+      from: { email: 'hello@gobebop.app', name: 'GoBebop' },
+    };
+    if (loopsAudienceId) payload.audienceId = loopsAudienceId;
 
-```
-const res = await fetch('https://app.loops.so/api/v1/campaigns/send', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + loopsKey },
-  body: JSON.stringify(payload),
-});
-if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Loops error'); }
+    const res = await fetch('https://app.loops.so/api/v1/campaigns/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + loopsKey },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Loops error'); }
 
-statusEl.textContent = '✅ Campaign sent! Check your Loops dashboard for delivery stats.';
-statusEl.style.color = '#2D6A4F';
-```
-
-} catch(e) {
-statusEl.textContent = ’✗ Send failed: ’ + e.message;
-statusEl.style.color = ‘#991B1B’;
-} finally {
-btn.disabled = false;
-btn.innerHTML = ‘<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 6-12 6V8.5l8-1.5-8-1.5V1z" fill="white"/></svg> Send to all subscribers’;
-}
+    statusEl.textContent = '✅ Campaign sent! Check your Loops dashboard for delivery stats.';
+    statusEl.style.color = '#2D6A4F';
+  } catch(e) {
+    statusEl.textContent = '✗ Send failed: ' + e.message;
+    statusEl.style.color = '#991B1B';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 6-12 6V8.5l8-1.5-8-1.5V1z" fill="white"/></svg> Send to all subscribers';
+  }
 }
 
 // ─── Copy HTML to clipboard ───────────────────────────────────────────────────
 
 async function copyEmailHtml(type) {
-let html;
-if (type === ‘events’) {
-html = buildEvtEmailHtml();
-} else if (type === ‘welcome’) {
-html = buildEmailHtml({
-isWelcome: true,
-welcomeOpener:  document.getElementById(‘welcome-opener’).value,
-welcomeBody:    document.getElementById(‘welcome-body’).value,
-welcomeCtaText: document.getElementById(‘welcome-cta-text’).value,
-welcomeCtaUrl:  document.getElementById(‘welcome-cta-url’).value,
-welcomeClosing: document.getElementById(‘welcome-closing’).value,
-});
-} else {
-html = buildEmailHtml(getEmailOpts());
-}
+  let html;
+  if (type === 'events') {
+    html = buildEvtEmailHtml();
+  } else if (type === 'welcome') {
+    html = buildEmailHtml({
+      isWelcome: true,
+      welcomeOpener:  document.getElementById('welcome-opener').value,
+      welcomeBody:    document.getElementById('welcome-body').value,
+      welcomeCtaText: document.getElementById('welcome-cta-text').value,
+      welcomeCtaUrl:  document.getElementById('welcome-cta-url').value,
+      welcomeClosing: document.getElementById('welcome-closing').value,
+    });
+  } else {
+    html = buildEmailHtml(getEmailOpts());
+  }
 
-const confirmId = type === ‘events’  ? ‘evt-copy-html-confirm’  :
-type === ‘welcome’ ? ‘welcome-copy-confirm’    :
-‘copy-html-confirm’;
-const btnId     = type === ‘events’  ? ‘evt-copy-html-btn’      :
-type === ‘welcome’ ? ‘welcome-copy-btn’        :
-‘copy-html-btn’;
+  const confirmId = type === 'events'  ? 'evt-copy-html-confirm'  :
+                    type === 'welcome' ? 'welcome-copy-confirm'    :
+                    'copy-html-confirm';
+  const btnId     = type === 'events'  ? 'evt-copy-html-btn'      :
+                    type === 'welcome' ? 'welcome-copy-btn'        :
+                    'copy-html-btn';
 
-try {
-await navigator.clipboard.writeText(html);
-} catch(e) {
-const ta = document.createElement(‘textarea’);
-ta.value = html;
-ta.style.cssText = ‘position:fixed;top:-9999px;left:-9999px;opacity:0;’;
-document.body.appendChild(ta);
-ta.select();
-document.execCommand(‘copy’);
-document.body.removeChild(ta);
-}
+  try {
+    await navigator.clipboard.writeText(html);
+  } catch(e) {
+    const ta = document.createElement('textarea');
+    ta.value = html;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
 
-const confirmEl = document.getElementById(confirmId);
-const btn = document.getElementById(btnId);
-if (confirmEl) { confirmEl.style.display = ‘block’; setTimeout(() => { confirmEl.style.display = ‘none’; }, 5000); }
-if (btn) {
-const orig = btn.textContent;
-btn.textContent = ‘✓ Copied!’;
-setTimeout(() => { btn.textContent = orig; }, 2000);
-}
+  const confirmEl = document.getElementById(confirmId);
+  const btn = document.getElementById(btnId);
+  if (confirmEl) { confirmEl.style.display = 'block'; setTimeout(() => { confirmEl.style.display = 'none'; }, 5000); }
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  }
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 loadConfig();
 
-if (!localStorage.getItem(‘bebop_loops_key’)) {
-document.getElementById(‘config-panel’).classList.add(‘visible’);
-document.getElementById(‘config-toggle’).classList.add(‘open’);
+if (!localStorage.getItem('bebop_loops_key')) {
+  document.getElementById('config-panel').classList.add('visible');
+  document.getElementById('config-toggle').classList.add('open');
 }
 </script>
 
