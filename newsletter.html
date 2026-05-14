@@ -1373,7 +1373,7 @@ function formatWeeklyEvtDate(dateStr) {
 
 function addWeeklyEvent(ev) {
   if (weeklyEvents.some(e => e.id === ev.id)) return;
-  if (weeklyEvents.length >= 4) return alert('Pick up to 4 events for the weekly newsletter.');
+  if (weeklyEvents.length >= 5) return alert('Pick up to 5 events for the weekly newsletter.');
   weeklyEvents.push({ ...ev, _url: '' });
   document.getElementById('weekly-evt-search').value = '';
   document.getElementById('weekly-evt-results').innerHTML = '';
@@ -1600,11 +1600,14 @@ function buildEmailHtml(opts) {
 
   // ── Logo header ──
   const headerHtml =
-    '<tr><td align="center" style="padding:24px 20px 16px;background:' + pageBg + ';">' +
-      '<a href="https://gobebop.app" style="text-decoration:none;">' +
+    '<tr><td align="center" style="padding:18px 20px 12px;background:' + pageBg + ';">' +
+      '<a href="https://gobebop.app/?utm_source=newsletter&utm_medium=email&utm_campaign=weekly" style="text-decoration:none;">' +
         '<img src="' + logoUrl + '" alt="GoBebop" height="40" style="height:40px;display:block;margin:0 auto;" />' +
       '</a>' +
     '</td></tr>';
+
+  // Larger section eyebrow for weekly newsletter
+  const sectionEyebrow = 'font-family:' + fontBody + ';font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 10px;';
 
   let bodyRows = '';
 
@@ -1612,123 +1615,142 @@ function buildEmailHtml(opts) {
   if (isWelcome) {
     bodyRows +=
       '<tr><td style="padding:0;background:' + teal + ';">' +
-        '<div style="padding:36px 20px 32px;">' +
+        '<div style="padding:32px 20px 28px;">' +
           '<p style="font-family:' + fontDisplay + ';font-size:28px;font-weight:700;color:#ffffff;margin:0 0 8px;line-height:1.2;">Welcome to GoBebop! 👋</p>' +
           '<p style="font-family:' + fontBody + ';font-size:15px;color:rgba(255,255,255,0.85);margin:0;line-height:1.6;">Your guide to family fun in and around Amsterdam.</p>' +
         '</div>' +
       '</td></tr>' +
-      '<tr><td style="padding:28px 20px 20px;background:' + cardBg + ';">' +
-        '<p style="font-family:' + fontBody + ';font-size:16px;font-weight:600;color:' + ink + ';margin:0 0 20px;line-height:1.5;">' + (welcomeOpener || '') + '</p>' +
-        '<p style="font-family:' + fontBody + ';font-size:15px;color:' + inkSoft + ';margin:0 0 28px;line-height:1.8;">' + (welcomeBody || '').replace(/\n/g, '<br>') + '</p>' +
-        '<a href="' + (welcomeCtaUrl || 'https://gobebop.app') + '" style="display:block;background:' + teal + ';color:#ffffff;font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:14px 20px;border-radius:10px;text-decoration:none;">' + (welcomeCtaText || 'Discover family spots near you') + '</a>' +
-        '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:28px 0 0;line-height:1.6;">' + (welcomeClosing || '') + '</p>' +
+      '<tr><td style="padding:24px 20px 20px;background:' + cardBg + ';">' +
+        '<p style="font-family:' + fontBody + ';font-size:16px;font-weight:600;color:' + ink + ';margin:0 0 18px;line-height:1.5;">' + (welcomeOpener || '') + '</p>' +
+        '<p style="font-family:' + fontBody + ';font-size:15px;color:' + inkSoft + ';margin:0 0 24px;line-height:1.8;">' + (welcomeBody || '').replace(/\n/g, '<br>') + '</p>' +
+        '<a href="' + (welcomeCtaUrl || 'https://gobebop.app') + '" style="display:block;background:' + teal + ';color:#ffffff;font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:13px 20px;border-radius:10px;text-decoration:none;">' + (welcomeCtaText || 'Discover family spots near you') + '</a>' +
+        '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:24px 0 0;line-height:1.6;">' + (welcomeClosing || '') + '</p>' +
       '</td></tr>';
 
   } else {
     // ── WEEKLY NEWSLETTER ──────────────────────────────────────────────────
 
-    // 1. Weather opener — written intro first, then Sat/Sun forecast tiles below
-    if (weatherIntro || satTemp || sunTemp) {
-      const showTiles = satTemp || sunTemp;
-      const satTile = satTemp ?
-        '<td style="width:50%;padding-right:6px;">' +
-          '<div style="background:#ffffff;border:1px solid ' + border + ';border-radius:10px;padding:14px 10px;text-align:center;">' +
-            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;color:' + inkMuted + ';text-transform:uppercase;letter-spacing:0.8px;margin:0 0 6px;">' + satLabel + '</p>' +
-            '<p style="font-size:26px;margin:0 0 4px;line-height:1;">' + satEmoji + '</p>' +
-            '<p style="font-family:' + fontBody + ';font-size:18px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + satTemp + '</p>' +
-            '<p style="font-family:' + fontBody + ';font-size:11px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + satDesc + '</p>' +
-          '</div>' +
-        '</td>' : '';
-      const sunTile = sunTemp ?
-        '<td style="width:50%;padding-left:6px;">' +
-          '<div style="background:#ffffff;border:1px solid ' + border + ';border-radius:10px;padding:14px 10px;text-align:center;">' +
-            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;color:' + inkMuted + ';text-transform:uppercase;letter-spacing:0.8px;margin:0 0 6px;">' + sunLabel + '</p>' +
-            '<p style="font-size:26px;margin:0 0 4px;line-height:1;">' + sunEmoji + '</p>' +
-            '<p style="font-family:' + fontBody + ';font-size:18px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + sunTemp + '</p>' +
-            '<p style="font-family:' + fontBody + ';font-size:11px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + sunDesc + '</p>' +
-          '</div>' +
-        '</td>' : '';
-      bodyRows +=
-        '<tr><td style="padding:20px 20px 0;">' +
-          '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:16px 18px;">' +
-            (weatherIntro ? '<p style="font-family:' + fontBody + ';font-size:15px;color:' + amberText + ';margin:0' + (showTiles ? ' 14px' : '') + ' 0 0;line-height:1.7;">⛅ ' + weatherIntro + '</p>' : '') +
-            (showTiles ?
-              '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' + satTile + sunTile + '</tr></table>'
-              : '') +
-          '</div>' +
-        '</td></tr>';
-    }
-
-    // 2. GoBebop Recommends — primary CTA
+    // 1. GoBebop Recommends — leads the email
     if (recName) {
       bodyRows +=
-        '<tr><td style="padding:20px 20px 0;">' +
-          '<p style="' + eyebrow + '">⭐ GoBebop Recommends</p>' +
+        '<tr><td style="padding:14px 14px 0;">' +
+          '<p style="' + sectionEyebrow + '">⭐ GoBebop Recommends</p>' +
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
             (recPhotoUrl ?
               '<img src="' + recPhotoUrl + '" alt="' + recName + '" width="100%" style="width:100%;height:200px;object-fit:cover;display:block;" />' :
-              '<div style="width:100%;height:100px;background:' + teal + ';display:flex;align-items:center;justify-content:center;"><span style="font-size:36px;">📍</span></div>') +
-            '<div style="padding:18px 18px 20px;">' +
+              '<div style="width:100%;height:90px;background:' + teal + ';display:flex;align-items:center;justify-content:center;"><span style="font-size:32px;">📍</span></div>') +
+            '<div style="padding:16px 16px 18px;">' +
               '<p style="font-family:' + fontDisplay + ';font-size:22px;font-weight:700;color:' + ink + ';margin:0 0 4px;line-height:1.2;">' + recName + '</p>' +
-              '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0 0 12px;letter-spacing:0.5px;">' + [recCity, recCat].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
-              (recHeadline ? '<p style="font-family:' + fontBody + ';font-size:15px;font-weight:700;color:' + ink + ';margin:0 0 10px;line-height:1.35;">' + recHeadline + '</p>' : '') +
-              '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 18px;line-height:1.7;">' + (recBody || '') + '</p>' +
-              '<a href="' + recPageUrl + '" style="display:block;background:' + teal + ';color:#ffffff;font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:13px 20px;border-radius:10px;text-decoration:none;">See full details →</a>' +
+              '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0 0 11px;letter-spacing:0.5px;">' + [recCity, recCat].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
+              (recHeadline ? '<p style="font-family:' + fontBody + ';font-size:15px;font-weight:700;color:' + ink + ';margin:0 0 9px;line-height:1.35;">' + recHeadline + '</p>' : '') +
+              '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 16px;line-height:1.7;">' + (recBody || '') + '</p>' +
+              '<a href="' + recPageUrl + '" style="display:block;background:' + teal + ';color:#ffffff;font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:12px 20px;border-radius:10px;text-decoration:none;">See full details →</a>' +
             '</div>' +
           '</div>' +
         '</td></tr>';
     }
 
-    // 3. This weekend's events — compact list, single "See all events" link at bottom
+    // 2. Forecast for this weekend — intro text then Sat/Sun tiles
+    if (weatherIntro || satTemp || sunTemp) {
+      const showTiles = satTemp || sunTemp;
+      // Parse date string to get "Saturday 17 May" style label
+      const fmtDay = (stored) => {
+        if (!stored) return '';
+        // stored is e.g. "2026-05-16" — parse as local noon to avoid timezone shift
+        const parts = stored.split('-');
+        if (parts.length === 3) {
+          const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+          return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+        }
+        return stored;
+      };
+      const satTile = satTemp ?
+        '<td style="width:50%;padding-right:5px;">' +
+          '<div style="background:#ffffff;border:1px solid ' + border + ';border-radius:10px;padding:12px 8px;text-align:center;">' +
+            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;color:' + inkMuted + ';text-transform:uppercase;letter-spacing:0.7px;margin:0 0 5px;">' + fmtDay(satLabel) + '</p>' +
+            '<p style="font-size:24px;margin:0 0 4px;line-height:1;">' + satEmoji + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:18px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + satTemp + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:11px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + satDesc + '</p>' +
+          '</div>' +
+        '</td>' : '';
+      const sunTile = sunTemp ?
+        '<td style="width:50%;padding-left:5px;">' +
+          '<div style="background:#ffffff;border:1px solid ' + border + ';border-radius:10px;padding:12px 8px;text-align:center;">' +
+            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;color:' + inkMuted + ';text-transform:uppercase;letter-spacing:0.7px;margin:0 0 5px;">' + fmtDay(sunLabel) + '</p>' +
+            '<p style="font-size:24px;margin:0 0 4px;line-height:1;">' + sunEmoji + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:18px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + sunTemp + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:11px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + sunDesc + '</p>' +
+          '</div>' +
+        '</td>' : '';
+      bodyRows +=
+        '<tr><td style="padding:14px 14px 0;">' +
+          '<p style="' + sectionEyebrow + '">🌤 Forecast for this weekend</p>' +
+          '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 14px;">' +
+            (weatherIntro ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + amberText + ';margin:0' + (showTiles ? ' 0 12px' : '') + ';line-height:1.7;">' + weatherIntro + '</p>' : '') +
+            (showTiles ? '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' + satTile + sunTile + '</tr></table>' : '') +
+          '</div>' +
+        '</td></tr>';
+    }
+
+    // 3. Events this weekend — compact list, single link, max 5
     if (weeklyEvents.length) {
-      const evtPageUrl = 'https://gobebop.app';
+      const evtPageUrl = 'https://gobebop.app/kids-activities/amsterdam/events/?utm_source=newsletter&utm_medium=email&utm_campaign=weekly';
       const evRows = weeklyEvents.map((ev, i) => {
         const loc = ev.locations || {};
         const iconFile = ev.icon || null;
         const iconImg = (iconFile && iconBase)
-          ? '<img src="' + iconBase + iconFile + '" width="32" height="32" style="width:32px;height:32px;object-fit:contain;display:block;" />'
-          : '<span style="font-size:24px;line-height:1;">📅</span>';
+          ? '<img src="' + iconBase + iconFile + '" width="30" height="30" style="width:30px;height:30px;object-fit:contain;display:block;" />'
+          : '<span style="font-size:22px;line-height:1;">📅</span>';
         const dateStr = formatWeeklyEvtDate(ev.start_date);
         const meta = [dateStr, loc.name ? loc.name + (loc.city ? ', ' + loc.city : '') : ''].filter(Boolean).join(' · ');
-        return '<div style="padding:14px 18px;' + (i < weeklyEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
+        return '<div style="padding:12px 14px;' + (i < weeklyEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
           '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
-            '<td style="width:40px;vertical-align:top;padding-right:12px;padding-top:2px;">' + iconImg + '</td>' +
+            '<td style="width:38px;vertical-align:top;padding-right:10px;padding-top:2px;">' + iconImg + '</td>' +
             '<td style="vertical-align:top;">' +
-              '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:700;color:' + ink + ';margin:0 0 3px;line-height:1.3;">' + ev.title + '</p>' +
+              '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:700;color:' + ink + ';margin:0 0 2px;line-height:1.3;">' + ev.title + '</p>' +
               '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;line-height:1.5;">' + meta + '</p>' +
             '</td>' +
           '</tr></table>' +
         '</div>';
       }).join('');
       bodyRows +=
-        '<tr><td style="padding:20px 20px 0;">' +
-          '<p style="' + eyebrow + '">📅 This weekend</p>' +
+        '<tr><td style="padding:14px 14px 0;">' +
+          '<p style="' + sectionEyebrow + '">📅 Events this weekend</p>' +
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
             evRows +
           '</div>' +
-          '<p style="font-family:' + fontBody + ';font-size:13px;text-align:center;margin:10px 0 0;">' +
+          '<p style="font-family:' + fontBody + ';font-size:13px;text-align:center;margin:8px 0 0;">' +
             '<a href="' + evtPageUrl + '" style="color:' + teal + ';text-decoration:none;font-weight:600;">See all upcoming events →</a>' +
           '</p>' +
         '</td></tr>';
     }
 
-    // 4. Just discovered — text-only card (Option A): name as link, category, description teaser
+    // 4. Just discovered — thumbnail (80px) + name link + category + description teaser
     if (recentSpot) {
       const spotUrl = recentSpot._url || 'https://gobebop.app';
+      const recentAllUrl = 'https://gobebop.app/explore/amsterdam/?sort=recently_added&view=list&utm_source=newsletter&utm_medium=email&utm_campaign=weekly';
       const desc = recentSpot.description
-        ? (recentSpot.description.length > 120 ? recentSpot.description.slice(0, 120) + '…' : recentSpot.description)
+        ? (recentSpot.description.length > 130 ? recentSpot.description.slice(0, 130) + '…' : recentSpot.description)
         : null;
       bodyRows +=
-        '<tr><td style="padding:20px 20px 0;">' +
-          '<p style="' + eyebrow + '">🆕 Just discovered</p>' +
-          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;padding:18px 18px 20px;">' +
-            '<a href="' + spotUrl + '" style="font-family:' + fontDisplay + ';font-size:19px;font-weight:700;color:' + ink + ';text-decoration:none;line-height:1.2;display:block;margin-bottom:4px;">' + recentSpot.name + '</a>' +
-            '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0 0 10px;letter-spacing:0.5px;">' + [recentSpot.city, recentSpot.secondary_category_lead].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
-            (desc ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 14px;line-height:1.65;">' + desc + '</p>' : '') +
-            '<a href="' + spotUrl + '" style="font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;">Find out more →</a>' +
+        '<tr><td style="padding:14px 14px 0;">' +
+          '<p style="' + sectionEyebrow + '">🆕 Just discovered</p>' +
+          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;padding:14px 14px 16px;">' +
+            '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
+              (recentSpot.thumbUrl ?
+                '<td style="width:80px;padding-right:14px;vertical-align:top;">' +
+                  '<img src="' + recentSpot.thumbUrl + '" width="80" height="80" style="width:80px;height:80px;border-radius:10px;object-fit:cover;display:block;" />' +
+                '</td>' : '') +
+              '<td style="vertical-align:top;">' +
+                '<a href="' + spotUrl + '" style="font-family:' + fontDisplay + ';font-size:18px;font-weight:700;color:' + ink + ';text-decoration:none;line-height:1.2;display:block;margin-bottom:3px;">' + recentSpot.name + '</a>' +
+                '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;color:' + teal + ';margin:0 0 8px;letter-spacing:0.5px;">' + [recentSpot.city, recentSpot.secondary_category_lead].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
+                (desc ? '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkSoft + ';margin:0 0 10px;line-height:1.6;">' + desc + '</p>' : '') +
+                '<a href="' + spotUrl + '" style="font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;">Find out more →</a>' +
+              '</td>' +
+            '</tr></table>' +
           '</div>' +
-          '<p style="font-family:' + fontBody + ';font-size:13px;text-align:center;margin:10px 0 0;">' +
-            '<a href="https://gobebop.app" style="color:' + teal + ';text-decoration:none;font-weight:600;">See all recently added spots →</a>' +
+          '<p style="font-family:' + fontBody + ';font-size:13px;text-align:center;margin:8px 0 0;">' +
+            '<a href="' + recentAllUrl + '" style="color:' + teal + ';text-decoration:none;font-weight:600;">See all recently added spots →</a>' +
           '</p>' +
         '</td></tr>';
     }
