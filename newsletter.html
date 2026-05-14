@@ -1751,18 +1751,11 @@ function buildEmailHtml(opts) {
         '<tr><td style="padding:14px 14px 0;">' +
           '<p style="' + sectionEyebrow + '">💡 Just discovered</p>' +
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
-            '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
-              (recentSpot.thumbUrl ?
-                '<td class="spot-thumb-cell" style="width:80px;vertical-align:top;">' +
-                  '<img src="' + recentSpot.thumbUrl + '" width="80" height="80" class="spot-thumb" style="width:80px;height:80px;object-fit:cover;display:block;" />' +
-                '</td>' : '') +
-              '<td style="vertical-align:middle;padding:14px 14px;">' +
-                '<a href="' + spotUrl + '" style="font-family:' + fontDisplay + ';font-size:20px;font-weight:700;color:' + ink + ';text-decoration:none;line-height:1.2;display:block;margin-bottom:4px;">' + recentSpot.name + '</a>' +
-                '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0;letter-spacing:0.5px;">' + [recentSpot.city, recentSpot.secondary_category_lead].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
-              '</td>' +
-            '</tr></table>' +
-            '<div style="padding:0 14px 14px;">' +
-              (desc ? '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkSoft + ';margin:0 0 10px;line-height:1.6;">' + desc + '</p>' : '') +
+            (recentSpot.thumbUrl ? '<img src="' + recentSpot.thumbUrl + '" alt="' + recentSpot.name + '" width="100%" style="width:100%;height:200px;object-fit:cover;display:block;" />' : '') +
+            '<div style="padding:16px 16px 18px;">' +
+              '<a href="' + spotUrl + '" style="font-family:' + fontDisplay + ';font-size:20px;font-weight:700;color:' + ink + ';text-decoration:none;line-height:1.2;display:block;margin-bottom:4px;">' + recentSpot.name + '</a>' +
+              '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0 0 10px;letter-spacing:0.5px;">' + [recentSpot.city, recentSpot.secondary_category_lead].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
+              (desc ? '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkSoft + ';margin:0 0 12px;line-height:1.6;">' + desc + '</p>' : '') +
               '<a href="' + spotUrl + '" style="font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;">See more →</a>' +
             '</div>' +
           '</div>' +
@@ -1783,12 +1776,10 @@ function buildEmailHtml(opts) {
       '</p>' +
     '</td></tr>';
 
-  const mobileStyles = '<style>@media only screen and (max-width:480px){.spot-thumb-cell{width:100%!important;display:block!important}.spot-thumb{width:100%!important;height:180px!important}}<\/style>';
   return '<!DOCTYPE html><html lang="en"><head>' +
     '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<meta name="x-apple-disable-message-reformatting"><title>GoBebop</title>' +
     '<link href="' + gFonts + '" rel="stylesheet">' +
-    mobileStyles +
     (previewText ? '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">' + previewText + '&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>' : '') +
     '</head>' +
     '<body style="margin:0;padding:0;background:' + pageBg + ';-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">' +
