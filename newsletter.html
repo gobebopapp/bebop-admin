@@ -1134,10 +1134,24 @@ async function loadWeather() {
     const getDay = (dateStr) => {
       const readings = data.list.filter(r => r.dt_txt.startsWith(dateStr));
       if (!readings.length) return null;
+      // Daytime = 04:00–18:00 UTC (06:00–20:00 Amsterdam summer)
       const daytime = readings.filter(r => { const h = parseInt(r.dt_txt.slice(11,13),10); return h>=4&&h<=18; });
       const pool = daytime.length ? daytime : readings;
-      const hottest = pool.reduce((best,r)=>(r.main.temp_max||r.main.temp)>(best.main.temp_max||best.main.temp)?r:best,pool[0]);
-      return { ...hottest, main: { ...hottest.main, temp: hottest.main.temp_max||hottest.main.temp } };
+      // Temp: highest temp_max across daytime = day's forecasted high
+      const maxTemp = Math.max(...pool.map(r => r.main.temp_max || r.main.temp));
+      // Icon + description: from the midday slot (10:00 UTC = noon Amsterdam),
+      // falling back to 12:00, 09:00, 13:00, then whatever is closest to noon
+      const midday = pool.find(r => r.dt_txt.includes('10:00:00'))
+                  || pool.find(r => r.dt_txt.includes('12:00:00'))
+                  || pool.find(r => r.dt_txt.includes('09:00:00'))
+                  || pool.find(r => r.dt_txt.includes('13:00:00'))
+                  || pool.reduce((best, r) => {
+                       const h = parseInt(r.dt_txt.slice(11,13),10);
+                       const bh = parseInt(best.dt_txt.slice(11,13),10);
+                       return Math.abs(h-10) < Math.abs(bh-10) ? r : best;
+                     }, pool[0]);
+      // Return midday slot for icon/desc, but override temp with the day's high
+      return { ...midday, main: { ...midday.main, temp: maxTemp } };
     };
 
     const sat = getDay(satStr);
