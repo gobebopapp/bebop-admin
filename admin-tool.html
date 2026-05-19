@@ -826,126 +826,124 @@ header {
     <div class="page-title">Photos</div>
     <p class="page-sub">Upload location photos or find images on Wikimedia Commons.</p>
 
-```
-<div class="photo-sub-toggle">
-  <button class="photo-sub-btn active" id="psub-upload" onclick="setPhotoSubMode('upload')">📷 Upload</button>
-  <button class="photo-sub-btn" id="psub-wikimedia" onclick="setPhotoSubMode('wikimedia')">🌐 Wikimedia</button>
-</div>
-
-<!-- Upload panel -->
-<div id="photo-upload-panel">
-
-  <div id="recent-section" class="recent-section" style="display:none;visibility:hidden;height:0;overflow:hidden;margin:0;padding:0;">
-    <div class="recent-label">Recent</div>
-    <div class="recent-list" id="recent-list"></div>
-  </div>
-
-  <div class="lookup-bar" style="flex-direction:column;gap:8px;">
-    <div class="field-wrap" style="width:100%;">
-      <label>Search locations</label>
-      <input type="text" id="photo-search-input" placeholder="Start typing a name…" oninput="searchLocations(this.value)" autocomplete="off" style="font-size:16px;" />
+    <div class="photo-sub-toggle">
+      <button class="photo-sub-btn active" id="psub-upload" onclick="setPhotoSubMode('upload')">📷 Upload</button>
+      <button class="photo-sub-btn" id="psub-wikimedia" onclick="setPhotoSubMode('wikimedia')">🌐 Wikimedia</button>
     </div>
-    <div class="photo-search-results" id="photo-search-results"></div>
-  </div>
 
-  <div id="photo-mode-upload-panel" style="display:none;">
-    <div class="photo-mode-upload">
-      <div class="photo-mode-selected" id="photo-mode-selected"></div>
-      <div id="existing-photos-warning" style="display:none;background:#fef9c3;border:1.5px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:14px;"></div>
-      <p class="text-muted" style="margin-bottom:14px;">Saved as WebP, max 1200px long edge (display) + max 400px (thumb). Pick a descriptor and add alt text for SEO. Filename pattern: <code style="font-family:'DM Mono',monospace;font-size:11px;background:#E4DDD3;padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.webp</code></p>
-      <div class="photo-drop-zone" id="photo-mode-drop-zone" ondragover="event.preventDefault()" ondrop="handlePhotoModeFiles(event.dataTransfer.files)">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:#A09A94;margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-        <p style="font-size:13px;color:#A09A94;margin-bottom:6px;">Drag photos here or</p>
-        <label class="btn btn-secondary" style="cursor:pointer;font-size:13px;">
-          Choose files
-          <input type="file" id="photo-mode-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoModeFiles(this.files)" />
-        </label>
+    <!-- Upload panel -->
+    <div id="photo-upload-panel">
+
+      <div id="recent-section" class="recent-section" style="display:none;visibility:hidden;height:0;overflow:hidden;margin:0;padding:0;">
+        <div class="recent-label">Recent</div>
+        <div class="recent-list" id="recent-list"></div>
       </div>
-      <div id="photo-mode-previews" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;"></div>
-      <div style="margin-top:16px;">
-        <button class="btn btn-save" id="pm-upload-btn" onclick="uploadPhotoMode()">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 4l3.5-3.5L10 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-          Upload Photos
-        </button>
-      </div>
-      <div class="next-location-bar hidden" id="next-location-bar">
-        <p>✓ Photos uploaded! Ready for next location?</p>
-        <button onclick="startNextLocation()">Next location →</button>
-      </div>
-    </div>
-  </div>
 
-</div><!-- /photo-upload-panel -->
-
-<!-- Wikimedia panel -->
-<div id="photo-wikimedia-panel" style="display:none;">
-
-  <!-- Step 1: Location search -->
-  <div class="lookup-bar" style="flex-direction:column;gap:8px;margin-bottom:16px;">
-    <div class="field-wrap" style="width:100%;">
-      <label>Search locations</label>
-      <input type="text" id="wm-loc-search" placeholder="Start typing a location name…" oninput="wmSearchLocations(this.value)" autocomplete="off" style="font-size:16px;" />
-    </div>
-    <div class="photo-search-results" id="wm-loc-results"></div>
-    <div id="wm-loc-selected" style="display:none;"></div>
-  </div>
-
-  <!-- Step 2: Wikimedia search (shown after location picked) -->
-  <div id="wm-search-panel" style="display:none;">
-    <div class="form-section">
-      <div class="section-header">
-        <div class="section-title">🌐 Search Wikimedia Commons</div>
-      </div>
-      <div class="section-body">
-        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:4px;">
-          <div class="field" style="flex:1;min-width:200px;">
-            <label>Search term</label>
-            <input type="text" id="wm-query" placeholder="e.g. Artis Amsterdam zoo" style="font-size:16px;"
-              onkeydown="if(event.key==='Enter') wmSearch()" />
-          </div>
-          <button class="btn btn-primary" onclick="wmSearch()" id="wm-search-btn">Search</button>
+      <div class="lookup-bar" style="flex-direction:column;gap:8px;">
+        <div class="field-wrap" style="width:100%;">
+          <label>Search locations</label>
+          <input type="text" id="photo-search-input" placeholder="Start typing a name…" oninput="searchLocations(this.value)" autocomplete="off" style="font-size:16px;" />
         </div>
-        <p class="text-muted">Only CC BY, CC BY-SA, and CC0 / Public Domain photos can be used. NC and ND licenses are flagged.</p>
+        <div class="photo-search-results" id="photo-search-results"></div>
+      </div>
 
-        <div id="wm-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;margin-top:8px;"></div>
-        <div class="wm-grid" id="wm-grid"></div>
-
-        <!-- Selected photo preview + descriptor + save -->
-        <div id="wm-selected-wrap" style="display:none;margin-top:20px;">
-          <div class="wm-selected-preview" id="wm-selected-preview"></div>
-          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;align-items:flex-end;">
-            <div class="field" style="min-width:180px;">
-              <label>Descriptor <span style="color:#E8541A;">*</span></label>
-              <select id="wm-descriptor" style="font-size:14px;">
-                <option value="">— select —</option>
-                <option value="interior">interior</option>
-                <option value="exterior">exterior</option>
-                <option value="play-area">play-area</option>
-                <option value="kids-cafe">kids-cafe</option>
-                <option value="entrance">entrance</option>
-                <option value="playground">playground</option>
-                <option value="activity">activity</option>
-                <option value="overview">overview</option>
-                <option value="hero">hero</option>
-                <option value="detail">detail</option>
-              </select>
-            </div>
-            <div class="field" style="flex:1;min-width:200px;">
-              <label>Alt text</label>
-              <input type="text" id="wm-alt-text" placeholder="e.g. Children playing at Artis zoo Amsterdam" />
-            </div>
-            <button class="btn btn-save" id="wm-save-btn" onclick="wmSavePhoto()" style="width:auto;padding:10px 24px;">
-              Save to location
+      <div id="photo-mode-upload-panel" style="display:none;">
+        <div class="photo-mode-upload">
+          <div class="photo-mode-selected" id="photo-mode-selected"></div>
+          <div id="existing-photos-warning" style="display:none;background:#fef9c3;border:1.5px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:14px;"></div>
+          <p class="text-muted" style="margin-bottom:14px;">Saved as WebP, max 1200px long edge (display) + max 400px (thumb). Pick a descriptor and add alt text for SEO. Filename pattern: <code style="font-family:'DM Mono',monospace;font-size:11px;background:#E4DDD3;padding:2px 5px;border-radius:4px;">place-name-city-descriptor-1.webp</code></p>
+          <div class="photo-drop-zone" id="photo-mode-drop-zone" ondragover="event.preventDefault()" ondrop="handlePhotoModeFiles(event.dataTransfer.files)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:#A09A94;margin-bottom:8px;"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 17l4-4 3 3 4-5 4 6" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <p style="font-size:13px;color:#A09A94;margin-bottom:6px;">Drag photos here or</p>
+            <label class="btn btn-secondary" style="cursor:pointer;font-size:13px;">
+              Choose files
+              <input type="file" id="photo-mode-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoModeFiles(this.files)" />
+            </label>
+          </div>
+          <div id="photo-mode-previews" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;"></div>
+          <div style="margin-top:16px;">
+            <button class="btn btn-save" id="pm-upload-btn" onclick="uploadPhotoMode()">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 4l3.5-3.5L10 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5h11" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Upload Photos
             </button>
           </div>
-          <div id="wm-save-status" style="margin-top:10px;font-size:13px;font-family:'DM Mono',monospace;"></div>
+          <div class="next-location-bar hidden" id="next-location-bar">
+            <p>✓ Photos uploaded! Ready for next location?</p>
+            <button onclick="startNextLocation()">Next location →</button>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
-</div><!-- /photo-wikimedia-panel -->
-```
+    </div><!-- /photo-upload-panel -->
+
+    <!-- Wikimedia panel -->
+    <div id="photo-wikimedia-panel" style="display:none;">
+
+      <!-- Step 1: Location search -->
+      <div class="lookup-bar" style="flex-direction:column;gap:8px;margin-bottom:16px;">
+        <div class="field-wrap" style="width:100%;">
+          <label>Search locations</label>
+          <input type="text" id="wm-loc-search" placeholder="Start typing a location name…" oninput="wmSearchLocations(this.value)" autocomplete="off" style="font-size:16px;" />
+        </div>
+        <div class="photo-search-results" id="wm-loc-results"></div>
+        <div id="wm-loc-selected" style="display:none;"></div>
+      </div>
+
+      <!-- Step 2: Wikimedia search (shown after location picked) -->
+      <div id="wm-search-panel" style="display:none;">
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-title">🌐 Search Wikimedia Commons</div>
+          </div>
+          <div class="section-body">
+            <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:4px;">
+              <div class="field" style="flex:1;min-width:200px;">
+                <label>Search term</label>
+                <input type="text" id="wm-query" placeholder="e.g. Artis Amsterdam zoo" style="font-size:16px;"
+                  onkeydown="if(event.key==='Enter') wmSearch()" />
+              </div>
+              <button class="btn btn-primary" onclick="wmSearch()" id="wm-search-btn">Search</button>
+            </div>
+            <p class="text-muted">Only CC BY, CC BY-SA, and CC0 / Public Domain photos can be used. NC and ND licenses are flagged.</p>
+
+            <div id="wm-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;margin-top:8px;"></div>
+            <div class="wm-grid" id="wm-grid"></div>
+
+            <!-- Selected photo preview + descriptor + save -->
+            <div id="wm-selected-wrap" style="display:none;margin-top:20px;">
+              <div class="wm-selected-preview" id="wm-selected-preview"></div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;align-items:flex-end;">
+                <div class="field" style="min-width:180px;">
+                  <label>Descriptor <span style="color:#E8541A;">*</span></label>
+                  <select id="wm-descriptor" style="font-size:14px;">
+                    <option value="">— select —</option>
+                    <option value="interior">interior</option>
+                    <option value="exterior">exterior</option>
+                    <option value="play-area">play-area</option>
+                    <option value="kids-cafe">kids-cafe</option>
+                    <option value="entrance">entrance</option>
+                    <option value="playground">playground</option>
+                    <option value="activity">activity</option>
+                    <option value="overview">overview</option>
+                    <option value="hero">hero</option>
+                    <option value="detail">detail</option>
+                  </select>
+                </div>
+                <div class="field" style="flex:1;min-width:200px;">
+                  <label>Alt text</label>
+                  <input type="text" id="wm-alt-text" placeholder="e.g. Children playing at Artis zoo Amsterdam" />
+                </div>
+                <button class="btn btn-save" id="wm-save-btn" onclick="wmSavePhoto()" style="width:auto;padding:10px 24px;">
+                  Save to location
+                </button>
+              </div>
+              <div id="wm-save-status" style="margin-top:10px;font-size:13px;font-family:'DM Mono',monospace;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /photo-wikimedia-panel -->
 
   </div>
 
@@ -1868,6 +1866,8 @@ function loadLocationForEdit(loc) {
   document.getElementById('f-name').value      = loc.name || '';
   document.getElementById('f-place-id').value  = loc.google_place_id || '';
   document.getElementById('f-maps-url').value  = loc.google_maps_url || '';
+  // Clear any previous duplicate warning when loading an existing location for edit
+  clearDuplicateWarning();
   // Update the Open ↗ links
   const mapsLink = document.getElementById('maps-url-link');
   if (mapsLink && loc.google_maps_url) mapsLink.href = loc.google_maps_url;
@@ -1974,6 +1974,71 @@ function loadLocationForEdit(loc) {
   // Update save button label
   const saveBtn = document.getElementById('save-btn');
   if (saveBtn) saveBtn.innerHTML = saveBtn.innerHTML.replace('Save to Supabase', 'Update location');
+}
+
+// ─── Duplicate Place ID check ────────────────────────────────────────────────
+
+async function checkDuplicatePlaceId(placeId) {
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  if (!supabaseUrl || !supabaseKey || !placeId) return;
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=eq.${placeId}&select=id,name,city,status&limit=1`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    if (Array.isArray(rows) && rows.length) {
+      const existing = rows[0];
+      showDuplicateWarning(existing);
+    } else {
+      clearDuplicateWarning();
+    }
+  } catch(e) { /* silently ignore — duplicate check is advisory only */ }
+}
+
+function showDuplicateWarning(existing) {
+  let el = document.getElementById('duplicate-warning');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'duplicate-warning';
+    // Insert before the location form
+    const form = document.getElementById('location-form');
+    if (form) form.parentNode.insertBefore(el, form);
+  }
+  el.style.cssText = 'background:#fff3cd;border:1.5px solid #f0c040;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;';
+  el.innerHTML = `
+    <div>
+      <strong style="font-size:13px;color:#7a4f00;">⚠ This Place ID already exists in the database</strong>
+      <div style="font-size:12px;color:#92400e;margin-top:3px;font-family:'DM Mono',monospace;">
+        ${existing.name}${existing.city ? ' · ' + existing.city : ''} · Status: ${existing.status || '—'}
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <button onclick="switchToEditExisting('${existing.id}')" style="background:#7a4f00;color:white;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;">Edit existing →</button>
+      <button onclick="clearDuplicateWarning()" style="background:none;border:1.5px solid #f0c040;border-radius:7px;padding:7px 14px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;color:#7a4f00;">Ignore</button>
+    </div>
+  `;
+}
+
+function clearDuplicateWarning() {
+  const el = document.getElementById('duplicate-warning');
+  if (el) el.remove();
+}
+
+function switchToEditExisting(locationId) {
+  // Switch to edit mode and trigger a search by ID
+  setAddSubMode('edit');
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  if (!supabaseUrl || !supabaseKey) return;
+  fetch(
+    `${supabaseUrl}/rest/v1/${supabaseTable}?id=eq.${locationId}&select=id,name,city,province,address,lat,lon,google_place_id,google_maps_url,google_rating,google_rating_count,website,agenda_url,opening_hours,opening_status,status,tier,primary_category,secondary_categories,secondary_category_lead,indoor_outdoor,ideal_age_min,ideal_age_max,all_ages,age_baby,age_preschooler,age_bigkid,cost,toilet,changing_table,lockers,pram_parking,food_drink,highchairs,accessible,party_venue,events,description,tips,page_title&limit=1`,
+    { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+  ).then(r => r.json()).then(rows => {
+    if (rows && rows.length) {
+      loadLocationForEdit(rows[0]);
+      clearDuplicateWarning();
+    }
+  }).catch(() => {});
 }
 
 // ─── Place lookup ────────────────────────────────────────────────────────────
@@ -2163,6 +2228,10 @@ function populateForm(place) {
   document.getElementById('f-lat').value = r6(place.location?.latitude);
   document.getElementById('f-lon').value = r6(place.location?.longitude);
   document.getElementById('f-place-id').value = place.id || '';
+
+  // Check for existing duplicate as soon as we have the Place ID
+  if (place.id) checkDuplicatePlaceId(place.id);
+
   const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${place.id}`;
   document.getElementById('f-maps-url').value = mapsUrl;
   document.getElementById('maps-url-link').href = mapsUrl;
@@ -2439,7 +2508,7 @@ ${website ? `- Website: ${website}` : ''}
 Return ONLY a valid JSON object with these exact keys:
 {
   "categories": [],         // array, pick 1-2 from: ["Active Play","Animals & Nature","Amusements & Attractions","Classes, Workshops, Camps","Culture & Learning","Restaurants & Cafes"]
-  "secondary_categories": [],  // array, pick 1-3 that apply from: ["Playground", "Indoor Playground", "Trampoline Park", "Skatepark", "Sports Field", "Swimming Pool", "Paddling Pool", "Water Park", "Climbing Centre", "Minigolf", "Bowling", "Ice Skating", "Cycling Track", "Nature Playground", "Adventure Park",  "Sensory Play Space", "Baby Spa", "Zoo", "Children's Farm", "Pick-Your-Own Farm", "Aquarium", "Butterfly House", "Wildlife Park", "Botanical Garden", "Nature Reserve", "Hiking Trail", "Gnome Trail", "Barefoot Path", "Pony Rides", "Theme Park", "Amusement Park", "Fun Center", "Role-Play Village", "Immersive Experience", "Interactive Store", "Arcade", "Cinema", "Planetarium", "Ferris Wheel / Observation Tower", "Boat Trip", "Train Ride", "Plane Spotting", "Children's Museum", "Natural History Museum", "Science Museum", "Space Museum", "History Museum", "Art Museum", "Culture Museum", "Maritime Museum", "Railway Museum", "Aviation Museum", "Open Air Museum", "Film Museum", "Music Museum", "Library", "Bookshop", "Theatre", "Swimming Lessons", "Gymnastics Classes", "Dance Classes", "Martial Arts", "Music Lessons", "Art Classes", "Drama Classes", "Cooking Classes", "Yoga / Mindfulness", "Coding Classes", "Language Classes", "Sports Coaching", "Sensory Classes",  "Horse Riding", "Playgroup", "Kids Cafe", "Pancake House", "Restaurant", "Cafe", "Ice Cream Shop", "Bakery"]
+  "secondary_categories": [],  // array, pick 1-3 that apply from: ["Playground", "Indoor Playground", "Trampoline Park", "Skatepark", "Sports Field", "Swimming Pool", "Paddling Pool", "Splash Pad", "Water Sports", "Water Park", "Climbing Centre", "Minigolf", "Bowling", "Ice Skating", "Cycling Track", "Nature Playground", "Adventure Park",  "Sensory Play Space", "Baby Spa", "Zoo", "Children's Farm", "Alpaca Farm", "Pick-Your-Own Farm", "Aquarium", "Butterfly House", "Wildlife Park", "Botanical Garden", "Nature Reserve", "Hiking Trail", "Gnome Trail", "Barefoot Path", "Pony Rides", "Theme Park", "Amusement Park", "Fun Center", "Role-Play Village", "Immersive Experience", "Interactive Store", "Arcade", "Cinema", "Planetarium", "Ferris Wheel / Observation Tower", "Boat Trip", "Train Ride", "Plane Spotting", "Children's Museum", "Natural History Museum", "Science Museum", "Space Museum", "History Museum", "Art Museum", "Culture Museum", "Maritime Museum", "Railway Museum", "Aviation Museum", "Open Air Museum", "Film Museum", "Music Museum", "Library", "Bookshop", "Theatre", "Swimming Lessons", "Gymnastics Classes", "Dance Classes", "Martial Arts", "Music Lessons", "Art Classes", "Drama Classes", "Cooking Classes", "Yoga / Mindfulness", "Coding Classes", "Language Classes", "Sports Coaching", "Sensory Classes",  "Horse Riding", "Playgroup", "Kids Cafe", "Pancake House", "Restaurant", "Cafe", "Ice Cream Shop", "Bakery"]
   "secondary_category_lead": null, // string, the single most defining secondary — must be one of secondary_categories
   "indoor_outdoor": "",     // "Indoor", "Outdoor", or "Mixed" — null if unsure
   "ideal_age_min": null,    // youngest suitable age in years (integer), null if truly all ages. Age ranges are INCLUSIVE — a place with min age 2 should have age_baby: true.
@@ -3041,7 +3110,7 @@ function wmSearch() {
     '?action=query&format=json&origin=*' +
     '&generator=search&gsrnamespace=6&gsrlimit=24' +
     '&gsrsearch=' + encodeURIComponent(query) +
-    '&prop=imageinfo&iiprop=url|extmetadata|size' +
+    '&prop=imageinfo&iiprop=url|extmetadata|size|timestamp' +
     '&iiurlwidth=400';
 
   fetch(apiUrl)
@@ -3063,6 +3132,14 @@ function wmSearch() {
         var authorRaw  = (meta.Artist || {}).value || '';
         var author = authorRaw.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
         var licInfo = wmLicenseInfo(licenseRaw);
+        // Date taken or uploaded
+        var dateRaw = (meta.DateTimeOriginal || meta.DateTime || {}).value || ii.timestamp || null;
+        var dateLabel = null;
+        if (dateRaw) {
+          // Strip HTML, take first 10 chars (YYYY-MM-DD)
+          var dateCleaned = dateRaw.replace(/<[^>]+>/g, '').trim().slice(0, 10);
+          if (dateCleaned.match(/^\d{4}/)) dateLabel = dateCleaned;
+        }
         return {
           title:      page.title.replace(/^File:/, ''),
           pageTitle:  page.title,
@@ -3074,6 +3151,7 @@ function wmSearch() {
           credit:     wmBuildCredit(author, licInfo.label, page.title),
           width:      ii.width,
           height:     ii.height,
+          dateLabel:  dateLabel,
         };
       }).filter(Boolean);
       statusEl.textContent = photos.length + ' results — only CC BY, CC BY-SA, and CC0 photos can be used.';
@@ -3130,9 +3208,35 @@ function wmRenderGrid(photos) {
     authorEl.className = 'wm-author';
     authorEl.textContent = photo.author || 'Unknown';
 
+    var metaRow = document.createElement('div');
+    metaRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-top:4px;';
+
+    if (photo.dateLabel) {
+      var dateEl = document.createElement('span');
+      dateEl.style.cssText = 'font-size:10px;color:#A09A94;font-family:DM Mono,monospace;';
+      dateEl.textContent = photo.dateLabel;
+      metaRow.appendChild(dateEl);
+    } else {
+      metaRow.appendChild(document.createElement('span'));
+    }
+
+    // Expand button — opens full image in lightbox
+    var expandBtn = document.createElement('button');
+    expandBtn.title = 'View full image';
+    expandBtn.style.cssText = 'background:none;border:1.5px solid #D4CEC6;border-radius:5px;padding:2px 6px;font-size:11px;color:#6B6560;cursor:pointer;line-height:1.4;flex-shrink:0;';
+    expandBtn.textContent = '⛶';
+    expandBtn.onclick = (function(url, title) {
+      return function(e) {
+        e.stopPropagation();
+        openLightbox(url);
+      };
+    })(photo.url, photo.title);
+    metaRow.appendChild(expandBtn);
+
     body.appendChild(badge);
     body.appendChild(titleEl);
     body.appendChild(authorEl);
+    body.appendChild(metaRow);
     card.appendChild(body);
 
     if (photo.licInfo.usable) {
@@ -3163,7 +3267,7 @@ function wmSelectPhoto(photo, card) {
     '<div class="wm-preview-meta">' +
       '<div class="wm-preview-title">' + photo.title + '</div>' +
       creditHtml +
-      '<div style="font-size:11px;color:#A09A94;margin-top:4px;">' + (photo.width || '?') + ' × ' + (photo.height || '?') + 'px · ' + photo.license + '</div>' +
+      '<div style="font-size:11px;color:#A09A94;margin-top:4px;">' + (photo.width || '?') + ' × ' + (photo.height || '?') + 'px · ' + photo.license + (photo.dateLabel ? ' · ' + photo.dateLabel : '') + '</div>' +
     '</div>';
 
   // Scroll to preview
@@ -3778,8 +3882,8 @@ async function uploadPhotoMode() {
 // ─── Secondary category taxonomy ─────────────────────────────────────────────
 
 const SECONDARY_TAXONOMY = {
-  "Active Play": ["Playground","Indoor Playground","Trampoline Park","Skatepark","Sports Field","Swimming Pool","Paddling Pool","Water Park","Climbing Centre","Minigolf","Bowling","Ice Skating","Cycling Track","Nature Playground","Adventure Park","Sensory Play Space","Baby Spa","Construction Playground"],
-  "Animals & Nature": ["Zoo","Children's Farm","Pick-Your-Own Farm","Aquarium","Butterfly House","Wildlife Park","Botanical Garden","Nature Reserve","Hiking Trail","Gnome Trail","Barefoot Path","Pony Rides"],
+  "Active Play": ["Playground","Indoor Playground","Trampoline Park","Skatepark","Sports Field","Swimming Pool","Paddling Pool","Splash Pad","Water Sports","Water Park","Climbing Centre","Minigolf","Bowling","Ice Skating","Cycling Track","Nature Playground","Adventure Park","Sensory Play Space","Baby Spa","Construction Playground"],
+  "Animals & Nature": ["Zoo","Children's Farm","Alpaca Farm","Pick-Your-Own Farm","Aquarium","Butterfly House","Wildlife Park","Botanical Garden","Nature Reserve","Hiking Trail","Gnome Trail","Barefoot Path","Pony Rides"],
   "Amusements & Attractions": ["Theme Park","Amusement Park","Fun Center","Role-Play Village","Immersive Experience","Interactive Store","Arcade","Cinema","Planetarium","Ferris Wheel / Observation Tower","Boat Trip","Train Ride","Plane Spotting"],
   "Culture & Learning": ["Children's Museum","Natural History Museum","Science Museum","Space Museum","History Museum","Art Museum","Culture Museum","Maritime Museum","Railway Museum","Aviation Museum","Open Air Museum","Film Museum","Music Museum","Library","Bookshop","Concert Hall","Historic Site","Theatre"],
   "Classes, Workshops, Camps": ["Swimming Lessons","Gymnastics Classes","Dance Classes","Martial Arts","Music Lessons","Art Classes","Drama Classes","Cooking Classes","Yoga / Mindfulness","Coding Classes","Language Classes","Sports Coaching","Sensory Classes","Horse Riding","Playgroup","Holiday Camp"],
@@ -5379,6 +5483,7 @@ function resetLocationForm() {
   document.getElementById('location-form').style.display = 'none';
   currentPlaceData = null;
   clearStatus();
+  clearDuplicateWarning();
 }
 
 // ─── Google bulk refresh ──────────────────────────────────────────────────────
