@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -9,386 +8,383 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-```
-:root {
-  --cream: #EDE8DF;
-  --paper: #E4DDD3;
-  --ink: #1A1714;
-  --ink-soft: #6B6560;
-  --ink-muted: #A09A94;
-  --accent: #4daabb;
-  --accent-light: #dff0f5;
-  --green: #2D6A4F;
-  --green-light: #D8EDDF;
-  --border: #D4CEC6;
-  --white: #FFFFFF;
-  --shadow: 0 1px 3px rgba(26,23,20,0.10), 0 4px 16px rgba(26,23,20,0.08);
-  --red-light: #FEE2E2;
-  --red: #991B1B;
-}
+    :root {
+      --cream: #EDE8DF;
+      --paper: #E4DDD3;
+      --ink: #1A1714;
+      --ink-soft: #6B6560;
+      --ink-muted: #A09A94;
+      --accent: #4daabb;
+      --accent-light: #dff0f5;
+      --green: #2D6A4F;
+      --green-light: #D8EDDF;
+      --border: #D4CEC6;
+      --white: #FFFFFF;
+      --shadow: 0 1px 3px rgba(26,23,20,0.10), 0 4px 16px rgba(26,23,20,0.08);
+      --red-light: #FEE2E2;
+      --red: #991B1B;
+    }
 
-body {
-  background: #F7F3ED;
-  color: var(--ink);
-  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 14px;
-  min-height: 100vh;
-  padding-bottom: 80px;
-}
+    body {
+      background: #F7F3ED;
+      color: var(--ink);
+      font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
 
-/* ── Header ── */
-header {
-  background: var(--white);
-  border-bottom: 1px solid #E8E3DC;
-  padding: 0 40px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.logo {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 22px;
-  font-weight: 300;
-  letter-spacing: -0.02em;
-}
-.logo span { color: var(--accent); font-style: italic; }
-.header-tag {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--ink-soft);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.header-nav {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-.header-nav a {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--ink-muted);
-  text-decoration: none;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  transition: color 0.15s;
-}
-.header-nav a:hover { color: var(--accent); }
+    /* ── Header ── */
+    header {
+      background: var(--white);
+      border-bottom: 1px solid #E8E3DC;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 22px;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+    }
+    .logo span { color: var(--accent); font-style: italic; }
+    .header-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-soft);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .header-nav {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .header-nav a {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+    }
+    .header-nav a:hover { color: var(--accent); }
 
-/* ── Layout ── */
-.container {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 48px 40px 0;
-}
-.page-title {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 36px;
-  font-weight: 300;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  margin-bottom: 6px;
-}
-.page-sub {
-  color: var(--ink-soft);
-  font-size: 14px;
-  margin-bottom: 40px;
-}
+    /* ── Layout ── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 40px 0;
+    }
+    .page-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 36px;
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .page-sub {
+      color: var(--ink-soft);
+      font-size: 14px;
+      margin-bottom: 40px;
+    }
 
-/* ── Tabs ── */
-.tab-toggle {
-  display: flex;
-  gap: 0;
-  margin-bottom: 32px;
-  border: 2px solid #D4CEC6;
-  border-radius: 12px;
-  overflow: hidden;
-  width: 100%;
-}
-.tab-btn {
-  flex: 1;
-  padding: 12px 16px;
-  font-size: 13.5px;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
-  background-color: #E4DDD3;
-  color: #1A1714;
-  border: none;
-  border-right: 2px solid #D4CEC6;
-  cursor: pointer;
-  transition: all 0.18s;
-  -webkit-appearance: none;
-  appearance: none;
-}
-.tab-btn:last-child { border-right: none; }
-.tab-btn:hover:not(.active) { background-color: #D4CEC6; }
-.tab-btn.active { background-color: #4daabb !important; color: white !important; font-weight: 600; }
+    /* ── Tabs ── */
+    .tab-toggle {
+      display: flex;
+      gap: 0;
+      margin-bottom: 32px;
+      border: 2px solid #D4CEC6;
+      border-radius: 12px;
+      overflow: hidden;
+      width: 100%;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 13.5px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      background-color: #E4DDD3;
+      color: #1A1714;
+      border: none;
+      border-right: 2px solid #D4CEC6;
+      cursor: pointer;
+      transition: all 0.18s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .tab-btn:last-child { border-right: none; }
+    .tab-btn:hover:not(.active) { background-color: #D4CEC6; }
+    .tab-btn.active { background-color: #4daabb !important; color: white !important; font-weight: 600; }
 
-/* ── Config ── */
-.config-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--ink-soft);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-  margin-bottom: 20px;
-  width: fit-content;
-}
-.config-toggle svg { transition: transform 0.2s; }
-.config-toggle.open svg { transform: rotate(180deg); }
-.config-panel {
-  display: none;
-  background: var(--white);
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 32px;
-  box-shadow: var(--shadow);
-}
-.config-panel.visible { display: block; }
+    /* ── Config ── */
+    .config-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-soft);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-bottom: 20px;
+      width: fit-content;
+    }
+    .config-toggle svg { transition: transform 0.2s; }
+    .config-toggle.open svg { transform: rotate(180deg); }
+    .config-panel {
+      display: none;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow);
+    }
+    .config-panel.visible { display: block; }
 
-/* ── Form sections ── */
-.form-section {
-  background: var(--white);
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  margin-bottom: 20px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.section-header {
-  padding: 16px 24px;
-  background: var(--paper);
-  border-bottom: 1.5px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.section-title {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.section-body { padding: 24px; }
+    /* ── Form sections ── */
+    .form-section {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .section-header {
+      padding: 16px 24px;
+      background: var(--paper);
+      border-bottom: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .section-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-body { padding: 24px; }
 
-/* ── Fields ── */
-.fields-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-}
-.fields-grid .full { grid-column: 1 / -1; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field label {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-.field input, .field select, .field textarea {
-  background: #F0EBE3;
-  border: 1.5px solid #DDD7CF;
-  border-radius: 8px;
-  padding: 9px 13px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13.5px;
-  color: var(--ink);
-  outline: none;
-  transition: border-color 0.15s;
-  width: 100%;
-}
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
-.field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
-.field select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6560' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 32px;
-}
-.text-muted { color: var(--ink-muted); font-size: 12px; margin-top: 4px; }
+    /* ── Fields ── */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .fields-grid .full { grid-column: 1 / -1; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+    .field input, .field select, .field textarea {
+      background: #F0EBE3;
+      border: 1.5px solid #DDD7CF;
+      border-radius: 8px;
+      padding: 9px 13px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+    .field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+    .field select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6560' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+    .text-muted { color: var(--ink-muted); font-size: 12px; margin-top: 4px; }
 
-/* ── Buttons ── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13.5px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  text-decoration: none;
-  -webkit-appearance: none;
-  appearance: none;
-  background-color: #E4DDD3;
-  color: #1A1714;
-}
-.btn-primary { background-color: #4daabb !important; color: #ffffff !important; border: none; }
-.btn-primary:hover { background-color: #3a9aaa !important; transform: translateY(-1px); }
-.btn-primary:disabled { background-color: #A09A94 !important; cursor: not-allowed; transform: none; }
-.btn-secondary { background-color: #E4DDD3 !important; color: #1A1714 !important; border: 1.5px solid #D4CEC6; }
-.btn-secondary:hover { background-color: #D4CEC6 !important; }
-.btn-save { background-color: #2D6A4F !important; color: #ffffff !important; border: none; width: 100%; justify-content: center; padding: 14px 20px; font-size: 15px; }
-.btn-save:hover { background-color: #1E4D38 !important; transform: translateY(-1px); }
-.btn-save:disabled { background-color: #A09A94 !important; cursor: not-allowed; transform: none; }
-.btn-enrich { background-color: #4daabb !important; color: #ffffff !important; border: none; font-size: 13px; padding: 8px 16px; }
-.btn-enrich:hover { background-color: #3a9aaa !important; }
-.btn-enrich:disabled { background-color: #A09A94 !important; cursor: not-allowed; }
-.btn-danger { background-color: #FEE2E2 !important; color: #991B1B !important; border: 1.5px solid #FECACA; }
-.btn-danger:hover { background-color: #FECACA !important; }
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      text-decoration: none;
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #E4DDD3;
+      color: #1A1714;
+    }
+    .btn-primary { background-color: #4daabb !important; color: #ffffff !important; border: none; }
+    .btn-primary:hover { background-color: #3a9aaa !important; transform: translateY(-1px); }
+    .btn-primary:disabled { background-color: #A09A94 !important; cursor: not-allowed; transform: none; }
+    .btn-secondary { background-color: #E4DDD3 !important; color: #1A1714 !important; border: 1.5px solid #D4CEC6; }
+    .btn-secondary:hover { background-color: #D4CEC6 !important; }
+    .btn-save { background-color: #2D6A4F !important; color: #ffffff !important; border: none; width: 100%; justify-content: center; padding: 14px 20px; font-size: 15px; }
+    .btn-save:hover { background-color: #1E4D38 !important; transform: translateY(-1px); }
+    .btn-save:disabled { background-color: #A09A94 !important; cursor: not-allowed; transform: none; }
+    .btn-enrich { background-color: #4daabb !important; color: #ffffff !important; border: none; font-size: 13px; padding: 8px 16px; }
+    .btn-enrich:hover { background-color: #3a9aaa !important; }
+    .btn-enrich:disabled { background-color: #A09A94 !important; cursor: not-allowed; }
+    .btn-danger { background-color: #FEE2E2 !important; color: #991B1B !important; border: 1.5px solid #FECACA; }
+    .btn-danger:hover { background-color: #FECACA !important; }
 
-/* ── Status ── */
-.status-bar {
-  display: none;
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 13px;
-  margin-bottom: 20px;
-  font-family: 'DM Mono', monospace;
-}
-.status-bar.loading { background: var(--paper); color: var(--ink-soft); border: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px; }
-.status-bar.error { background: var(--red-light); color: var(--red); border: 1.5px solid #FECACA; display: block; }
-.status-bar.success { background: var(--green-light); color: var(--green); border: 1.5px solid #A7D7BB; display: block; }
-.spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; flex-shrink: 0; }
-@keyframes spin { to { transform: rotate(360deg); } }
+    /* ── Status ── */
+    .status-bar {
+      display: none;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      font-family: 'DM Mono', monospace;
+    }
+    .status-bar.loading { background: var(--paper); color: var(--ink-soft); border: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .status-bar.error { background: var(--red-light); color: var(--red); border: 1.5px solid #FECACA; display: block; }
+    .status-bar.success { background: var(--green-light); color: var(--green); border: 1.5px solid #A7D7BB; display: block; }
+    .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Rec card ── */
-.rec-card {
-  background: var(--accent-light);
-  border: 1.5px solid var(--accent);
-  border-radius: 10px;
-  padding: 16px 20px;
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  margin-bottom: 16px;
-}
-.rec-card-body { flex: 1; min-width: 0; }
-.rec-card-name { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
-.rec-card-city { font-size: 11px; color: var(--ink-muted); font-family: 'DM Mono', monospace; margin-bottom: 8px; }
-.rec-card-headline { font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 4px; }
-.rec-card-body-text { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
-.rec-card-badge { background: var(--green-light); color: var(--green); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+    /* ── Rec card ── */
+    .rec-card {
+      background: var(--accent-light);
+      border: 1.5px solid var(--accent);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .rec-card-body { flex: 1; min-width: 0; }
+    .rec-card-name { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+    .rec-card-city { font-size: 11px; color: var(--ink-muted); font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+    .rec-card-headline { font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 4px; }
+    .rec-card-body-text { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+    .rec-card-badge { background: var(--green-light); color: var(--green); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; font-family: 'DM Mono', monospace; flex-shrink: 0; }
 
-/* ── Weather card ── */
-.weather-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-.weather-day {
-  background: var(--paper);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 16px;
-  text-align: center;
-  min-width: 80px;
-  flex: 1;
-}
-.weather-day.selected { background: var(--accent-light); border-color: var(--accent); }
-.weather-day-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 4px; }
-.weather-day-icon { font-size: 22px; margin-bottom: 4px; }
-.weather-day-temp { font-size: 13px; font-weight: 600; color: var(--ink); }
-.weather-day-desc { font-size: 10px; color: var(--ink-soft); margin-top: 2px; text-transform: capitalize; }
+    /* ── Weather card ── */
+    .weather-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .weather-day {
+      background: var(--paper);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      text-align: center;
+      min-width: 80px;
+      flex: 1;
+    }
+    .weather-day.selected { background: var(--accent-light); border-color: var(--accent); }
+    .weather-day-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 4px; }
+    .weather-day-icon { font-size: 22px; margin-bottom: 4px; }
+    .weather-day-temp { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .weather-day-desc { font-size: 10px; color: var(--ink-soft); margin-top: 2px; text-transform: capitalize; }
 
-/* ── Recent locations list ── */
-.recent-loc-list { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
-.recent-loc-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: var(--paper);
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-.recent-loc-item:hover { border-color: var(--accent); }
-.recent-loc-item.selected { background: var(--green-light); border-color: var(--green); }
-.recent-loc-item input[type=checkbox] { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--green); }
-.recent-loc-name { font-size: 13px; font-weight: 600; color: var(--ink); }
-.recent-loc-meta { font-size: 11px; color: var(--ink-muted); font-family: 'DM Mono', monospace; }
+    /* ── Recent locations list ── */
+    .recent-loc-list { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+    .recent-loc-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--paper);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .recent-loc-item:hover { border-color: var(--accent); }
+    .recent-loc-item.selected { background: var(--green-light); border-color: var(--green); }
+    .recent-loc-item input[type=checkbox] { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--green); }
+    .recent-loc-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .recent-loc-meta { font-size: 11px; color: var(--ink-muted); font-family: 'DM Mono', monospace; }
 
-/* ── Preview panel ── */
-#preview-panel {
-  display: none;
-  background: var(--white);
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  margin-bottom: 20px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.preview-frame {
-  width: 100%;
-  border: none;
-  min-height: 500px;
-  display: block;
-  background: white;
-}
+    /* ── Preview panel ── */
+    #preview-panel {
+      display: none;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .preview-frame {
+      width: 100%;
+      border: none;
+      min-height: 500px;
+      display: block;
+      background: white;
+    }
 
-/* ── Email HTML preview (rendered inside iframe) ── */
+    /* ── Email HTML preview (rendered inside iframe) ── */
 
-/* ── Badge ── */
-.badge {
-  font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-family: 'DM Mono', monospace;
-  letter-spacing: 0.04em;
-  font-weight: 600;
-}
-.badge-green { background: var(--green-light); color: var(--green); }
-.badge-blue  { background: var(--accent-light); color: var(--accent); }
+    /* ── Badge ── */
+    .badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.04em;
+      font-weight: 600;
+    }
+    .badge-green { background: var(--green-light); color: var(--green); }
+    .badge-blue  { background: var(--accent-light); color: var(--accent); }
 
-/* ── Tabs content ── */
-.tab-content { display: none; }
-.tab-content.active { display: block; }
+    /* ── Tabs content ── */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
-/* ── Subscriber stats ── */
-.stats-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
-.stat-card {
-  background: var(--white);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  padding: 16px 20px;
-  flex: 1;
-  min-width: 120px;
-  box-shadow: var(--shadow);
-}
-.stat-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
-.stat-value { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 300; color: var(--ink); letter-spacing: -0.02em; }
+    /* ── Subscriber stats ── */
+    .stats-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      flex: 1;
+      min-width: 120px;
+      box-shadow: var(--shadow);
+    }
+    .stat-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+    .stat-value { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 300; color: var(--ink); letter-spacing: -0.02em; }
 
-/* ── Welcome email preview chips ── */
-.chip { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-light); color: var(--accent); font-size: 11px; font-family: 'DM Mono', monospace; padding: 3px 9px; border-radius: 20px; }
+    /* ── Welcome email preview chips ── */
+    .chip { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-light); color: var(--accent); font-size: 11px; font-family: 'DM Mono', monospace; padding: 3px 9px; border-radius: 20px; }
 
-@media (max-width: 600px) {
-  .container { padding: 20px 16px 0; }
-  header { padding: 0 16px; }
-  .header-tag, .header-nav { display: none; }
-  .page-title { font-size: 26px; }
-  .fields-grid { grid-template-columns: 1fr !important; }
-  .tab-btn { font-size: 12px; padding: 10px 8px; }
-  .stats-row { gap: 10px; }
-}
-```
-
+    @media (max-width: 600px) {
+      .container { padding: 20px 16px 0; }
+      header { padding: 0 16px; }
+      .header-tag, .header-nav { display: none; }
+      .page-title { font-size: 26px; }
+      .fields-grid { grid-template-columns: 1fr !important; }
+      .tab-btn { font-size: 12px; padding: 10px 8px; }
+      .stats-row { gap: 10px; }
+    }
   </style>
 </head>
 <body>
@@ -404,7 +400,6 @@ header {
 <div class="container">
 
   <!-- Config -->
-
   <div class="config-toggle" id="config-toggle" onclick="toggleConfig()">
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     API Config
@@ -440,12 +435,10 @@ header {
   </div>
 
   <!-- Page title -->
-
   <div class="page-title">Newsletter</div>
   <p class="page-sub">Compose and send GoBebop emails — weekly picks, special occasions, and the welcome flow.</p>
 
   <!-- Tab toggle -->
-
   <div class="tab-toggle">
     <button class="tab-btn active" onclick="setTab('weekly')">📬 Weekly</button>
     <button class="tab-btn" onclick="setTab('events')">🎉 Events</button>
@@ -454,492 +447,521 @@ header {
   </div>
 
   <!-- Status bar -->
-
   <div class="status-bar" id="status-bar"></div>
 
   <!-- ══ TAB: WEEKLY NEWSLETTER ══════════════════════════════════════════════ -->
-
   <div class="tab-content active" id="tab-weekly">
 
-```
-<!-- Step 1: Featured rec -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">① GoBebop Recommends</div>
-    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadActiveRec()">↺ Refresh</button>
-  </div>
-  <div class="section-body">
-    <p class="text-muted" style="margin-bottom:16px;">Pulls the active recommendation from your database. Set one in the admin tool's Recs tab first.</p>
-    <div id="rec-display">
-      <div style="padding:20px;text-align:center;color:#A09A94;font-size:13px;">Click Refresh to load the active recommendation.</div>
-    </div>
-    <div id="rec-overrides" style="display:none;margin-top:16px;border-top:1.5px solid #D4CEC6;padding-top:16px;">
-      <p class="text-muted" style="margin-bottom:12px;">Optional: override the saved text for this send.</p>
-      <div class="fields-grid">
-        <div class="field full">
-          <label>Headline override</label>
-          <input type="text" id="rec-headline-override" placeholder="Leave blank to use saved headline" />
-        </div>
-        <div class="field full">
-          <label>Body override</label>
-          <textarea id="rec-body-override" placeholder="Leave blank to use saved recommendation text"></textarea>
-        </div>
-        <div class="field full">
-          <label>Location page URL <span style="color:#A09A94;font-weight:400;">("See full details" button links here)</span></label>
-          <input type="text" id="rec-page-url" placeholder="https://gobebop.app/kids-activities/amsterdam/..." />
-        </div>
+    <!-- Step 1: Featured rec -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">① GoBebop Recommends</div>
+        <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadActiveRec()">↺ Load from DB</button>
       </div>
-    </div>
-  </div>
-</div>
+      <div class="section-body">
+        <!-- Mode toggle: DB or Manual -->
+        <div style="display:flex;gap:0;margin-bottom:16px;border:1.5px solid #D4CEC6;border-radius:8px;overflow:hidden;width:fit-content;">
+          <button id="rec-mode-db-btn" onclick="setRecMode('db')" style="padding:7px 16px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;background:#4daabb;color:white;border:none;cursor:pointer;">From database</button>
+          <button id="rec-mode-manual-btn" onclick="setRecMode('manual')" style="padding:7px 16px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;background:#E4DDD3;color:#1A1714;border:none;border-left:1.5px solid #D4CEC6;cursor:pointer;">Write manually</button>
+        </div>
 
-<!-- Step 2: Weekend weather opener -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">② Weather opener</div>
-    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadWeather()">↺ Fetch weather</button>
-  </div>
-  <div class="section-body">
-    <p class="text-muted" style="margin-bottom:16px;">A short 2-line opener that sets the scene for the weekend. Shown at the top of the email.</p>
-    <div id="weather-display">
-      <div style="padding:20px;text-align:center;color:#A09A94;font-size:13px;">Click "Fetch weather" to load the Amsterdam weekend forecast.</div>
-    </div>
-    <div style="margin-top:16px;">
-      <div class="field">
-        <label>Weather intro</label>
-        <textarea id="weather-intro" placeholder="e.g. It's looking like a beautiful weekend — perfect for getting outside. Here's our pick for where to go." style="min-height:70px;"></textarea>
-      </div>
-      <div style="margin-top:10px;">
-        <button class="btn btn-enrich" onclick="generateWeatherIntro()" id="weather-intro-btn">✦ Generate with AI</button>
-      </div>
-    </div>
-  </div>
-</div>
+        <!-- DB mode -->
+        <div id="rec-mode-db">
+          <p class="text-muted" style="margin-bottom:12px;">Pulls the active recommendation from your database. Set one in the admin tool's Recs tab first.</p>
+          <div id="rec-display">
+            <div style="padding:20px;text-align:center;color:#A09A94;font-size:13px;">Click "Load from DB" to fetch the active recommendation.</div>
+          </div>
+          <div id="rec-overrides" style="display:none;margin-top:16px;border-top:1.5px solid #D4CEC6;padding-top:16px;">
+            <p class="text-muted" style="margin-bottom:12px;">Optional: override the saved text for this send.</p>
+            <div class="fields-grid">
+              <div class="field full">
+                <label>Headline override</label>
+                <input type="text" id="rec-headline-override" placeholder="Leave blank to use saved headline" />
+              </div>
+              <div class="field full">
+                <label>Body override</label>
+                <textarea id="rec-body-override" placeholder="Leave blank to use saved recommendation text"></textarea>
+              </div>
+              <div class="field full">
+                <label>Location page URL <span style="color:#A09A94;font-weight:400;">("See full details" button links here)</span></label>
+                <input type="text" id="rec-page-url" placeholder="https://gobebop.app/kids-activities/amsterdam/..." />
+              </div>
+            </div>
+          </div>
+        </div>
 
-<!-- Step 3: Weekend events -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">③ This weekend's events</div>
-    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadWeeklyEvents()">↺ Load events</button>
-  </div>
-  <div class="section-body">
-    <p class="text-muted" style="margin-bottom:12px;">Pick 3–4 events happening this weekend. Each gets a small "Info →" text link.</p>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <input type="text" id="weekly-evt-search" placeholder="Search events by title…" oninput="searchWeeklyEvents(this.value)" autocomplete="off"
-        style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
-    </div>
-    <div id="weekly-evt-results" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;max-height:240px;overflow-y:auto;"></div>
-    <div id="weekly-evt-selected" style="display:flex;flex-direction:column;gap:6px;"></div>
-  </div>
-</div>
-
-<!-- Step 4: One recently added spot -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">④ Just discovered</div>
-    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadRecentLocations()">↺ Load recent</button>
-  </div>
-  <div class="section-body">
-    <p class="text-muted" style="margin-bottom:12px;">Pick one recently added spot to highlight. Links to its page on gobebop.app, with a "See all recently added" text link below.</p>
-    <div id="recent-locs-display">
-      <div style="padding:20px;text-align:center;color:#A09A94;font-size:13px;">Click "Load recent" to see recently added locations.</div>
-    </div>
-    <div id="recent-single-selected" style="display:none;margin-top:12px;">
-      <div id="recent-single-card" style="background:#dff0f5;border:1.5px solid #4daabb;border-radius:10px;padding:14px 18px;"></div>
-      <div style="margin-top:12px;">
-        <div class="field">
-          <label>Location page URL <span style="color:#A09A94;font-weight:400;">(location name links here)</span></label>
-          <input type="text" id="recent-single-url" placeholder="https://gobebop.app/kids-activities/amsterdam/..." />
+        <!-- Manual mode -->
+        <div id="rec-mode-manual" style="display:none;">
+          <p class="text-muted" style="margin-bottom:12px;">Write a recommendation from scratch — useful for places that span multiple locations or aren't in the DB yet.</p>
+          <div class="fields-grid">
+            <div class="field full">
+              <label>Headline <span style="color:#E8541A;">*</span></label>
+              <input type="text" id="rec-manual-headline" placeholder="e.g. Amsterdam's backyard — and it's bigger than you think" />
+            </div>
+            <div class="field full">
+              <label>Body <span style="color:#E8541A;">*</span></label>
+              <textarea id="rec-manual-body" placeholder="Your recommendation text…" style="min-height:120px;"></textarea>
+            </div>
+            <div class="field full">
+              <label>Location page URL <span style="color:#A09A94;font-weight:400;">("See full details" button links here)</span></label>
+              <input type="text" id="rec-manual-url" placeholder="https://gobebop.app/kids-activities/amsterdam/..." />
+            </div>
+            <div class="field full">
+              <label>Photo URL <span style="color:#A09A94;font-weight:400;">(shown as hero image — paste any public image URL)</span></label>
+              <input type="text" id="rec-manual-photo" placeholder="https://your-storage-url.com/photo.webp" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Step 5: Subject line -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">⑤ Subject line & preview text</div>
-  </div>
-  <div class="section-body">
-    <div class="fields-grid">
-      <div class="field full">
-        <label>Subject line <span style="color:#E8541A;">*</span></label>
-        <div style="display:flex;gap:8px;align-items:flex-start;">
-          <input type="text" id="email-subject" placeholder="e.g. This weekend: a hidden gem in Amsterdam 🌿" style="flex:1;" />
-          <button class="btn btn-enrich" id="subject-generate-btn" onclick="generateSubject()" style="flex-shrink:0;white-space:nowrap;">✦ Generate</button>
+    <!-- Step 2: Weekend weather opener -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">② Weather opener</div>
+        <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadWeather()">↺ Fetch weather</button>
+      </div>
+      <div class="section-body">
+        <p class="text-muted" style="margin-bottom:16px;">A short opener that sets the scene for the weekend. Shown after the recommendation.</p>
+        <div id="weather-display">
+          <div style="padding:20px;text-align:center;color:#A09A94;font-size:13px;">Click "Fetch weather" to load the Amsterdam weekend forecast.</div>
         </div>
-        <p class="text-muted" id="subject-count">0 characters</p>
-      </div>
-      <div class="field full">
-        <label>Preview text <span style="font-weight:400;color:#A09A94;">(shown after subject in inbox)</span></label>
-        <input type="text" id="email-preview-text" placeholder="e.g. Plus events this weekend and a newly discovered spot..." />
+        <div style="margin-top:16px;">
+          <div class="field">
+            <label>Weather intro</label>
+            <textarea id="weather-intro" placeholder="e.g. It's looking like a beautiful weekend — perfect for getting outside. Here's our pick for where to go." style="min-height:70px;"></textarea>
+          </div>
+          <div style="margin-top:10px;">
+            <button class="btn btn-enrich" onclick="generateWeatherIntro()" id="weather-intro-btn">✦ Generate with AI</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Step 6: Preview & copy -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">⑥ Preview & export</div>
-  </div>
-  <div class="section-body">
-    <p class="text-muted" style="margin-bottom:16px;">Preview the email, then copy the HTML to paste into Mailchimp's "Code your own" editor.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-      <button class="btn btn-secondary" onclick="buildPreview()">👁 Preview email</button>
-      <button class="btn btn-save" onclick="copyEmailHtml('weekly')" id="copy-html-btn" style="width:auto;padding:10px 20px;font-size:13.5px;">📋 Copy HTML for Mailchimp</button>
-    </div>
-    <div id="copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:12px;">✓ HTML copied — paste into Mailchimp's HTML editor (Campaign → Design → Code your own)</div>
-
-    <div id="preview-panel" style="display:none;">
-      <div style="padding:12px 20px;background:#E4DDD3;border-bottom:1.5px solid #D4CEC6;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:#6B6560;text-transform:uppercase;letter-spacing:0.07em;">Email preview</span>
-        <button onclick="document.getElementById('preview-panel').style.display='none'" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;">Close ✕</button>
+    <!-- Step 3: Weekend events -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">③ This weekend's events</div>
+        <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadWeeklyEvents()">↺ Load events</button>
       </div>
-      <iframe id="preview-frame" class="preview-frame" title="Email preview"></iframe>
+      <div class="section-body">
+        <p class="text-muted" style="margin-bottom:12px;">Pick up to 5 events happening this weekend.</p>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="text" id="weekly-evt-search" placeholder="Search events by title…" oninput="searchWeeklyEvents(this.value)" autocomplete="off"
+            style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
+        </div>
+        <div id="weekly-evt-results" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;max-height:240px;overflow-y:auto;"></div>
+        <div id="weekly-evt-selected" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
     </div>
-  </div>
-</div>
-```
+
+    <!-- Step 4: One recently added spot -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">④ Just discovered</div>
+        <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadRecentLocations()">↺ Load recent</button>
+      </div>
+      <div class="section-body">
+        <p class="text-muted" style="margin-bottom:12px;">Pick one recently added spot to highlight. Links to its page on gobebop.app, with a "See all recently added" text link below.</p>
+        <div id="recent-locs-display">
+          <div style="padding:20px;text-align:center;color:#A09A94;font-size:13px;">Click "Load recent" to see recently added locations.</div>
+        </div>
+        <div id="recent-single-selected" style="display:none;margin-top:12px;">
+          <div id="recent-single-card" style="background:#dff0f5;border:1.5px solid #4daabb;border-radius:10px;padding:14px 18px;"></div>
+          <div style="margin-top:12px;">
+            <div class="field">
+              <label>Location page URL <span style="color:#A09A94;font-weight:400;">(location name links here)</span></label>
+              <input type="text" id="recent-single-url" placeholder="https://gobebop.app/kids-activities/amsterdam/..." />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Special announcement (optional) -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">⑤ Special announcement <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(optional)</span></div>
+      </div>
+      <div class="section-body">
+        <p class="text-muted" style="margin-bottom:14px;">For occasional news — a new Instagram, a new feature, an update. Appears at the bottom of the email before the footer. Leave blank to skip.</p>
+        <div class="fields-grid">
+          <div class="field full">
+            <label>Announcement text</label>
+            <textarea id="announcement-text" placeholder="e.g. We're now on Instagram! Follow us @gobebop for daily family inspiration in Amsterdam." style="min-height:70px;"></textarea>
+          </div>
+          <div class="field full">
+            <label>Link text <span style="color:#A09A94;font-weight:400;">(optional)</span></label>
+            <input type="text" id="announcement-link-text" placeholder="e.g. Follow us on Instagram →" />
+          </div>
+          <div class="field full">
+            <label>Link URL <span style="color:#A09A94;font-weight:400;">(optional)</span></label>
+            <input type="text" id="announcement-link-url" placeholder="https://instagram.com/gobebop" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6: Subject line -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">⑥ Subject line & preview text</div>
+      </div>
+      <div class="section-body">
+        <div class="fields-grid">
+          <div class="field full">
+            <label>Subject line <span style="color:#E8541A;">*</span></label>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <input type="text" id="email-subject" placeholder="e.g. This weekend: a hidden gem in Amsterdam 🌿" style="flex:1;" />
+              <button class="btn btn-enrich" id="subject-generate-btn" onclick="generateSubject()" style="flex-shrink:0;white-space:nowrap;">✦ Generate</button>
+            </div>
+            <p class="text-muted" id="subject-count">0 characters</p>
+          </div>
+          <div class="field full">
+            <label>Preview text <span style="font-weight:400;color:#A09A94;">(shown after subject in inbox)</span></label>
+            <input type="text" id="email-preview-text" placeholder="e.g. Plus events this weekend and a newly discovered spot..." />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 7: Preview & copy -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">⑦ Preview & export</div>
+      </div>
+      <div class="section-body">
+        <p class="text-muted" style="margin-bottom:16px;">Preview the email, then copy the HTML to paste into Mailchimp's "Code your own" editor.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+          <button class="btn btn-secondary" onclick="buildPreview()">👁 Preview email</button>
+          <button class="btn btn-save" onclick="copyEmailHtml('weekly')" id="copy-html-btn" style="width:auto;padding:10px 20px;font-size:13.5px;">📋 Copy HTML for Mailchimp</button>
+        </div>
+        <div id="copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:12px;">✓ HTML copied — paste into Mailchimp's HTML editor (Campaign → Design → Code your own)</div>
+
+        <div id="preview-panel" style="display:none;">
+          <div style="padding:12px 20px;background:#E4DDD3;border-bottom:1.5px solid #D4CEC6;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-family:'DM Mono',monospace;font-size:11px;color:#6B6560;text-transform:uppercase;letter-spacing:0.07em;">Email preview</span>
+            <button onclick="document.getElementById('preview-panel').style.display='none'" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;">Close ✕</button>
+          </div>
+          <iframe id="preview-frame" class="preview-frame" title="Email preview"></iframe>
+        </div>
+      </div>
+    </div>
 
   </div><!-- /tab-weekly -->
 
   <!-- ══ TAB: WELCOME EMAIL ══════════════════════════════════════════════════ -->
-
   <div class="tab-content" id="tab-welcome">
 
-```
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">Welcome email setup</div>
-  </div>
-  <div class="section-body">
-    <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:20px;">
-      The welcome email is sent automatically via a <strong>Loops transactional email</strong> whenever a new subscriber signs up.
-      Set up the trigger in Loops, then use this page to manage and preview the template content.
-    </p>
-
-    <div style="background:var(--accent-light);border:1.5px solid var(--accent);border-radius:10px;padding:16px 20px;margin-bottom:24px;">
-      <p style="font-size:13px;color:var(--ink);font-weight:600;margin-bottom:6px;">📋 How to set this up in Loops</p>
-      <ol style="font-size:13px;color:var(--ink-soft);line-height:2;padding-left:20px;">
-        <li>In Loops, go to <strong>Transactional</strong> → <strong>Create transactional email</strong></li>
-        <li>Design your welcome email template (use the preview below as a guide)</li>
-        <li>Copy the <strong>Transactional ID</strong> and paste it into the API Config panel above</li>
-        <li>When someone subscribes on gobebop.app, call the Loops API with their email to trigger the send</li>
-      </ol>
-    </div>
-
-    <!-- Welcome email content editor -->
-    <div class="fields-grid">
-      <div class="field full">
-        <label>Subject line</label>
-        <input type="text" id="welcome-subject" value="Welcome to GoBebop 👋" />
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">Welcome email setup</div>
       </div>
-      <div class="field full">
-        <label>Opening line <span style="color:var(--ink-muted);font-weight:400;">(personalised — use {{firstName}} for their name)</span></label>
-        <input type="text" id="welcome-opener" value="Welcome to GoBebop, your guide to family fun in and around Amsterdam." />
-      </div>
-      <div class="field full">
-        <label>Main message</label>
-        <textarea id="welcome-body" style="min-height:160px;">Every Thursday morning we'll land in your inbox with your weekly cheat sheet:
-```
+      <div class="section-body">
+        <p style="font-size:13px;color:#6B6560;line-height:1.7;margin-bottom:20px;">
+          Edit the welcome email content below, preview it, then copy the HTML to use in Mailchimp whenever a new subscriber signs up.
+        </p>
 
-⭐ One hand-picked recommendation for a family-friendly spot — think playgrounds, children’s farms, museums, pancake houses, kids’ cafes, and hidden gems we’ve tracked down so you don’t have to
+        <!-- Welcome email content editor -->
+        <div class="fields-grid">
+          <div class="field full">
+            <label>Subject line</label>
+            <input type="text" id="welcome-subject" value="Welcome to GoBebop 👋" />
+          </div>
+          <div class="field full">
+            <label>Opening line <span style="color:var(--ink-muted);font-weight:400;">(personalised — use {{firstName}} for their name)</span></label>
+            <input type="text" id="welcome-opener" value="Welcome to GoBebop, your guide to family fun in and around Amsterdam." />
+          </div>
+          <div class="field full">
+            <label>Main message</label>
+            <textarea id="welcome-body" style="min-height:160px;">Every Thursday morning we'll land in your inbox with your weekly cheat sheet:
+
+⭐ One hand-picked recommendation for a family-friendly spot — think playgrounds, children's farms, museums, pancake houses, kids' cafes, and hidden gems we've tracked down so you don't have to
 📅 A short curated list of events coming up that weekend: workshops, performances, festivals, outdoor activities, and more
 ⛅ Weekend suggestions based on the weather, plus recently discovered places we think are worth your time
 
-The goal is simple: less time wondering “what should we do with the kids this weekend?” and more time actually doing it.</textarea>
+The goal is simple: less time wondering "what should we do with the kids this weekend?" and more time actually doing it.</textarea>
+          </div>
+          <div class="field full">
+            <label>Call to action text</label>
+            <input type="text" id="welcome-cta-text" value="Discover family spots near you" />
+          </div>
+          <div class="field full">
+            <label>Call to action URL</label>
+            <input type="text" id="welcome-cta-url" value="https://gobebop.app" />
+          </div>
+          <div class="field full">
+            <label>Closing line</label>
+            <input type="text" id="welcome-closing" value="See you Thursday — Alison" />
+          </div>
+        </div>
 
-</div>
-<div class="field full">
-<label>Call to action text</label>
-<input type="text" id="welcome-cta-text" value="Discover family spots near you" />
-</div>
-<div class="field full">
-<label>Call to action URL</label>
-<input type="text" id="welcome-cta-url" value="https://gobebop.app" />
-</div>
-<div class="field full">
-<label>Closing line</label>
-<input type="text" id="welcome-closing" value="See you Thursday — Alison" />
-</div>
-</div>
+        <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <button class="btn btn-secondary" onclick="buildWelcomePreview()">👁 Preview welcome email</button>
+          <button class="btn btn-save" onclick="copyEmailHtml('welcome')" id="welcome-copy-btn" style="width:auto;padding:10px 20px;font-size:13.5px;">📋 Copy HTML for Mailchimp</button>
+        </div>
+        <div id="welcome-copy-confirm" style="display:none;margin-top:8px;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;">✓ HTML copied — paste into Mailchimp's HTML editor (Campaign → Design → Code your own)</div>
 
-```
-    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-      <button class="btn btn-secondary" onclick="buildWelcomePreview()">👁 Preview welcome email</button>
-      <button class="btn btn-save" onclick="copyEmailHtml('welcome')" id="welcome-copy-btn" style="width:auto;padding:10px 20px;font-size:13.5px;">📋 Copy HTML for Mailchimp</button>
-    </div>
-    <div id="welcome-copy-confirm" style="display:none;margin-top:8px;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;">✓ HTML copied — paste into Mailchimp's HTML editor (Campaign → Design → Code your own)</div>
+        <div id="welcome-preview-panel" style="display:none;margin-top:16px;border:1.5px solid #D4CEC6;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 20px;background:#E4DDD3;border-bottom:1.5px solid #D4CEC6;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-family:'DM Mono',monospace;font-size:11px;color:#6B6560;text-transform:uppercase;letter-spacing:0.07em;">Welcome email preview</span>
+            <button onclick="document.getElementById('welcome-preview-panel').style.display='none'" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;">Close ✕</button>
+          </div>
+          <iframe id="welcome-preview-frame" style="width:100%;border:none;min-height:500px;display:block;" title="Welcome email preview"></iframe>
+        </div>
 
-    <div id="welcome-preview-panel" style="display:none;margin-top:16px;border:1.5px solid #D4CEC6;border-radius:10px;overflow:hidden;">
-      <div style="padding:12px 20px;background:#E4DDD3;border-bottom:1.5px solid #D4CEC6;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:#6B6560;text-transform:uppercase;letter-spacing:0.07em;">Welcome email preview</span>
-        <button onclick="document.getElementById('welcome-preview-panel').style.display='none'" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;">Close ✕</button>
+        <div id="welcome-status" style="margin-top:12px;font-size:13px;font-family:'DM Mono',monospace;"></div>
       </div>
-      <iframe id="welcome-preview-frame" style="width:100%;border:none;min-height:500px;display:block;" title="Welcome email preview"></iframe>
     </div>
 
-    <div id="welcome-status" style="margin-top:12px;font-size:13px;font-family:'DM Mono',monospace;"></div>
-  </div>
-</div>
-
-<!-- Manual trigger -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">How to send the welcome email</div>
-  </div>
-  <div class="section-body">
-    <p style="font-size:13px;color:#6B6560;line-height:1.7;margin-bottom:16px;">
-      To send the welcome email to a new subscriber, copy the HTML above and create a new campaign in Mailchimp addressed to that person.
-      In the future, this can be automated via your signup form — ask your husband to trigger the welcome send when a new subscriber is added.
-    </p>
-    <div style="background:#dff0f5;border:1.5px solid #4daabb;border-radius:10px;padding:14px 18px;">
-      <p style="font-size:13px;color:#1A1714;font-weight:600;margin:0 0 6px;">Steps to send in Mailchimp:</p>
-      <ol style="font-size:13px;color:#6B6560;line-height:2;padding-left:18px;margin:0;">
-        <li>Click "👁 Preview welcome email" then "📋 Copy HTML for Mailchimp" above</li>
-        <li>In Mailchimp, create a new campaign → Single email</li>
-        <li>Under Design, choose "Code your own" and paste the HTML</li>
-        <li>Set the recipient to the new subscriber's email</li>
-        <li>Send immediately</li>
-      </ol>
+    <!-- Manual trigger -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">How to send the welcome email</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:13px;color:#6B6560;line-height:1.7;margin-bottom:16px;">
+          To send the welcome email to a new subscriber, copy the HTML above and create a new campaign in Mailchimp addressed to that person.
+          In the future, this can be automated via your signup form — ask your husband to trigger the welcome send when a new subscriber is added.
+        </p>
+        <div style="background:#dff0f5;border:1.5px solid #4daabb;border-radius:10px;padding:14px 18px;">
+          <p style="font-size:13px;color:#1A1714;font-weight:600;margin:0 0 6px;">Steps to send in Mailchimp:</p>
+          <ol style="font-size:13px;color:#6B6560;line-height:2;padding-left:18px;margin:0;">
+            <li>Click "👁 Preview welcome email" then "📋 Copy HTML for Mailchimp" above</li>
+            <li>In Mailchimp, create a new campaign → Single email</li>
+            <li>Under Design, choose "Code your own" and paste the HTML</li>
+            <li>Set the recipient to the new subscriber's email</li>
+            <li>Send immediately</li>
+          </ol>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-```
 
   </div><!-- /tab-welcome -->
 
   <!-- ══ TAB: SUBSCRIBERS ════════════════════════════════════════════════════ -->
-
   <div class="tab-content" id="tab-subscribers">
 
-```
-<div class="stats-row" id="sub-stats">
-  <div class="stat-card">
-    <div class="stat-label">Total subscribers</div>
-    <div class="stat-value" id="stat-total">—</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Subscribed</div>
-    <div class="stat-value" id="stat-subscribed">—</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Unsubscribed</div>
-    <div class="stat-value" id="stat-unsub">—</div>
-  </div>
-</div>
-
-<div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
-  <button class="btn btn-primary" onclick="loadSubscribers()">↺ Load subscribers</button>
-  <div class="field" style="flex:1;min-width:200px;">
-    <input type="text" id="sub-search" placeholder="Search by email…" oninput="filterSubscribers(this.value)" style="font-size:13px;" />
-  </div>
-</div>
-
-<!-- Add subscriber -->
-<div class="form-section" style="margin-bottom:20px;">
-  <div class="section-header">
-    <div class="section-title">Add a subscriber</div>
-  </div>
-  <div class="section-body">
-    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
-      <div class="field" style="flex:2;min-width:200px;">
-        <label>Email</label>
-        <input type="email" id="add-sub-email" placeholder="new@subscriber.com" />
+    <div class="stats-row" id="sub-stats">
+      <div class="stat-card">
+        <div class="stat-label">Total subscribers</div>
+        <div class="stat-value" id="stat-total">—</div>
       </div>
-      <div class="field" style="flex:1;min-width:140px;">
-        <label>First name</label>
-        <input type="text" id="add-sub-firstname" placeholder="Optional" />
+      <div class="stat-card">
+        <div class="stat-label">Subscribed</div>
+        <div class="stat-value" id="stat-subscribed">—</div>
       </div>
-      <div class="field" style="flex:1;min-width:140px;">
-        <label>Last name</label>
-        <input type="text" id="add-sub-lastname" placeholder="Optional" />
-      </div>
-      <div style="display:flex;gap:8px;flex-shrink:0;">
-        <button class="btn btn-primary" onclick="addSubscriber(false)">Add</button>
-        <button class="btn btn-enrich" onclick="addSubscriber(true)" title="Add and send welcome email">Add + Welcome</button>
+      <div class="stat-card">
+        <div class="stat-label">Unsubscribed</div>
+        <div class="stat-value" id="stat-unsub">—</div>
       </div>
     </div>
-    <div id="add-sub-status" style="margin-top:10px;font-size:13px;font-family:'DM Mono',monospace;"></div>
-  </div>
-</div>
 
-<!-- Subscriber list -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">Subscriber list</div>
-  </div>
-  <div class="section-body" style="padding:0;">
-    <div id="sub-list">
-      <div style="padding:24px;text-align:center;color:var(--ink-muted);font-size:13px;">Click "Load subscribers" above to fetch your list from Loops.</div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="loadSubscribers()">↺ Load subscribers</button>
+      <div class="field" style="flex:1;min-width:200px;">
+        <input type="text" id="sub-search" placeholder="Search by email…" oninput="filterSubscribers(this.value)" style="font-size:13px;" />
+      </div>
     </div>
-  </div>
-</div>
-```
+
+    <!-- Add subscriber -->
+    <div class="form-section" style="margin-bottom:20px;">
+      <div class="section-header">
+        <div class="section-title">Add a subscriber</div>
+      </div>
+      <div class="section-body">
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+          <div class="field" style="flex:2;min-width:200px;">
+            <label>Email</label>
+            <input type="email" id="add-sub-email" placeholder="new@subscriber.com" />
+          </div>
+          <div class="field" style="flex:1;min-width:140px;">
+            <label>First name</label>
+            <input type="text" id="add-sub-firstname" placeholder="Optional" />
+          </div>
+          <div class="field" style="flex:1;min-width:140px;">
+            <label>Last name</label>
+            <input type="text" id="add-sub-lastname" placeholder="Optional" />
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0;">
+            <button class="btn btn-primary" onclick="addSubscriber(false)">Add</button>
+            <button class="btn btn-enrich" onclick="addSubscriber(true)" title="Add and send welcome email">Add + Welcome</button>
+          </div>
+        </div>
+        <div id="add-sub-status" style="margin-top:10px;font-size:13px;font-family:'DM Mono',monospace;"></div>
+      </div>
+    </div>
+
+    <!-- Subscriber list -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">Subscriber list</div>
+      </div>
+      <div class="section-body" style="padding:0;">
+        <div id="sub-list">
+          <div style="padding:24px;text-align:center;color:var(--ink-muted);font-size:13px;">Click "Load subscribers" above to fetch your list from Loops.</div>
+        </div>
+      </div>
+    </div>
 
   </div><!-- /tab-subscribers -->
 
   <!-- ══ TAB: EVENTS EMAIL ══════════════════════════════════════════════════ -->
-
   <div class="tab-content" id="tab-events">
 
-```
-<!-- Step 1: Occasion setup -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">① Occasion</div>
-  </div>
-  <div class="section-body">
-    <div class="fields-grid">
-      <div class="field">
-        <label>Occasion</label>
-        <select id="evt-occasion-select" onchange="updateEvtOccasionUrl()">
-          <option value="">— select —</option>
-          <option value="Easter">Easter</option>
-          <option value="Koningsdag">Koningsdag</option>
-          <option value="Meivakantie">Meivakantie</option>
-          <option value="Zomervakantie">Zomervakantie</option>
-          <option value="Halloween">Halloween</option>
-          <option value="Sinterklaas">Sinterklaas</option>
-          <option value="Kerstvakantie">Kerstvakantie</option>
-          <option value="Herfstvakantie">Herfstvakantie</option>
-        </select>
+    <!-- Step 1: Occasion setup -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">① Occasion</div>
       </div>
-      <div class="field">
-        <label>Date range <span style="font-weight:400;color:#A09A94;">(shown in email header)</span></label>
-        <input type="text" id="evt-date-range" placeholder="e.g. 26 Apr – 5 May" />
-      </div>
-      <div class="field full">
-        <label>Intro text <span style="color:#E8541A;">*</span></label>
-        <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;">
-          <textarea id="evt-intro-notes" placeholder="Your notes — e.g. Koningsdag is huge, lots of free outdoor stuff, great for all ages, market stalls everywhere…" style="flex:1;min-height:60px;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;resize:vertical;"></textarea>
-          <button class="btn btn-enrich" id="evt-intro-gen-btn" onclick="generateEvtIntro()" style="flex-shrink:0;white-space:nowrap;">✦ Generate</button>
-        </div>
-        <textarea id="evt-intro" placeholder="The intro text that will appear in the email…" style="min-height:80px;"></textarea>
-      </div>
-      <div class="field full">
-        <label>Hero image URL <span style="font-weight:400;color:#A09A94;">(optional — shown behind the intro text. Paste any image URL.)</span></label>
-        <input type="text" id="evt-hero-image" placeholder="https://your-storage-url.com/photo.webp" />
-        <p class="text-muted" style="margin-top:4px;">Tip: copy the public URL of any photo from your Supabase storage bucket, or use an image hosted elsewhere.</p>
-      </div>
-      <div class="field full">
-        <label>Events page URL <span style="color:#E8541A;">*</span> <span style="font-weight:400;color:#A09A94;">(the full link to the occasion page on gobebop.app)</span></label>
-        <input type="text" id="evt-page-url" placeholder="https://gobebop.app/kids-activities/amsterdam/events/koningsdag/index.html" />
-      </div>
-      <div class="field full">
-        <label>CTA button text</label>
-        <input type="text" id="evt-cta-text" value="See all events on GoBebop →" />
-      </div>
-      <div class="field full">
-        <label>Tip <span style="font-weight:400;color:#A09A94;">(optional — e.g. booking advice, shown in amber box at bottom)</span></label>
-        <input type="text" id="evt-tip" placeholder="e.g. Most events book up fast — check availability early." />
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Step 2: Featured event -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">② Featured event <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(hand-pick one highlight)</span></div>
-    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadOccasionEvents()">↺ Load events</button>
-  </div>
-  <div class="section-body">
-    <p class="text-muted" style="margin-bottom:16px;">Search for the occasion's events from your database, then pick one to feature prominently at the top.</p>
-
-    <!-- Event search -->
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <input type="text" id="evt-featured-search" placeholder="Search events by title…" oninput="searchOccasionEvents(this.value)" autocomplete="off"
-        style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
-    </div>
-    <div id="evt-featured-results" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;max-height:220px;overflow-y:auto;"></div>
-
-    <!-- Selected featured event -->
-    <div id="evt-featured-selected" style="display:none;">
-      <div id="evt-featured-card" style="background:#dff0f5;border:1.5px solid #4daabb;border-radius:10px;padding:14px 18px;"></div>
-      <div style="margin-top:12px;border-top:1.5px solid #D4CEC6;padding-top:12px;">
-        <p class="text-muted" style="margin-bottom:10px;">Optional overrides for this send:</p>
+      <div class="section-body">
         <div class="fields-grid">
-          <div class="field full">
-            <label>Event page URL <span style="color:#E8541A;">*</span> <span style="font-weight:400;color:#A09A94;">("See more" button links here)</span></label>
-            <input type="text" id="evt-featured-url" placeholder="https://gobebop.app/kids-activities/amsterdam/events/..." />
+          <div class="field">
+            <label>Occasion</label>
+            <select id="evt-occasion-select" onchange="updateEvtOccasionUrl()">
+              <option value="">— select —</option>
+              <option value="Easter">Easter</option>
+              <option value="Koningsdag">Koningsdag</option>
+              <option value="Meivakantie">Meivakantie</option>
+              <option value="Zomervakantie">Zomervakantie</option>
+              <option value="Halloween">Halloween</option>
+              <option value="Sinterklaas">Sinterklaas</option>
+              <option value="Kerstvakantie">Kerstvakantie</option>
+              <option value="Herfstvakantie">Herfstvakantie</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Date range <span style="font-weight:400;color:#A09A94;">(shown in email header)</span></label>
+            <input type="text" id="evt-date-range" placeholder="e.g. 26 Apr – 5 May" />
           </div>
           <div class="field full">
-            <label>Featured event title override</label>
-            <input type="text" id="evt-featured-title-override" placeholder="Leave blank to use saved title" />
+            <label>Intro text <span style="color:#E8541A;">*</span></label>
+            <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;">
+              <textarea id="evt-intro-notes" placeholder="Your notes — e.g. Koningsdag is huge, lots of free outdoor stuff, great for all ages, market stalls everywhere…" style="flex:1;min-height:60px;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;resize:vertical;"></textarea>
+              <button class="btn btn-enrich" id="evt-intro-gen-btn" onclick="generateEvtIntro()" style="flex-shrink:0;white-space:nowrap;">✦ Generate</button>
+            </div>
+            <textarea id="evt-intro" placeholder="The intro text that will appear in the email…" style="min-height:80px;"></textarea>
           </div>
           <div class="field full">
-            <label>Featured event description override</label>
-            <textarea id="evt-featured-desc-override" placeholder="Leave blank to use saved description" style="min-height:70px;"></textarea>
+            <label>Hero image URL <span style="font-weight:400;color:#A09A94;">(optional — shown behind the intro text. Paste any image URL.)</span></label>
+            <input type="text" id="evt-hero-image" placeholder="https://your-storage-url.com/photo.webp" />
+            <p class="text-muted" style="margin-top:4px;">Tip: copy the public URL of any photo from your Supabase storage bucket, or use an image hosted elsewhere.</p>
+          </div>
+          <div class="field full">
+            <label>Events page URL <span style="color:#E8541A;">*</span> <span style="font-weight:400;color:#A09A94;">(the full link to the occasion page on gobebop.app)</span></label>
+            <input type="text" id="evt-page-url" placeholder="https://gobebop.app/kids-activities/amsterdam/events/koningsdag/index.html" />
+          </div>
+          <div class="field full">
+            <label>CTA button text</label>
+            <input type="text" id="evt-cta-text" value="See all events on GoBebop →" />
+          </div>
+          <div class="field full">
+            <label>Tip <span style="font-weight:400;color:#A09A94;">(optional — e.g. booking advice, shown in amber box at bottom)</span></label>
+            <input type="text" id="evt-tip" placeholder="e.g. Most events book up fast — check availability early." />
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Step 3: Additional events -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">③ More events <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(3–5 events — each gets its own link)</span></div>
-    <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadAllOccasionEventsForList()">↺ Load events</button>
-  </div>
-  <div class="section-body">
-    <p class="text-muted" style="margin-bottom:12px;">Pick up to 5 more events. After selecting, paste the event page URL for each one.</p>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <input type="text" id="evt-list-search" placeholder="Or search by title…" oninput="searchOccasionEventsForList(this.value)" autocomplete="off"
-        style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
-    </div>
-    <div id="evt-list-results" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;max-height:300px;overflow-y:auto;"></div>
-    <div id="evt-list-selected" style="display:flex;flex-direction:column;gap:6px;"></div>
-  </div>
-</div>
+    <!-- Step 2: Featured event -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">② Featured event <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(hand-pick one highlight)</span></div>
+        <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadOccasionEvents()">↺ Load events</button>
+      </div>
+      <div class="section-body">
+        <p class="text-muted" style="margin-bottom:16px;">Search for the occasion's events from your database, then pick one to feature prominently at the top.</p>
 
-<!-- Step 4: Subject + preview -->
-<div class="form-section">
-  <div class="section-header">
-    <div class="section-title">④ Subject line & send</div>
-  </div>
-  <div class="section-body">
-    <div class="fields-grid" style="margin-bottom:20px;">
-      <div class="field full">
-        <label>Subject line <span style="color:#E8541A;">*</span></label>
-        <div style="display:flex;gap:8px;align-items:flex-start;">
-          <input type="text" id="evt-subject" placeholder="e.g. Things to do with kids this Koningsdag 🧡" style="flex:1;" />
-          <button class="btn btn-enrich" id="evt-subject-generate-btn" onclick="generateEvtSubject()" style="flex-shrink:0;">✦ Generate</button>
+        <!-- Event search -->
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="text" id="evt-featured-search" placeholder="Search events by title…" oninput="searchOccasionEvents(this.value)" autocomplete="off"
+            style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
+        </div>
+        <div id="evt-featured-results" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;max-height:220px;overflow-y:auto;"></div>
+
+        <!-- Selected featured event -->
+        <div id="evt-featured-selected" style="display:none;">
+          <div id="evt-featured-card" style="background:#dff0f5;border:1.5px solid #4daabb;border-radius:10px;padding:14px 18px;"></div>
+          <div style="margin-top:12px;border-top:1.5px solid #D4CEC6;padding-top:12px;">
+            <p class="text-muted" style="margin-bottom:10px;">Optional overrides for this send:</p>
+            <div class="fields-grid">
+              <div class="field full">
+                <label>Event page URL <span style="color:#E8541A;">*</span> <span style="font-weight:400;color:#A09A94;">("Find out more" button links here)</span></label>
+                <input type="text" id="evt-featured-url" placeholder="https://gobebop.app/kids-activities/amsterdam/events/..." />
+              </div>
+              <div class="field full">
+                <label>Featured event title override</label>
+                <input type="text" id="evt-featured-title-override" placeholder="Leave blank to use saved title" />
+              </div>
+              <div class="field full">
+                <label>Featured event description override</label>
+                <textarea id="evt-featured-desc-override" placeholder="Leave blank to use saved description" style="min-height:70px;"></textarea>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="field full">
-        <label>Preview text</label>
-        <input type="text" id="evt-preview-text" placeholder="e.g. Our top picks for Meivakantie — plus tips on what to book early." />
+    </div>
+
+    <!-- Step 3: Additional events -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">③ More events <span style="font-weight:400;text-transform:none;font-family:'DM Sans',sans-serif;font-size:11px;color:#A09A94;">(3–5 events — each gets its own link)</span></div>
+        <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadAllOccasionEventsForList()">↺ Load events</button>
+      </div>
+      <div class="section-body">
+        <p class="text-muted" style="margin-bottom:12px;">Pick up to 5 more events. After selecting, paste the event page URL for each one.</p>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="text" id="evt-list-search" placeholder="Or search by title…" oninput="searchOccasionEventsForList(this.value)" autocomplete="off"
+            style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#1A1714;outline:none;" />
+        </div>
+        <div id="evt-list-results" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;max-height:300px;overflow-y:auto;"></div>
+        <div id="evt-list-selected" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
     </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-      <button class="btn btn-secondary" onclick="buildEvtPreview()">👁 Preview email</button>
-      <button class="btn btn-secondary" onclick="copyEmailHtml('events')" id="evt-copy-html-btn">📋 Copy HTML</button>
-      <button class="btn btn-enrich" onclick="sendEvtTest()" id="evt-test-btn">✉ Send test</button>
-      <div class="field" style="flex:1;min-width:200px;">
-        <input type="email" id="evt-test-addr" placeholder="your@email.com" style="font-size:13px;" />
+
+    <!-- Step 4: Subject + preview -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">④ Subject line & send</div>
+      </div>
+      <div class="section-body">
+        <div class="fields-grid" style="margin-bottom:20px;">
+          <div class="field full">
+            <label>Subject line <span style="color:#E8541A;">*</span></label>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <input type="text" id="evt-subject" placeholder="e.g. Things to do with kids this Koningsdag 🧡" style="flex:1;" />
+              <button class="btn btn-enrich" id="evt-subject-generate-btn" onclick="generateEvtSubject()" style="flex-shrink:0;">✦ Generate</button>
+            </div>
+          </div>
+          <div class="field full">
+            <label>Preview text</label>
+            <input type="text" id="evt-preview-text" placeholder="e.g. Our top picks for Meivakantie — plus tips on what to book early." />
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+          <button class="btn btn-secondary" onclick="buildEvtPreview()">👁 Preview email</button>
+          <button class="btn btn-secondary" onclick="copyEmailHtml('events')" id="evt-copy-html-btn">📋 Copy HTML</button>
+          <button class="btn btn-enrich" onclick="sendEvtTest()" id="evt-test-btn">✉ Send test</button>
+          <div class="field" style="flex:1;min-width:200px;">
+            <input type="email" id="evt-test-addr" placeholder="your@email.com" style="font-size:13px;" />
+          </div>
+        </div>
+        <div id="evt-copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:8px;">✓ HTML copied to clipboard — paste into Mailchimp's HTML editor</div>
+        <div id="evt-preview-panel" style="display:none;border:1.5px solid #D4CEC6;border-radius:10px;overflow:hidden;margin-bottom:16px;">
+          <div style="padding:12px 20px;background:#E4DDD3;border-bottom:1.5px solid #D4CEC6;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-family:'DM Mono',monospace;font-size:11px;color:#6B6560;text-transform:uppercase;letter-spacing:0.07em;">Events email preview</span>
+            <button onclick="document.getElementById('evt-preview-panel').style.display='none'" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;">Close ✕</button>
+          </div>
+          <iframe id="evt-preview-frame" style="width:100%;border:none;min-height:500px;display:block;" title="Events email preview"></iframe>
+        </div>
+        <button class="btn btn-save" onclick="sendEvtCampaign()" id="evt-send-btn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 6-12 6V8.5l8-1.5-8-1.5V1z" fill="white"/></svg>
+          Send to all subscribers
+        </button>
+        <div id="evt-send-status" style="margin-top:10px;font-size:13px;font-family:'DM Mono',monospace;"></div>
       </div>
     </div>
-    <div id="evt-copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:8px;">✓ HTML copied to clipboard — paste into Mailchimp's HTML editor</div>
-    <div id="evt-preview-panel" style="display:none;border:1.5px solid #D4CEC6;border-radius:10px;overflow:hidden;margin-bottom:16px;">
-      <div style="padding:12px 20px;background:#E4DDD3;border-bottom:1.5px solid #D4CEC6;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:#6B6560;text-transform:uppercase;letter-spacing:0.07em;">Events email preview</span>
-        <button onclick="document.getElementById('evt-preview-panel').style.display='none'" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;">Close ✕</button>
-      </div>
-      <iframe id="evt-preview-frame" style="width:100%;border:none;min-height:500px;display:block;" title="Events email preview"></iframe>
-    </div>
-    <button class="btn btn-save" onclick="sendEvtCampaign()" id="evt-send-btn">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 6-12 6V8.5l8-1.5-8-1.5V1z" fill="white"/></svg>
-      Send to all subscribers
-    </button>
-    <div id="evt-send-status" style="margin-top:10px;font-size:13px;font-family:'DM Mono',monospace;"></div>
-  </div>
-</div>
-```
 
   </div><!-- /tab-events -->
 
@@ -1015,6 +1037,7 @@ function clearStatus() {
 // ─── State ────────────────────────────────────────────────────────────────────
 
 let activeRec = null;          // loaded recommendation object
+let recMode = 'db';            // 'db' or 'manual'
 let weatherData = null;        // loaded forecast
 let recentLocations = [];      // all recent locations loaded
 let selectedRecentIds = new Set(); // selected location IDs (kept for compat, not used in new format)
@@ -1023,6 +1046,19 @@ let weeklyEvents = [];         // hand-picked weekend events for weekly newslett
 let allSubscribers = [];       // cached from Loops
 let weekendPicks = [];         // kept for compat
 let weekendPicks2 = [];        // legacy compat
+
+// ─── Rec mode toggle ─────────────────────────────────────────────────────────
+
+function setRecMode(mode) {
+  recMode = mode;
+  const isDb = mode === 'db';
+  document.getElementById('rec-mode-db').style.display     = isDb ? '' : 'none';
+  document.getElementById('rec-mode-manual').style.display = isDb ? 'none' : '';
+  document.getElementById('rec-mode-db-btn').style.background     = isDb ? '#4daabb' : '#E4DDD3';
+  document.getElementById('rec-mode-db-btn').style.color          = isDb ? 'white' : '#1A1714';
+  document.getElementById('rec-mode-manual-btn').style.background = isDb ? '#E4DDD3' : '#4daabb';
+  document.getElementById('rec-mode-manual-btn').style.color      = isDb ? '#1A1714' : 'white';
+}
 
 // ─── Step 1: Load active recommendation ──────────────────────────────────────
 
@@ -1127,31 +1163,12 @@ async function loadWeather() {
     const sunDate = new Date(satDate);
     sunDate.setDate(satDate.getDate() + 1);
 
-    const pad = n => String(n).padStart(2, '0');
-    const satStr = satDate.getFullYear() + '-' + pad(satDate.getMonth()+1) + '-' + pad(satDate.getDate());
-    const sunStr = sunDate.getFullYear() + '-' + pad(sunDate.getMonth()+1) + '-' + pad(sunDate.getDate());
+    const satStr = satDate.toISOString().slice(0, 10);
+    const sunStr = sunDate.toISOString().slice(0, 10);
 
     const getDay = (dateStr) => {
       const readings = data.list.filter(r => r.dt_txt.startsWith(dateStr));
-      if (!readings.length) return null;
-      // Daytime = 04:00–18:00 UTC (06:00–20:00 Amsterdam summer)
-      const daytime = readings.filter(r => { const h = parseInt(r.dt_txt.slice(11,13),10); return h>=4&&h<=18; });
-      const pool = daytime.length ? daytime : readings;
-      // Temp: highest temp_max across daytime = day's forecasted high
-      const maxTemp = Math.max(...pool.map(r => r.main.temp_max || r.main.temp));
-      // Icon + description: from the midday slot (10:00 UTC = noon Amsterdam),
-      // falling back to 12:00, 09:00, 13:00, then whatever is closest to noon
-      const midday = pool.find(r => r.dt_txt.includes('10:00:00'))
-                  || pool.find(r => r.dt_txt.includes('12:00:00'))
-                  || pool.find(r => r.dt_txt.includes('09:00:00'))
-                  || pool.find(r => r.dt_txt.includes('13:00:00'))
-                  || pool.reduce((best, r) => {
-                       const h = parseInt(r.dt_txt.slice(11,13),10);
-                       const bh = parseInt(best.dt_txt.slice(11,13),10);
-                       return Math.abs(h-10) < Math.abs(bh-10) ? r : best;
-                     }, pool[0]);
-      // Return midday slot for icon/desc, but override temp with the day's high
-      return { ...midday, main: { ...midday.main, temp: maxTemp } };
+      return readings.find(r => r.dt_txt.includes('12:00:00')) || readings[0] || null;
     };
 
     const sat = getDay(satStr);
@@ -1410,11 +1427,6 @@ function updateWeeklyEvtUrl(id, url) {
   if (ev) ev._url = url;
 }
 
-function updateWeeklyEvtDesc(id, desc) {
-  const ev = weeklyEvents.find(e => e.id === id);
-  if (ev) ev._desc = desc;
-}
-
 function renderWeeklyEvtSelected() {
   const el = document.getElementById('weekly-evt-selected');
   if (!weeklyEvents.length) { el.innerHTML = ''; return; }
@@ -1437,9 +1449,6 @@ function renderWeeklyEvtSelected() {
       '</div>' +
       '<input type="text" value="' + (ev._url || '') + '" placeholder="Event page URL for \'Info →\' link (optional)"' +
         ' oninput="updateWeeklyEvtUrl(\'' + ev.id + '\', this.value)"' +
-        ' style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;margin-bottom:6px;" />' +
-      '<input type="text" value="' + (ev._desc || '') + '" placeholder="One-line description (optional — shown in email below date/venue)"' +
-        ' oninput="updateWeeklyEvtDesc(\'' + ev.id + '\', this.value)"' +
         ' style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;" />' +
     '</div>';
   }).join('');
@@ -1593,7 +1602,6 @@ async function generateSubject() {
 function buildEmailHtml(opts) {
   const {
     previewText = '',
-    // Weekly newsletter opts
     recName = '', recCity = '', recCat = '', recHeadline = '', recBody = '',
     recPageUrl = 'https://gobebop.app', recPhotoUrl = null,
     weatherIntro = '',
@@ -1601,7 +1609,7 @@ function buildEmailHtml(opts) {
     sunLabel = '', sunEmoji = '', sunTemp = '', sunDesc = '',
     weeklyEvents = [],
     recentSpot = null,
-    // Welcome email opts
+    announcementText = '', announcementLinkText = '', announcementLinkUrl = '',
     isWelcome = false,
     welcomeOpener = '', welcomeBody = '', welcomeCtaText = '', welcomeCtaUrl = '', welcomeClosing = '',
   } = opts;
@@ -1660,25 +1668,30 @@ function buildEmailHtml(opts) {
 
     // 1. GoBebop Recommends — leads the email
     if (recName) {
+      // In manual mode: recName = headline, recHeadline = '', recCity/recCat = ''
+      // In DB mode: recName = location name, recHeadline = editorial headline
+      const cardTitle    = recMode === 'manual' ? recName    : (recHeadline || recName);
+      const cardSubtitle = recMode === 'manual' ? ''         : [recCity, recCat].filter(Boolean).join(' · ').toUpperCase();
+      const cardBody     = recMode === 'manual' ? recBody    : recBody;
+      const cardLocation = recMode === 'manual' ? ''         : recName;
       bodyRows +=
-        '<tr><td style="padding:14px 14px 0;">' +
+        '<tr><td style="padding:25px 14px 0;">' +
           '<p style="' + sectionEyebrow + '">⭐ GoBebop Recommends</p>' +
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
             (recPhotoUrl ?
-              '<img src="' + recPhotoUrl + '" alt="' + recName + '" width="100%" style="width:100%;height:200px;object-fit:cover;display:block;" />' :
+              '<img src="' + recPhotoUrl + '" alt="' + (cardLocation || cardTitle) + '" width="100%" style="width:100%;height:200px;object-fit:cover;display:block;" />' :
               '<div style="width:100%;height:90px;background:' + teal + ';display:flex;align-items:center;justify-content:center;"><span style="font-size:32px;">📍</span></div>') +
             '<div style="padding:16px 16px 18px;">' +
-              '<p style="font-family:' + fontDisplay + ';font-size:22px;font-weight:700;color:' + ink + ';margin:0 0 4px;line-height:1.2;">' + recName + '</p>' +
-              '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0 0 11px;letter-spacing:0.5px;">' + [recCity, recCat].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
-              (recHeadline ? '<p style="font-family:' + fontBody + ';font-size:15px;font-weight:700;color:' + ink + ';margin:0 0 9px;line-height:1.35;">' + recHeadline + '</p>' : '') +
-              '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 16px;line-height:1.7;">' + (recBody || '') + '</p>' +
+              (cardLocation ? '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0 0 4px;letter-spacing:0.5px;">' + cardSubtitle + '</p>' : '') +
+              '<p style="font-family:' + fontDisplay + ';font-size:20px;font-weight:700;color:' + ink + ';margin:0 0 10px;line-height:1.25;">' + cardTitle + '</p>' +
+              '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 16px;line-height:1.7;">' + cardBody + '</p>' +
               '<a href="' + recPageUrl + '" style="display:block;background:' + teal + ';color:#ffffff;font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:12px 20px;border-radius:10px;text-decoration:none;">See full details →</a>' +
             '</div>' +
           '</div>' +
         '</td></tr>';
     }
 
-    // 2. Weekend forecast — intro text then Sat/Sun tiles
+    // 2. Forecast for this weekend — intro text then Sat/Sun tiles
     if (weatherIntro || satTemp || sunTemp) {
       const showTiles = satTemp || sunTemp;
       // Parse date string to get "Saturday 17 May" style label
@@ -1711,12 +1724,12 @@ function buildEmailHtml(opts) {
           '</div>' +
         '</td>' : '';
       bodyRows +=
-        '<tr><td style="padding:14px 14px 0;">' +
-          '<p style="' + sectionEyebrow + '">🌤 Weekend forecast</p>' +
-          (showTiles ? '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:10px;"><tr>' + satTile + sunTile + '</tr></table>' : '') +
-          (weatherIntro ? '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 14px;">' +
-            '<p style="font-family:' + fontBody + ';font-size:14px;color:' + amberText + ';margin:0;line-height:1.7;">' + weatherIntro + '</p>' +
-          '</div>' : '') +
+        '<tr><td style="padding:25px 14px 0;">' +
+          '<p style="' + sectionEyebrow + '">🌤 Forecast for this weekend</p>' +
+          '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 14px;">' +
+            (weatherIntro ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + amberText + ';margin:0' + (showTiles ? ' 0 12px' : '') + ';line-height:1.7;">' + weatherIntro + '</p>' : '') +
+            (showTiles ? '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' + satTile + sunTile + '</tr></table>' : '') +
+          '</div>' +
         '</td></tr>';
     }
 
@@ -1736,14 +1749,13 @@ function buildEmailHtml(opts) {
             '<td style="width:38px;vertical-align:top;padding-right:10px;padding-top:2px;">' + iconImg + '</td>' +
             '<td style="vertical-align:top;">' +
               '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:700;color:' + ink + ';margin:0 0 2px;line-height:1.3;">' + ev.title + '</p>' +
-              '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0' + (ev._desc ? ' 0 4px' : '') + ';line-height:1.5;">' + meta + '</p>' +
-              (ev._desc ? '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkSoft + ';margin:0;line-height:1.5;font-style:italic;">' + ev._desc + '</p>' : '') +
+              '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;line-height:1.5;">' + meta + '</p>' +
             '</td>' +
           '</tr></table>' +
         '</div>';
       }).join('');
       bodyRows +=
-        '<tr><td style="padding:14px 14px 0;">' +
+        '<tr><td style="padding:25px 14px 0;">' +
           '<p style="' + sectionEyebrow + '">📅 Events this weekend</p>' +
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
             evRows +
@@ -1754,7 +1766,7 @@ function buildEmailHtml(opts) {
         '</td></tr>';
     }
 
-    // 4. Just discovered — two rows: thumb+name, then desc+link full-width
+    // 4. Just discovered — thumbnail (80px) + name link + category + description teaser
     if (recentSpot) {
       const spotUrl = recentSpot._url || 'https://gobebop.app';
       const recentAllUrl = 'https://gobebop.app/explore/amsterdam/?sort=recently_added&view=list&utm_source=newsletter&utm_medium=email&utm_campaign=weekly';
@@ -1762,20 +1774,38 @@ function buildEmailHtml(opts) {
         ? (recentSpot.description.length > 130 ? recentSpot.description.slice(0, 130) + '…' : recentSpot.description)
         : null;
       bodyRows +=
-        '<tr><td style="padding:14px 14px 0;">' +
-          '<p style="' + sectionEyebrow + '">💡 Just discovered</p>' +
-          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
-            (recentSpot.thumbUrl ? '<img src="' + recentSpot.thumbUrl + '" alt="' + recentSpot.name + '" width="100%" style="width:100%;height:200px;object-fit:cover;display:block;" />' : '') +
-            '<div style="padding:16px 16px 18px;">' +
-              '<a href="' + spotUrl + '" style="font-family:' + fontDisplay + ';font-size:20px;font-weight:700;color:' + ink + ';text-decoration:none;line-height:1.2;display:block;margin-bottom:4px;">' + recentSpot.name + '</a>' +
-              '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0 0 10px;letter-spacing:0.5px;">' + [recentSpot.city, recentSpot.secondary_category_lead].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
-              (desc ? '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkSoft + ';margin:0 0 12px;line-height:1.6;">' + desc + '</p>' : '') +
-              '<a href="' + spotUrl + '" style="font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;">See more →</a>' +
-            '</div>' +
+        '<tr><td style="padding:25px 14px 0;">' +
+          '<p style="' + sectionEyebrow + '">🆕 Just discovered</p>' +
+          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;padding:14px 14px 16px;">' +
+            '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
+              (recentSpot.thumbUrl ?
+                '<td style="width:80px;padding-right:14px;vertical-align:top;">' +
+                  '<img src="' + recentSpot.thumbUrl + '" width="80" height="80" style="width:80px;height:80px;border-radius:10px;object-fit:cover;display:block;" />' +
+                '</td>' : '') +
+              '<td style="vertical-align:top;">' +
+                '<a href="' + spotUrl + '" style="font-family:' + fontDisplay + ';font-size:18px;font-weight:700;color:' + ink + ';text-decoration:none;line-height:1.2;display:block;margin-bottom:3px;">' + recentSpot.name + '</a>' +
+                '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;color:' + teal + ';margin:0 0 8px;letter-spacing:0.5px;">' + [recentSpot.city, recentSpot.secondary_category_lead].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
+                (desc ? '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkSoft + ';margin:0 0 10px;line-height:1.6;">' + desc + '</p>' : '') +
+                '<a href="' + spotUrl + '" style="font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;">Find out more →</a>' +
+              '</td>' +
+            '</tr></table>' +
           '</div>' +
           '<p style="font-family:' + fontBody + ';font-size:13px;text-align:center;margin:8px 0 0;">' +
             '<a href="' + recentAllUrl + '" style="color:' + teal + ';text-decoration:none;font-weight:600;">See all recently added spots →</a>' +
           '</p>' +
+        '</td></tr>';
+    }
+    // 5. Special announcement (optional) — minimal text aside before footer
+    if (announcementText) {
+      bodyRows +=
+        '<tr><td style="padding:25px 14px 0;">' +
+          '<div style="background:' + pageBg + ';border-radius:12px;padding:14px 16px;">' +
+            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 8px;">📣 From us</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0' + (announcementLinkText && announcementLinkUrl ? ' 0 10px' : '') + ';line-height:1.65;">' + announcementText + '</p>' +
+            (announcementLinkText && announcementLinkUrl
+              ? '<a href="' + announcementLinkUrl + '" style="font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;">' + announcementLinkText + '</a>'
+              : '') +
+          '</div>' +
         '</td></tr>';
     }
   }
@@ -1813,29 +1843,53 @@ function buildEmailHtml(opts) {
 // ─── Preview ─────────────────────────────────────────────────────────────────
 
 function getEmailOpts() {
-  const loc = activeRec?.locations || {};
   const satR = weatherData?.sat;
   const sunR = weatherData?.sun;
+
+  // Rec — either from DB or manually entered
+  let recName, recCity, recCat, recHeadline, recBody, recPageUrl, recPhotoUrl;
+  if (recMode === 'manual') {
+    recName     = document.getElementById('rec-manual-headline').value || '';
+    recCity     = '';
+    recCat      = '';
+    recHeadline = '';
+    recBody     = document.getElementById('rec-manual-body').value || '';
+    recPageUrl  = document.getElementById('rec-manual-url').value || 'https://gobebop.app';
+    recPhotoUrl = document.getElementById('rec-manual-photo').value.trim() || null;
+  } else {
+    const loc   = activeRec?.locations || {};
+    recName     = loc.name || '';
+    recCity     = loc.city || '';
+    recCat      = loc.secondary_category_lead || '';
+    recHeadline = document.getElementById('rec-headline-override').value || activeRec?.headline || '';
+    recBody     = document.getElementById('rec-body-override').value || activeRec?.body || '';
+    recPageUrl  = document.getElementById('rec-page-url')?.value || 'https://gobebop.app';
+    recPhotoUrl = activeRec?._photoUrl || null;
+  }
+
   return {
-    previewText:    document.getElementById('email-preview-text').value,
-    recName:        loc.name || '',
-    recCity:        loc.city || '',
-    recCat:         loc.secondary_category_lead || '',
-    recHeadline:    document.getElementById('rec-headline-override').value || activeRec?.headline || '',
-    recBody:        document.getElementById('rec-body-override').value || activeRec?.body || '',
-    recPageUrl:     document.getElementById('rec-page-url')?.value || 'https://gobebop.app',
-    recPhotoUrl:    activeRec?._photoUrl || null,
-    weatherIntro:   document.getElementById('weather-intro').value,
-    satLabel:       weatherData ? weatherData.satStr : '',
-    satEmoji:       satR ? getWeatherEmoji(satR.weather[0].id) : '',
-    satTemp:        satR ? Math.round(satR.main.temp) + '°C' : '',
-    satDesc:        satR ? satR.weather[0].description : '',
-    sunLabel:       weatherData ? weatherData.sunStr : '',
-    sunEmoji:       sunR ? getWeatherEmoji(sunR.weather[0].id) : '',
-    sunTemp:        sunR ? Math.round(sunR.main.temp) + '°C' : '',
-    sunDesc:        sunR ? sunR.weather[0].description : '',
-    weeklyEvents:   weeklyEvents,
-    recentSpot:     recentSinglePick || null,
+    previewText:         document.getElementById('email-preview-text').value,
+    recName,
+    recCity,
+    recCat,
+    recHeadline,
+    recBody,
+    recPageUrl,
+    recPhotoUrl,
+    weatherIntro:        document.getElementById('weather-intro').value,
+    satLabel:            weatherData ? weatherData.satStr : '',
+    satEmoji:            satR ? getWeatherEmoji(satR.weather[0].id) : '',
+    satTemp:             satR ? Math.round(satR.main.temp) + '°C' : '',
+    satDesc:             satR ? satR.weather[0].description : '',
+    sunLabel:            weatherData ? weatherData.sunStr : '',
+    sunEmoji:            sunR ? getWeatherEmoji(sunR.weather[0].id) : '',
+    sunTemp:             sunR ? Math.round(sunR.main.temp) + '°C' : '',
+    sunDesc:             sunR ? sunR.weather[0].description : '',
+    weeklyEvents:        weeklyEvents,
+    recentSpot:          recentSinglePick || null,
+    announcementText:    document.getElementById('announcement-text')?.value?.trim() || '',
+    announcementLinkText:document.getElementById('announcement-link-text')?.value?.trim() || '',
+    announcementLinkUrl: document.getElementById('announcement-link-url')?.value?.trim() || '',
   };
 }
 
@@ -2345,7 +2399,7 @@ function buildEvtEmailHtml() {
           '</p>' +
           (featDesc ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 18px;line-height:1.65;">' + featDesc.slice(0, 280) + (featDesc.length > 280 ? '…' : '') + '</p>' : '') +
           // Full-width button — easy tap target on mobile
-          '<a href="' + featuredUrl + '" style="display:block;background:' + teal + ';color:#ffffff;font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:13px 20px;border-radius:10px;text-decoration:none;">See more →</a>' +
+          '<a href="' + featuredUrl + '" style="display:block;background:' + teal + ';color:#ffffff;font-family:' + fontBody + ';font-size:15px;font-weight:700;text-align:center;padding:13px 20px;border-radius:10px;text-decoration:none;">Find out more →</a>' +
         '</div>' +
       '</div>' +
     '</td></tr>' : '';
