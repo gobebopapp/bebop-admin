@@ -526,7 +526,33 @@
         <div id="weather-display">
           <div style="padding:20px;text-align:center;color:#A09A94;font-size:13px;">Click "Fetch weather" to load the Amsterdam weekend forecast.</div>
         </div>
-        <div style="margin-top:16px;">
+
+        <!-- Manual weather overrides — always visible, pre-filled by API, editable -->
+        <div style="margin-top:14px;border-top:1.5px solid #D4CEC6;padding-top:14px;">
+          <p class="text-muted" style="margin-bottom:10px;">Override forecast values if needed:</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <!-- Saturday -->
+            <div style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:12px;">
+              <p style="font-family:'DM Mono',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 8px;">Saturday</p>
+              <div style="display:flex;gap:6px;margin-bottom:6px;">
+                <input type="text" id="sat-emoji-override" placeholder="☀️" style="width:52px;text-align:center;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 4px;font-size:18px;outline:none;" />
+                <input type="text" id="sat-temp-override" placeholder="20°C" style="flex:1;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;" />
+              </div>
+              <input type="text" id="sat-desc-override" placeholder="e.g. sunny" style="width:100%;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;" />
+            </div>
+            <!-- Sunday -->
+            <div style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:12px;">
+              <p style="font-family:'DM Mono',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 8px;">Sunday</p>
+              <div style="display:flex;gap:6px;margin-bottom:6px;">
+                <input type="text" id="sun-emoji-override" placeholder="⛅" style="width:52px;text-align:center;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 4px;font-size:18px;outline:none;" />
+                <input type="text" id="sun-temp-override" placeholder="17°C" style="flex:1;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;" />
+              </div>
+              <input type="text" id="sun-desc-override" placeholder="e.g. partly cloudy" style="width:100%;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;" />
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
           <div class="field">
             <label>Weather intro</label>
             <textarea id="weather-intro" placeholder="e.g. It's looking like a beautiful weekend — perfect for getting outside. Here's our pick for where to go." style="min-height:70px;"></textarea>
@@ -1194,6 +1220,18 @@ async function loadWeather() {
 
     el.innerHTML = '<div class="weather-grid">' + renderDay(sat, satLabel) + renderDay(sun, sunLabel) + '</div>';
 
+    // Pre-fill override fields from API data so user can edit if needed
+    if (sat) {
+      document.getElementById('sat-emoji-override').value = getWeatherEmoji(sat.weather[0].id);
+      document.getElementById('sat-temp-override').value  = Math.round(sat.main.temp) + '°C';
+      document.getElementById('sat-desc-override').value  = sat.weather[0].description;
+    }
+    if (sun) {
+      document.getElementById('sun-emoji-override').value = getWeatherEmoji(sun.weather[0].id);
+      document.getElementById('sun-temp-override').value  = Math.round(sun.main.temp) + '°C';
+      document.getElementById('sun-desc-override').value  = sun.weather[0].description;
+    }
+
   } catch(e) {
     el.innerHTML = '<div style="padding:12px;background:#FEE2E2;border-radius:8px;font-size:13px;color:#991B1B;">Error: ' + e.message + '</div>';
   }
@@ -1411,7 +1449,7 @@ function formatWeeklyEvtDate(dateStr) {
 function addWeeklyEvent(ev) {
   if (weeklyEvents.some(e => e.id === ev.id)) return;
   if (weeklyEvents.length >= 5) return alert('Pick up to 5 events for the weekly newsletter.');
-  weeklyEvents.push({ ...ev, _url: '' });
+  weeklyEvents.push({ ...ev, _url: '', _desc: '' });
   document.getElementById('weekly-evt-search').value = '';
   document.getElementById('weekly-evt-results').innerHTML = '';
   renderWeeklyEvtSelected();
@@ -1425,6 +1463,11 @@ function removeWeeklyEvent(id) {
 function updateWeeklyEvtUrl(id, url) {
   const ev = weeklyEvents.find(e => e.id === id);
   if (ev) ev._url = url;
+}
+
+function updateWeeklyEvtDesc(id, desc) {
+  const ev = weeklyEvents.find(e => e.id === id);
+  if (ev) ev._desc = desc;
 }
 
 function renderWeeklyEvtSelected() {
@@ -1445,11 +1488,14 @@ function renderWeeklyEvtSelected() {
           '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + ev.title + '</div>' +
           '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;">' + formatWeeklyEvtDate(ev.start_date) + (loc.name ? ' · ' + loc.name : '') + '</div>' +
         '</div>' +
-        '<button onclick="removeWeeklyEvent(\'' + ev.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;">✕</button>' +
+        '<button onclick="removeWeeklyEvent(\'' + ev.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;flex-shrink:0;">✕</button>' +
       '</div>' +
-      '<input type="text" value="' + (ev._url || '') + '" placeholder="Event page URL for \'Info →\' link (optional)"' +
-        ' oninput="updateWeeklyEvtUrl(\'' + ev.id + '\', this.value)"' +
-        ' style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;" />' +
+      '<input type="text" id="wevt-desc-' + ev.id + '" value="' + (ev._desc || '').replace(/"/g, '&quot;') + '" placeholder="One-line description (required)" ' +
+        'oninput="updateWeeklyEvtDesc(\'' + ev.id + '\', this.value)" ' +
+        'style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;box-sizing:border-box;margin-bottom:6px;" />' +
+      '<input type="text" id="wevt-url-' + ev.id + '" value="' + (ev._url || '') + '" placeholder="Event page URL (optional)" ' +
+        'oninput="updateWeeklyEvtUrl(\'' + ev.id + '\', this.value)" ' +
+        'style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;box-sizing:border-box;" />' +
     '</div>';
   }).join('');
 }
@@ -1733,7 +1779,7 @@ function buildEmailHtml(opts) {
         '</td></tr>';
     }
 
-    // 3. Events this weekend — compact list, single link, max 5
+    // 3. Events this weekend — compact list with description, single link, max 5
     if (weeklyEvents.length) {
       const evtPageUrl = 'https://gobebop.app/kids-activities/amsterdam/events/?utm_source=newsletter&utm_medium=email&utm_campaign=weekly';
       const evRows = weeklyEvents.map((ev, i) => {
@@ -1744,12 +1790,14 @@ function buildEmailHtml(opts) {
           : '<span style="font-size:22px;line-height:1;">📅</span>';
         const dateStr = formatWeeklyEvtDate(ev.start_date);
         const meta = [dateStr, loc.name ? loc.name + (loc.city ? ', ' + loc.city : '') : ''].filter(Boolean).join(' · ');
+        const desc = ev._desc || '';
         return '<div style="padding:12px 14px;' + (i < weeklyEvents.length - 1 ? 'border-bottom:1px solid ' + border + ';' : '') + '">' +
           '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
             '<td style="width:38px;vertical-align:top;padding-right:10px;padding-top:2px;">' + iconImg + '</td>' +
             '<td style="vertical-align:top;">' +
               '<p style="font-family:' + fontBody + ';font-size:14px;font-weight:700;color:' + ink + ';margin:0 0 2px;line-height:1.3;">' + ev.title + '</p>' +
-              '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;line-height:1.5;">' + meta + '</p>' +
+              (desc ? '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkSoft + ';margin:0 0 3px;line-height:1.5;">' + desc + '</p>' : '') +
+              '<p style="font-family:' + fontBody + ';font-size:11px;color:' + inkMuted + ';margin:0;line-height:1.5;">' + meta + '</p>' +
             '</td>' +
           '</tr></table>' +
         '</div>';
@@ -1867,6 +1915,14 @@ function getEmailOpts() {
     recPhotoUrl = activeRec?._photoUrl || null;
   }
 
+    // Weather — read from manual override fields (pre-filled by API, user-editable)
+    const satEmoji = document.getElementById('sat-emoji-override')?.value || (satR ? getWeatherEmoji(satR.weather[0].id) : '');
+    const satTemp  = document.getElementById('sat-temp-override')?.value  || (satR ? Math.round(satR.main.temp) + '°C' : '');
+    const satDesc  = document.getElementById('sat-desc-override')?.value  || (satR ? satR.weather[0].description : '');
+    const sunEmoji = document.getElementById('sun-emoji-override')?.value || (sunR ? getWeatherEmoji(sunR.weather[0].id) : '');
+    const sunTemp  = document.getElementById('sun-temp-override')?.value  || (sunR ? Math.round(sunR.main.temp) + '°C' : '');
+    const sunDesc  = document.getElementById('sun-desc-override')?.value  || (sunR ? sunR.weather[0].description : '');
+
   return {
     previewText:         document.getElementById('email-preview-text').value,
     recName,
@@ -1878,13 +1934,13 @@ function getEmailOpts() {
     recPhotoUrl,
     weatherIntro:        document.getElementById('weather-intro').value,
     satLabel:            weatherData ? weatherData.satStr : '',
-    satEmoji:            satR ? getWeatherEmoji(satR.weather[0].id) : '',
-    satTemp:             satR ? Math.round(satR.main.temp) + '°C' : '',
-    satDesc:             satR ? satR.weather[0].description : '',
+    satEmoji,
+    satTemp,
+    satDesc,
     sunLabel:            weatherData ? weatherData.sunStr : '',
-    sunEmoji:            sunR ? getWeatherEmoji(sunR.weather[0].id) : '',
-    sunTemp:             sunR ? Math.round(sunR.main.temp) + '°C' : '',
-    sunDesc:             sunR ? sunR.weather[0].description : '',
+    sunEmoji,
+    sunTemp,
+    sunDesc,
     weeklyEvents:        weeklyEvents,
     recentSpot:          recentSinglePick || null,
     announcementText:    document.getElementById('announcement-text')?.value?.trim() || '',
@@ -2563,6 +2619,36 @@ async function sendEvtCampaign() {
 // ─── Copy HTML to clipboard ───────────────────────────────────────────────────
 
 async function copyEmailHtml(type) {
+  // Validate required fields before copying
+  if (type === 'weekly') {
+    const errors = [];
+
+    // Rec URL
+    if (recMode === 'db') {
+      const recUrl = document.getElementById('rec-page-url')?.value?.trim();
+      if (!recUrl) errors.push('Location page URL is required for the recommendation (Step 1)');
+    } else {
+      const recUrl = document.getElementById('rec-manual-url')?.value?.trim();
+      if (!recUrl) errors.push('Location page URL is required for the recommendation (Step 1)');
+    }
+
+    // Event descriptions
+    const missingDesc = weeklyEvents.filter(ev => !ev._desc || !ev._desc.trim());
+    if (missingDesc.length) {
+      errors.push('One-line description required for: ' + missingDesc.map(e => '"' + e.title + '"').join(', '));
+    }
+
+    // Just discovered URL
+    if (recentSinglePick) {
+      const recentUrl = document.getElementById('recent-single-url')?.value?.trim();
+      if (!recentUrl) errors.push('Location page URL is required for the Just Discovered spot (Step 4)');
+    }
+
+    if (errors.length) {
+      alert('Please fill in the following before copying:\n\n• ' + errors.join('\n• '));
+      return;
+    }
+  }
   let html;
   if (type === 'events') {
     html = buildEvtEmailHtml();
