@@ -2897,10 +2897,8 @@ async function uploadPhotos() {
       const displayPath   = `photos/${placeId}/${filename}`;
       const thumbPath     = `photos/${placeId}/${thumbFilename}`;
 
-      await Promise.all([
-        supabaseUpload(supabaseUrl, supabaseKey, displayPath, displayBlob),
-        supabaseUpload(supabaseUrl, supabaseKey, thumbPath,   thumbBlob),
-      ]);
+      await r2Upload(displayPath, displayBlob);
+      await r2Upload(thumbPath, thumbBlob);
 
       if (statusEl) { statusEl.textContent = '✓ ' + filename; statusEl.className = 'photo-status done'; }
 
@@ -2910,20 +2908,34 @@ async function uploadPhotos() {
   }
 }
 
-async function supabaseUpload(url, key, path, blob) {
-  const res = await fetch(`${url}/storage/v1/object/photos/${path}`, {
+async function r2Upload(path, blob) {
+  const form = new FormData();
+  form.append('file', blob, path.split('/').pop());
+  form.append('path', path);
+  const res = await fetch('https://gobebop-photo-upload.gobebopapp.workers.dev/admin/upload', {
     method: 'POST',
-    headers: {
-      'apikey': key,
-      'Authorization': `Bearer ${key}`,
-      'Content-Type': 'image/webp',
-      'x-upsert': 'true',
-    },
-    body: blob,
+    headers: { 'X-Admin-Secret': '75c6bbce7360981e4b26ea4928c01980f2c18bf19a4c11c5232d1e9f922d8621' },
+    body: form,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Upload failed');
+    throw new Error(err.error || err.message || 'R2 upload failed');
+  }
+  return res.json();
+}
+
+async function r2Delete(path) {
+  const res = await fetch('https://gobebop-photo-upload.gobebopapp.workers.dev/admin/delete', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Secret': '75c6bbce7360981e4b26ea4928c01980f2c18bf19a4c11c5232d1e9f922d8621',
+    },
+    body: JSON.stringify({ path }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || err.message || 'R2 delete failed');
   }
   return res.json();
 }
@@ -3326,25 +3338,18 @@ function wmSavePhoto() {
       var thumbFilename = buildPhotoFilename(loc.id, loc.city || '', descriptor + '-thumb', photoNum);
       var displayPath   = loc.id + '/' + filename;
       var thumbPath     = loc.id + '/' + thumbFilename;
-      var headers = {
-        'apikey': writeKey, 'Authorization': 'Bearer ' + writeKey,
-        'Content-Type': 'image/webp', 'x-upsert': 'true',
-      };
       btn.textContent = 'Uploading…';
-      return fetch(cfg.supabaseUrl + '/storage/v1/object/photos/' + displayPath, { method: 'POST', headers: headers, body: displayBlob })
-        .then(function(r1) {
-          if (!r1.ok) return r1.json().catch(function(){return {};}).then(function(e1){ throw new Error(e1.message || 'Upload failed'); });
-          return fetch(cfg.supabaseUrl + '/storage/v1/object/photos/' + thumbPath, { method: 'POST', headers: headers, body: thumbBlob });
+      return r2Upload(displayPath, displayBlob)
+        .then(function() {
+          return r2Upload(thumbPath, thumbBlob);
         })
-        .then(function(r2) {
-          if (r2 && !r2.ok) return r2.json().catch(function(){return {};}).then(function(e2){ throw new Error('Thumb: ' + (e2.message || 'failed')); });
-          var publicUrl = cfg.supabaseUrl + '/storage/v1/object/public/photos/' + displayPath;
-          var altText   = document.getElementById('wm-alt-text').value.trim() || null;
+        .then(function() {
+          var altText = document.getElementById('wm-alt-text').value.trim() || null;
           return fetch(cfg.supabaseUrl + '/rest/v1/photos', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'apikey': writeKey, 'Authorization': 'Bearer ' + writeKey, 'Prefer': 'return=minimal' },
             body: JSON.stringify({
-              location_id: loc.id, path: displayPath, url: publicUrl,
+              location_id: loc.id, path: displayPath, url: null,
               sort_order: photoNum, alt_text: altText,
               credit: JSON.stringify(photo.credit), source: 'wikimedia',
             }),
@@ -3558,23 +3563,16 @@ async function deleteAllPhotos(locationId) {
 
   let errors = 0;
 
-  // Delete each display file and its thumbnail from storage
+  // Delete each display file and its thumbnail from R2
   for (const row of rows) {
-    // Build thumb path from display path: uuid/name.webp -> uuid/name-thumb.webp
     const thumbPath = row.path.replace(/-(\d+)(\.webp|\.jpg)$/, '-thumb-$1$2');
     for (const path of [row.path, thumbPath]) {
       try {
-        const res = await fetch(`${supabaseUrl}/storage/v1/object/photos/${path}`, {
-          method: 'DELETE',
-          headers: { 'apikey': writeKey, 'Authorization': `Bearer ${writeKey}` },
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          console.error('Storage delete error for', path, err);
-          // Don't count thumb 404s as errors — thumb may not exist for old uploads
-          if (path === row.path) errors++;
-        }
-      } catch(e) { console.error('Storage delete exception:', e); if (path === row.path) errors++; }
+        await r2Delete(path);
+      } catch(e) {
+        console.error('R2 delete error for', path, e.message);
+        if (path === row.path) errors++;
+      }
     }
   }
 
@@ -3607,12 +3605,7 @@ async function deleteSinglePhoto(locationId, photoId, path) {
 
   // Delete from storage (display + thumb)
   for (const p of [path, thumbPath]) {
-    try {
-      await fetch(`${supabaseUrl}/storage/v1/object/photos/${p}`, {
-        method: 'DELETE',
-        headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
-      });
-    } catch(e) {}
+    try { await r2Delete(p); } catch(e) { console.warn('R2 delete failed for', p, e.message); }
   }
 
   // Delete from photos table
@@ -3774,14 +3767,10 @@ async function uploadSinglePhoto(idx) {
   const displayPath   = `${locationUuid}/${filename}`;
   const thumbPath     = `${locationUuid}/${thumbFilename}`;
 
-  await Promise.all([
-    supabaseUpload(supabaseUrl, writeKey, displayPath, displayBlob),
-    supabaseUpload(supabaseUrl, writeKey, thumbPath,   thumbBlob),
-  ]);
+  await r2Upload(displayPath, displayBlob);
+  await r2Upload(thumbPath, thumbBlob);
 
   // Build public URL
-  const publicUrl = `${supabaseUrl}/storage/v1/object/public/photos/${displayPath}`;
-
   // sort_order: if no existing photos, primary=1; otherwise continue from existingCount+1
   let sortOrder;
   if (existingCount === 0 && idx === primaryPhotoIdx) {
@@ -3811,7 +3800,7 @@ async function uploadSinglePhoto(idx) {
     body: JSON.stringify({
       location_id: locationUuid,
       path: displayPath,
-      url: publicUrl,
+      url: null,
       sort_order: sortOrder,
       alt_text: entry.altText || null,
     }),
