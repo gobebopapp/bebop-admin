@@ -657,12 +657,12 @@
         <div class="section-title">⑦ Preview & export</div>
       </div>
       <div class="section-body">
-        <p class="text-muted" style="margin-bottom:16px;">Preview the email, then copy the HTML to paste into Mailchimp's "Code your own" editor.</p>
+        <p class="text-muted" style="margin-bottom:16px;">Preview the email, then copy the HTML to paste into Brevo's HTML editor.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
           <button class="btn btn-secondary" onclick="buildPreview()">👁 Preview email</button>
-          <button class="btn btn-save" onclick="copyEmailHtml('weekly')" id="copy-html-btn" style="width:auto;padding:10px 20px;font-size:13.5px;">📋 Copy HTML for Mailchimp</button>
+          <button class="btn btn-save" onclick="copyEmailHtml('weekly')" id="copy-html-btn" style="width:auto;padding:10px 20px;font-size:13.5px;">📋 Copy HTML for Brevo</button>
         </div>
-        <div id="copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:12px;">✓ HTML copied — paste into Mailchimp's HTML editor (Campaign → Design → Code your own)</div>
+        <div id="copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:12px;">✓ HTML copied — paste into Brevo (Campaign → Start designing → HTML custom code → Paste your code)</div>
 
         <div id="preview-panel" style="display:none;">
           <div style="padding:12px 20px;background:#E4DDD3;border-bottom:1.5px solid #D4CEC6;display:flex;justify-content:space-between;align-items:center;">
@@ -685,7 +685,7 @@
       </div>
       <div class="section-body">
         <p style="font-size:13px;color:#6B6560;line-height:1.7;margin-bottom:20px;">
-          Edit the welcome email content below, preview it, then copy the HTML to use in Mailchimp whenever a new subscriber signs up.
+          Edit the welcome email content below, preview it, then copy the HTML to use in Brevo whenever a new subscriber signs up.
         </p>
 
         <!-- Welcome email content editor -->
@@ -724,9 +724,9 @@ The goal is simple: less time wondering "what should we do with the kids this we
 
         <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
           <button class="btn btn-secondary" onclick="buildWelcomePreview()">👁 Preview welcome email</button>
-          <button class="btn btn-save" onclick="copyEmailHtml('welcome')" id="welcome-copy-btn" style="width:auto;padding:10px 20px;font-size:13.5px;">📋 Copy HTML for Mailchimp</button>
+          <button class="btn btn-save" onclick="copyEmailHtml('welcome')" id="welcome-copy-btn" style="width:auto;padding:10px 20px;font-size:13.5px;">📋 Copy HTML for Brevo</button>
         </div>
-        <div id="welcome-copy-confirm" style="display:none;margin-top:8px;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;">✓ HTML copied — paste into Mailchimp's HTML editor (Campaign → Design → Code your own)</div>
+        <div id="welcome-copy-confirm" style="display:none;margin-top:8px;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;">✓ HTML copied — paste into Brevo (Campaign → Start designing → HTML custom code → Paste your code)</div>
 
         <div id="welcome-preview-panel" style="display:none;margin-top:16px;border:1.5px solid #D4CEC6;border-radius:10px;overflow:hidden;">
           <div style="padding:12px 20px;background:#E4DDD3;border-bottom:1.5px solid #D4CEC6;display:flex;justify-content:space-between;align-items:center;">
@@ -747,16 +747,18 @@ The goal is simple: less time wondering "what should we do with the kids this we
       </div>
       <div class="section-body">
         <p style="font-size:13px;color:#6B6560;line-height:1.7;margin-bottom:16px;">
-          To send the welcome email to a new subscriber, copy the HTML above and create a new campaign in Mailchimp addressed to that person.
+          To send the welcome email to a new subscriber, copy the HTML above and create a new campaign in Brevo addressed to that person.
           In the future, this can be automated via your signup form — ask your husband to trigger the welcome send when a new subscriber is added.
         </p>
         <div style="background:#dff0f5;border:1.5px solid #4daabb;border-radius:10px;padding:14px 18px;">
-          <p style="font-size:13px;color:#1A1714;font-weight:600;margin:0 0 6px;">Steps to send in Mailchimp:</p>
+          <p style="font-size:13px;color:#1A1714;font-weight:600;margin:0 0 6px;">Steps to send in Brevo:</p>
           <ol style="font-size:13px;color:#6B6560;line-height:2;padding-left:18px;margin:0;">
-            <li>Click "👁 Preview welcome email" then "📋 Copy HTML for Mailchimp" above</li>
-            <li>In Mailchimp, create a new campaign → Single email</li>
-            <li>Under Design, choose "Code your own" and paste the HTML</li>
-            <li>Set the recipient to the new subscriber's email</li>
+            <li>Click "👁 Preview welcome email" then "📋 Copy HTML for Brevo" above</li>
+            <li>In Brevo, go to <strong>Campaigns → Create email campaign</strong></li>
+            <li>Fill in campaign name, subject line, and sender, then click <strong>Start designing</strong></li>
+            <li>Choose <strong>Start from scratch → HTML custom code</strong></li>
+            <li>Click <strong>Paste your code</strong> and paste the copied HTML, then click <strong>Save &amp; quit</strong></li>
+            <li>Set the recipient to the new subscriber's email address</li>
             <li>Send immediately</li>
           </ol>
         </div>
@@ -973,7 +975,7 @@ The goal is simple: less time wondering "what should we do with the kids this we
             <input type="email" id="evt-test-addr" placeholder="your@email.com" style="font-size:13px;" />
           </div>
         </div>
-        <div id="evt-copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:8px;">✓ HTML copied to clipboard — paste into Mailchimp's HTML editor</div>
+        <div id="evt-copy-html-confirm" style="display:none;font-size:12px;color:#2D6A4F;font-family:'DM Mono',monospace;margin-bottom:8px;">✓ HTML copied to clipboard — paste into Brevo's HTML editor</div>
         <div id="evt-preview-panel" style="display:none;border:1.5px solid #D4CEC6;border-radius:10px;overflow:hidden;margin-bottom:16px;">
           <div style="padding:12px 20px;background:#E4DDD3;border-bottom:1.5px solid #D4CEC6;display:flex;justify-content:space-between;align-items:center;">
             <span style="font-family:'DM Mono',monospace;font-size:11px;color:#6B6560;text-transform:uppercase;letter-spacing:0.07em;">Events email preview</span>
@@ -1771,7 +1773,7 @@ function buildEmailHtml(opts) {
         '</td>' : '';
       bodyRows +=
         '<tr><td style="padding:25px 14px 0;">' +
-          '<p style="' + sectionEyebrow + '">🌤 Forecast for this weekend</p>' +
+          '<p style="' + sectionEyebrow + '">🌤 Weekend forecast</p>' +
           '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 14px;">' +
             (weatherIntro ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + amberText + ';margin:0' + (showTiles ? ' 0 12px' : '') + ';line-height:1.7;">' + weatherIntro + '</p>' : '') +
             (showTiles ? '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' + satTile + sunTile + '</tr></table>' : '') +
@@ -1814,7 +1816,7 @@ function buildEmailHtml(opts) {
         '</td></tr>';
     }
 
-    // 4. Just discovered — thumbnail (80px) + name link + category + description teaser
+    // 4. Just discovered — full-width image + name link + category + description teaser
     if (recentSpot) {
       const spotUrl = recentSpot._url || 'https://gobebop.app';
       const recentAllUrl = 'https://gobebop.app/explore/amsterdam/?sort=recently_added&view=list&utm_source=newsletter&utm_medium=email&utm_campaign=weekly';
@@ -1823,32 +1825,30 @@ function buildEmailHtml(opts) {
         : null;
       bodyRows +=
         '<tr><td style="padding:25px 14px 0;">' +
-          '<p style="' + sectionEyebrow + '">🆕 Just discovered</p>' +
-          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;padding:14px 14px 16px;">' +
-            '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' +
-              (recentSpot.thumbUrl ?
-                '<td style="width:80px;padding-right:14px;vertical-align:top;">' +
-                  '<img src="' + recentSpot.thumbUrl + '" width="80" height="80" style="width:80px;height:80px;border-radius:10px;object-fit:cover;display:block;" />' +
-                '</td>' : '') +
-              '<td style="vertical-align:top;">' +
-                '<a href="' + spotUrl + '" style="font-family:' + fontDisplay + ';font-size:18px;font-weight:700;color:' + ink + ';text-decoration:none;line-height:1.2;display:block;margin-bottom:3px;">' + recentSpot.name + '</a>' +
-                '<p style="font-family:' + fontBody + ';font-size:11px;font-weight:700;color:' + teal + ';margin:0 0 8px;letter-spacing:0.5px;">' + [recentSpot.city, recentSpot.secondary_category_lead].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
-                (desc ? '<p style="font-family:' + fontBody + ';font-size:13px;color:' + inkSoft + ';margin:0 0 10px;line-height:1.6;">' + desc + '</p>' : '') +
-                '<a href="' + spotUrl + '" style="font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;">Find out more →</a>' +
-              '</td>' +
-            '</tr></table>' +
+          '<p style="' + sectionEyebrow + '">💡 Just discovered</p>' +
+          '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
+            (recentSpot.thumbUrl ?
+              '<img src="' + recentSpot.thumbUrl + '" alt="' + recentSpot.name + '" width="100%" style="width:100%;height:180px;object-fit:cover;display:block;" />' :
+              '<div style="width:100%;height:80px;background:' + teal + ';display:flex;align-items:center;justify-content:center;"><span style="font-size:28px;">📍</span></div>') +
+            '<div style="padding:16px 16px 18px;">' +
+              '<a href="' + spotUrl + '" style="font-family:' + fontDisplay + ';font-size:20px;font-weight:700;color:' + ink + ';text-decoration:none;line-height:1.2;display:block;margin-bottom:4px;">' + recentSpot.name + '</a>' +
+              '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:700;color:' + teal + ';margin:0 0 10px;letter-spacing:0.5px;">' + [recentSpot.city, recentSpot.secondary_category_lead].filter(Boolean).join(' · ').toUpperCase() + '</p>' +
+              (desc ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0 0 14px;line-height:1.65;">' + desc + '</p>' : '') +
+              '<a href="' + spotUrl + '" style="font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;">Find out more →</a>' +
+            '</div>' +
           '</div>' +
           '<p style="font-family:' + fontBody + ';font-size:13px;text-align:center;margin:8px 0 0;">' +
             '<a href="' + recentAllUrl + '" style="color:' + teal + ';text-decoration:none;font-weight:600;">See all recently added spots →</a>' +
           '</p>' +
         '</td></tr>';
     }
-    // 5. Special announcement (optional) — minimal text aside before footer
+
+    // 5. Updates (optional) — eyebrow outside grey box, matching other section headers
     if (announcementText) {
       bodyRows +=
         '<tr><td style="padding:25px 14px 0;">' +
+          '<p style="' + sectionEyebrow + '">📣 Updates</p>' +
           '<div style="background:' + pageBg + ';border-radius:12px;padding:14px 16px;">' +
-            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:' + inkMuted + ';margin:0 0 8px;">📣 From us</p>' +
             '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0' + (announcementLinkText && announcementLinkUrl ? ' 0 10px' : '') + ';line-height:1.65;">' + announcementText + '</p>' +
             (announcementLinkText && announcementLinkUrl
               ? '<a href="' + announcementLinkUrl + '" style="font-family:' + fontBody + ';font-size:13px;font-weight:700;color:' + teal + ';text-decoration:none;">' + announcementLinkText + '</a>'
