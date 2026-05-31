@@ -419,10 +419,6 @@
         <input type="password" id="cfg-loops-key" placeholder="loops_..." oninput="saveConfig()" />
       </div>
       <div class="field">
-        <label>OpenWeather API Key</label>
-        <input type="password" id="cfg-weather-key" placeholder="..." oninput="saveConfig()" />
-      </div>
-      <div class="field">
         <label>Loops Transactional ID — Welcome</label>
         <input type="text" id="cfg-loops-welcome-id" placeholder="From Loops dashboard" oninput="saveConfig()" />
       </div>
@@ -518,48 +514,84 @@
     <!-- Step 2: Weekend weather opener -->
     <div class="form-section">
       <div class="section-header">
-        <div class="section-title">② Weather opener</div>
-        <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="loadWeather()">↺ Fetch weather</button>
+        <div class="section-title">② Weekend forecast</div>
       </div>
       <div class="section-body">
-        <p class="text-muted" style="margin-bottom:16px;">A short opener that sets the scene for the weekend. Shown after the recommendation.</p>
-        <div id="weather-display">
-          <div style="padding:20px;text-align:center;color:#A09A94;font-size:13px;">Click "Fetch weather" to load the Amsterdam weekend forecast.</div>
+        <p class="text-muted" style="margin-bottom:14px;">Enter the weekend forecast manually. Click the emoji field to pick a weather icon.</p>
+
+        <!-- Forecast tiles — Saturday and Sunday, fixed labels -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          <!-- Saturday -->
+          <div style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:12px;">
+            <p style="font-family:'DM Mono',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 8px;">Saturday</p>
+            <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;">
+              <div style="position:relative;">
+                <input type="text" id="sat-emoji-override" placeholder="☀️"
+                  style="width:48px;text-align:center;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 4px;font-size:20px;outline:none;cursor:pointer;"
+                  onclick="showEmojiPickerFor('sat-emoji-override')" readonly />
+                <div id="sat-emoji-picker" style="display:none;position:absolute;top:44px;left:0;z-index:200;background:white;border:1.5px solid #D4CEC6;border-radius:10px;padding:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);width:220px;">
+                  <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                    <button onclick="pickEmoji('sat-emoji-override','☀️')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Sunny">☀️</button>
+                    <button onclick="pickEmoji('sat-emoji-override','🌤')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Mostly sunny">🌤</button>
+                    <button onclick="pickEmoji('sat-emoji-override','⛅')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Partly cloudy">⛅</button>
+                    <button onclick="pickEmoji('sat-emoji-override','🌥')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Cloudy">🌥</button>
+                    <button onclick="pickEmoji('sat-emoji-override','☁️')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Overcast">☁️</button>
+                    <button onclick="pickEmoji('sat-emoji-override','🌦')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Showers">🌦</button>
+                    <button onclick="pickEmoji('sat-emoji-override','🌧')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Rain">🌧</button>
+                    <button onclick="pickEmoji('sat-emoji-override','⛈')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Thunderstorm">⛈</button>
+                    <button onclick="pickEmoji('sat-emoji-override','🌩')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Lightning">🌩</button>
+                    <button onclick="pickEmoji('sat-emoji-override','❄️')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Snow">❄️</button>
+                    <button onclick="pickEmoji('sat-emoji-override','🌫')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Fog">🌫</button>
+                    <button onclick="pickEmoji('sat-emoji-override','🌬')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Windy">🌬</button>
+                  </div>
+                </div>
+              </div>
+              <input type="text" id="sat-temp-override" placeholder="e.g. 20°C"
+                style="flex:1;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;" />
+            </div>
+            <input type="text" id="sat-desc-override" placeholder="e.g. sunny, partly cloudy…"
+              style="width:100%;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;" />
+          </div>
+          <!-- Sunday -->
+          <div style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:12px;">
+            <p style="font-family:'DM Mono',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 8px;">Sunday</p>
+            <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;">
+              <div style="position:relative;">
+                <input type="text" id="sun-emoji-override" placeholder="⛅"
+                  style="width:48px;text-align:center;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 4px;font-size:20px;outline:none;cursor:pointer;"
+                  onclick="showEmojiPickerFor('sun-emoji-override')" readonly />
+                <div id="sun-emoji-picker" style="display:none;position:absolute;top:44px;left:0;z-index:200;background:white;border:1.5px solid #D4CEC6;border-radius:10px;padding:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);width:220px;">
+                  <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                    <button onclick="pickEmoji('sun-emoji-override','☀️')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Sunny">☀️</button>
+                    <button onclick="pickEmoji('sun-emoji-override','🌤')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Mostly sunny">🌤</button>
+                    <button onclick="pickEmoji('sun-emoji-override','⛅')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Partly cloudy">⛅</button>
+                    <button onclick="pickEmoji('sun-emoji-override','🌥')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Cloudy">🌥</button>
+                    <button onclick="pickEmoji('sun-emoji-override','☁️')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Overcast">☁️</button>
+                    <button onclick="pickEmoji('sun-emoji-override','🌦')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Showers">🌦</button>
+                    <button onclick="pickEmoji('sun-emoji-override','🌧')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Rain">🌧</button>
+                    <button onclick="pickEmoji('sun-emoji-override','⛈')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Thunderstorm">⛈</button>
+                    <button onclick="pickEmoji('sun-emoji-override','🌩')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Lightning">🌩</button>
+                    <button onclick="pickEmoji('sun-emoji-override','❄️')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Snow">❄️</button>
+                    <button onclick="pickEmoji('sun-emoji-override','🌫')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Fog">🌫</button>
+                    <button onclick="pickEmoji('sun-emoji-override','🌬')" style="font-size:22px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;" title="Windy">🌬</button>
+                  </div>
+                </div>
+              </div>
+              <input type="text" id="sun-temp-override" placeholder="e.g. 17°C"
+                style="flex:1;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;" />
+            </div>
+            <input type="text" id="sun-desc-override" placeholder="e.g. sunny, partly cloudy…"
+              style="width:100%;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;" />
+          </div>
         </div>
 
-        <!-- Manual weather overrides — always visible, pre-filled by API, editable -->
-        <div style="margin-top:14px;border-top:1.5px solid #D4CEC6;padding-top:14px;">
-          <p class="text-muted" style="margin-bottom:10px;">Override forecast values if needed:</p>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-            <!-- Saturday -->
-            <div style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:12px;">
-              <p style="font-family:'DM Mono',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 8px;">Saturday</p>
-              <div style="display:flex;gap:6px;margin-bottom:6px;">
-                <input type="text" id="sat-emoji-override" placeholder="☀️" style="width:52px;text-align:center;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 4px;font-size:18px;outline:none;" />
-                <input type="text" id="sat-temp-override" placeholder="20°C" style="flex:1;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;" />
-              </div>
-              <input type="text" id="sat-desc-override" placeholder="e.g. sunny" style="width:100%;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;" />
-            </div>
-            <!-- Sunday -->
-            <div style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:12px;">
-              <p style="font-family:'DM Mono',monospace;font-size:10px;color:#A09A94;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 8px;">Sunday</p>
-              <div style="display:flex;gap:6px;margin-bottom:6px;">
-                <input type="text" id="sun-emoji-override" placeholder="⛅" style="width:52px;text-align:center;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 4px;font-size:18px;outline:none;" />
-                <input type="text" id="sun-temp-override" placeholder="17°C" style="flex:1;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;" />
-              </div>
-              <input type="text" id="sun-desc-override" placeholder="e.g. partly cloudy" style="width:100%;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:6px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;" />
-            </div>
-          </div>
+        <!-- Weather intro below the tiles -->
+        <div class="field">
+          <label>Weekend intro <span style="color:#A09A94;font-weight:400;">(shown above the forecast tiles in the email)</span></label>
+          <textarea id="weather-intro" placeholder="e.g. It's looking like a beautiful weekend — perfect for getting outside. Here's our pick for where to go." style="min-height:70px;"></textarea>
         </div>
-
-        <div style="margin-top:14px;">
-          <div class="field">
-            <label>Weather intro</label>
-            <textarea id="weather-intro" placeholder="e.g. It's looking like a beautiful weekend — perfect for getting outside. Here's our pick for where to go." style="min-height:70px;"></textarea>
-          </div>
-          <div style="margin-top:10px;">
-            <button class="btn btn-enrich" onclick="generateWeatherIntro()" id="weather-intro-btn">✦ Generate with AI</button>
-          </div>
+        <div style="margin-top:10px;">
+          <button class="btn btn-enrich" onclick="generateWeatherIntro()" id="weather-intro-btn">✦ Generate with AI</button>
         </div>
       </div>
     </div>
@@ -1002,7 +1034,6 @@ function saveConfig() {
   localStorage.setItem('bebop_supabase_url',      document.getElementById('cfg-supabase-url').value);
   localStorage.setItem('bebop_supabase_key',      document.getElementById('cfg-supabase-key').value);
   localStorage.setItem('bebop_loops_key',         document.getElementById('cfg-loops-key').value);
-  localStorage.setItem('bebop_weather_key',       document.getElementById('cfg-weather-key').value);
   localStorage.setItem('bebop_loops_welcome_id',  document.getElementById('cfg-loops-welcome-id').value);
   localStorage.setItem('bebop_loops_audience_id', document.getElementById('cfg-loops-audience-id').value);
 }
@@ -1011,7 +1042,6 @@ function loadConfig() {
   document.getElementById('cfg-supabase-url').value      = localStorage.getItem('bebop_supabase_url') || '';
   document.getElementById('cfg-supabase-key').value      = localStorage.getItem('bebop_supabase_key') || '';
   document.getElementById('cfg-loops-key').value         = localStorage.getItem('bebop_loops_key') || '';
-  document.getElementById('cfg-weather-key').value       = localStorage.getItem('bebop_weather_key') || '';
   document.getElementById('cfg-loops-welcome-id').value  = localStorage.getItem('bebop_loops_welcome_id') || '';
   document.getElementById('cfg-loops-audience-id').value = localStorage.getItem('bebop_loops_audience_id') || '';
 }
@@ -1021,7 +1051,6 @@ function getConfig() {
     supabaseUrl:     localStorage.getItem('bebop_supabase_url') || '',
     supabaseKey:     localStorage.getItem('bebop_supabase_key') || '',
     loopsKey:        localStorage.getItem('bebop_loops_key') || '',
-    weatherKey:      localStorage.getItem('bebop_weather_key') || '',
     loopsWelcomeId:  localStorage.getItem('bebop_loops_welcome_id') || '',
     loopsAudienceId: localStorage.getItem('bebop_loops_audience_id') || '',
   };
@@ -1146,98 +1175,35 @@ async function loadActiveRec() {
 
 // ─── Step 2: Load weather ─────────────────────────────────────────────────────
 
-function getWeatherEmoji(id) {
-  if (id >= 200 && id < 300) return '⛈';
-  if (id >= 300 && id < 400) return '🌦';
-  if (id >= 500 && id < 600) return '🌧';
-  if (id >= 600 && id < 700) return '❄️';
-  if (id >= 700 && id < 800) return '🌫';
-  if (id === 800) return '☀️';
-  if (id === 801 || id === 802) return '⛅';
-  return '🌥';
+// ─── Emoji picker ─────────────────────────────────────────────────────────────
+
+function showEmojiPickerFor(fieldId) {
+  const pickerId = fieldId === 'sat-emoji-override' ? 'sat-emoji-picker' : 'sun-emoji-picker';
+  const otherPickerId = pickerId === 'sat-emoji-picker' ? 'sun-emoji-picker' : 'sat-emoji-picker';
+  document.getElementById(otherPickerId).style.display = 'none';
+  const picker = document.getElementById(pickerId);
+  picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
 }
 
-async function loadWeather() {
-  const { weatherKey } = getConfig();
-  if (!weatherKey) {
-    document.getElementById('config-panel').classList.add('visible');
-    document.getElementById('config-toggle').classList.add('open');
-    return alert('Please add your OpenWeather API key in the config panel.');
-  }
-
-  const el = document.getElementById('weather-display');
-  el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#A09A94;"><div class="spinner"></div> Fetching Amsterdam forecast…</div>';
-
-  try {
-    const lat = 52.3676, lon = 4.9041;
-    // cnt=40 = 5 days of 3-hour intervals (max on free tier)
-    const url = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + weatherKey + '&units=metric&cnt=40';
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!res.ok) throw new Error((data.message || 'HTTP ' + res.status) + ' — check your OpenWeather API key');
-
-    // Find upcoming Saturday and Sunday
-    // If today is Sat, use today; if Sun, next Saturday; otherwise next Saturday
-    const now = new Date();
-    const todayDay = now.getDay(); // 0=Sun,1=Mon,...,6=Sat
-    let daysUntilSat;
-    if (todayDay === 6) daysUntilSat = 0;
-    else if (todayDay === 0) daysUntilSat = 6;
-    else daysUntilSat = 6 - todayDay;
-
-    const satDate = new Date(now);
-    satDate.setDate(now.getDate() + daysUntilSat);
-    satDate.setHours(0, 0, 0, 0);
-    const sunDate = new Date(satDate);
-    sunDate.setDate(satDate.getDate() + 1);
-
-    const satStr = satDate.toISOString().slice(0, 10);
-    const sunStr = sunDate.toISOString().slice(0, 10);
-
-    const getDay = (dateStr) => {
-      const readings = data.list.filter(r => r.dt_txt.startsWith(dateStr));
-      return readings.find(r => r.dt_txt.includes('12:00:00')) || readings[0] || null;
-    };
-
-    const sat = getDay(satStr);
-    const sun = getDay(sunStr);
-
-    if (!sat && !sun) {
-      el.innerHTML = '<div style="padding:12px;background:#FEE2E2;border-radius:8px;font-size:13px;color:#991B1B;">No data for ' + satStr + ' — the free OpenWeather tier covers max 5 days ahead. Try again closer to the weekend.</div>';
-      return;
-    }
-
-    weatherData = { sat, sun, satStr, sunStr };
-
-    const renderDay = (reading, label) => {
-      if (!reading) return '<div class="weather-day"><div class="weather-day-label">' + label + '</div><div class="weather-day-icon">—</div><div class="weather-day-temp">No data</div></div>';
-      const temp = Math.round(reading.main.temp);
-      const emoji = getWeatherEmoji(reading.weather[0].id);
-      const desc = reading.weather[0].description;
-      return '<div class="weather-day"><div class="weather-day-label">' + label + '</div><div class="weather-day-icon">' + emoji + '</div><div class="weather-day-temp">' + temp + '°C</div><div class="weather-day-desc">' + desc + '</div></div>';
-    };
-
-    const satLabel = satDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
-    const sunLabel = sunDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
-
-    el.innerHTML = '<div class="weather-grid">' + renderDay(sat, satLabel) + renderDay(sun, sunLabel) + '</div>';
-
-    // Pre-fill override fields from API data so user can edit if needed
-    if (sat) {
-      document.getElementById('sat-emoji-override').value = getWeatherEmoji(sat.weather[0].id);
-      document.getElementById('sat-temp-override').value  = Math.round(sat.main.temp) + '°C';
-      document.getElementById('sat-desc-override').value  = sat.weather[0].description;
-    }
-    if (sun) {
-      document.getElementById('sun-emoji-override').value = getWeatherEmoji(sun.weather[0].id);
-      document.getElementById('sun-temp-override').value  = Math.round(sun.main.temp) + '°C';
-      document.getElementById('sun-desc-override').value  = sun.weather[0].description;
-    }
-
-  } catch(e) {
-    el.innerHTML = '<div style="padding:12px;background:#FEE2E2;border-radius:8px;font-size:13px;color:#991B1B;">Error: ' + e.message + '</div>';
-  }
+function pickEmoji(fieldId, emoji) {
+  document.getElementById(fieldId).value = emoji;
+  const pickerId = fieldId === 'sat-emoji-override' ? 'sat-emoji-picker' : 'sun-emoji-picker';
+  document.getElementById(pickerId).style.display = 'none';
 }
+
+// Close emoji pickers when clicking outside
+document.addEventListener('click', function(e) {
+  ['sat-emoji-picker', 'sun-emoji-picker'].forEach(id => {
+    const picker = document.getElementById(id);
+    const inputId = id === 'sat-emoji-picker' ? 'sat-emoji-override' : 'sun-emoji-override';
+    if (picker && !picker.contains(e.target) && e.target.id !== inputId) {
+      picker.style.display = 'none';
+    }
+  });
+});
+
+// ─── Weather API removed — forecast is now fully manual ───────────────────────
+// loadWeather and related functions removed; weatherData state no longer needed
 
 // ─── Generate weather intro via Claude ───────────────────────────────────────
 
@@ -1739,24 +1705,13 @@ function buildEmailHtml(opts) {
         '</td></tr>';
     }
 
-    // 2. Forecast for this weekend — intro text then Sat/Sun tiles
+    // 2. Forecast for this weekend — intro text then Sat/Sun tiles (labels already "Saturday"/"Sunday")
     if (weatherIntro || satTemp || sunTemp) {
       const showTiles = satTemp || sunTemp;
-      // Parse date string to get "Saturday 17 May" style label
-      const fmtDay = (stored) => {
-        if (!stored) return '';
-        // stored is e.g. "2026-05-16" — parse as local noon to avoid timezone shift
-        const parts = stored.split('-');
-        if (parts.length === 3) {
-          const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-          return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
-        }
-        return stored;
-      };
       const satTile = satTemp ?
         '<td style="width:50%;padding-right:5px;">' +
           '<div style="background:#ffffff;border:1px solid ' + border + ';border-radius:10px;padding:12px 8px;text-align:center;">' +
-            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;color:' + inkMuted + ';text-transform:uppercase;letter-spacing:0.7px;margin:0 0 5px;">' + fmtDay(satLabel) + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;color:' + inkMuted + ';text-transform:uppercase;letter-spacing:0.7px;margin:0 0 5px;">' + satLabel + '</p>' +
             '<p style="font-size:24px;margin:0 0 4px;line-height:1;">' + satEmoji + '</p>' +
             '<p style="font-family:' + fontBody + ';font-size:18px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + satTemp + '</p>' +
             '<p style="font-family:' + fontBody + ';font-size:11px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + satDesc + '</p>' +
@@ -1765,7 +1720,7 @@ function buildEmailHtml(opts) {
       const sunTile = sunTemp ?
         '<td style="width:50%;padding-left:5px;">' +
           '<div style="background:#ffffff;border:1px solid ' + border + ';border-radius:10px;padding:12px 8px;text-align:center;">' +
-            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;color:' + inkMuted + ';text-transform:uppercase;letter-spacing:0.7px;margin:0 0 5px;">' + fmtDay(sunLabel) + '</p>' +
+            '<p style="font-family:' + fontBody + ';font-size:10px;font-weight:700;color:' + inkMuted + ';text-transform:uppercase;letter-spacing:0.7px;margin:0 0 5px;">' + sunLabel + '</p>' +
             '<p style="font-size:24px;margin:0 0 4px;line-height:1;">' + sunEmoji + '</p>' +
             '<p style="font-family:' + fontBody + ';font-size:18px;font-weight:700;color:' + ink + ';margin:0 0 3px;">' + sunTemp + '</p>' +
             '<p style="font-family:' + fontBody + ';font-size:11px;color:' + inkSoft + ';margin:0;text-transform:capitalize;">' + sunDesc + '</p>' +
@@ -1858,12 +1813,14 @@ function buildEmailHtml(opts) {
     }
   }
 
-  // ── Footer ──
+  // ── Footer — with Instagram link ──
   const footerHtml =
     '<tr><td style="padding:28px 20px;border-top:1px solid ' + border + ';margin-top:16px;">' +
       '<p style="font-family:' + fontBody + ';font-size:12px;font-weight:600;color:' + inkMuted + ';margin:0 0 6px;text-align:center;">GoBebop · Family guide to Amsterdam &amp; the Netherlands</p>' +
-      '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0;text-align:center;">' +
-        '<a href="https://gobebop.app" style="color:' + teal + ';text-decoration:none;font-weight:600;">gobebop.app</a>' +
+      '<p style="font-family:' + fontBody + ';font-size:12px;color:' + inkMuted + ';margin:0 0 8px;text-align:center;">' +
+        '<a href="https://gobebop.app/?utm_source=newsletter&utm_medium=email&utm_campaign=weekly" style="color:' + teal + ';text-decoration:none;font-weight:600;">gobebop.app</a>' +
+        ' &nbsp;·&nbsp; ' +
+        '<a href="https://www.instagram.com/gobebop.app/" style="color:' + teal + ';text-decoration:none;font-weight:600;">Instagram</a>' +
         ' &nbsp;·&nbsp; <a href="{{unsubscribeUrl}}" style="color:' + inkMuted + ';text-decoration:underline;">Unsubscribe</a>' +
       '</p>' +
     '</td></tr>';
@@ -1915,13 +1872,13 @@ function getEmailOpts() {
     recPhotoUrl = activeRec?._photoUrl || null;
   }
 
-    // Weather — read from manual override fields (pre-filled by API, user-editable)
-    const satEmoji = document.getElementById('sat-emoji-override')?.value || (satR ? getWeatherEmoji(satR.weather[0].id) : '');
-    const satTemp  = document.getElementById('sat-temp-override')?.value  || (satR ? Math.round(satR.main.temp) + '°C' : '');
-    const satDesc  = document.getElementById('sat-desc-override')?.value  || (satR ? satR.weather[0].description : '');
-    const sunEmoji = document.getElementById('sun-emoji-override')?.value || (sunR ? getWeatherEmoji(sunR.weather[0].id) : '');
-    const sunTemp  = document.getElementById('sun-temp-override')?.value  || (sunR ? Math.round(sunR.main.temp) + '°C' : '');
-    const sunDesc  = document.getElementById('sun-desc-override')?.value  || (sunR ? sunR.weather[0].description : '');
+    // Weather — read directly from manual fields, fixed Saturday/Sunday labels
+    const satEmoji = document.getElementById('sat-emoji-override')?.value || '';
+    const satTemp  = document.getElementById('sat-temp-override')?.value  || '';
+    const satDesc  = document.getElementById('sat-desc-override')?.value  || '';
+    const sunEmoji = document.getElementById('sun-emoji-override')?.value || '';
+    const sunTemp  = document.getElementById('sun-temp-override')?.value  || '';
+    const sunDesc  = document.getElementById('sun-desc-override')?.value  || '';
 
   return {
     previewText:         document.getElementById('email-preview-text').value,
@@ -1933,11 +1890,11 @@ function getEmailOpts() {
     recPageUrl,
     recPhotoUrl,
     weatherIntro:        document.getElementById('weather-intro').value,
-    satLabel:            weatherData ? weatherData.satStr : '',
+    satLabel:            'Saturday',
     satEmoji,
     satTemp,
     satDesc,
-    sunLabel:            weatherData ? weatherData.sunStr : '',
+    sunLabel:            'Sunday',
     sunEmoji,
     sunTemp,
     sunDesc,
