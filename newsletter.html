@@ -548,6 +548,7 @@
               </div>
               <input type="text" id="sat-temp-override" placeholder="e.g. 20°C"
                 style="flex:1;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;" />
+              <button onclick="appendDegree('sat-temp-override')" title="Insert °" style="background:#E4DDD3;border:1.5px solid #D4CEC6;border-radius:6px;padding:5px 8px;font-size:14px;font-weight:600;cursor:pointer;color:#1A1714;flex-shrink:0;">°</button>
             </div>
             <input type="text" id="sat-desc-override" placeholder="e.g. sunny, partly cloudy…"
               style="width:100%;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;" />
@@ -579,6 +580,7 @@
               </div>
               <input type="text" id="sun-temp-override" placeholder="e.g. 17°C"
                 style="flex:1;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;" />
+              <button onclick="appendDegree('sun-temp-override')" title="Insert °" style="background:#E4DDD3;border:1.5px solid #D4CEC6;border-radius:6px;padding:5px 8px;font-size:14px;font-weight:600;cursor:pointer;color:#1A1714;flex-shrink:0;">°</button>
             </div>
             <input type="text" id="sun-desc-override" placeholder="e.g. sunny, partly cloudy…"
               style="width:100%;background:white;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;box-sizing:border-box;" />
@@ -1255,21 +1257,30 @@ async function generateWeatherIntro() {
 }
 
 // ─── Photo fetch helper ───────────────────────────────────────────────────────
-// Fetches the primary photo URL for one or more location IDs from the photos table
+// Photos are served via Cloudflare CDN (cdn.gobebop.app) with R2 as primary
+// and Supabase as fallback. The path column contains relative paths only.
+
+const PHOTOS_BASE_URL = 'https://cdn.gobebop.app/storage/v1/object/public/photos';
 
 async function fetchPrimaryPhotos(locationIds) {
   if (!locationIds.length) return {};
   const { supabaseUrl, supabaseKey } = getConfig();
   if (!supabaseUrl || !supabaseKey) return {};
   try {
-    const ids = locationIds.map(id => '"' + id + '"').join(',');
     const res = await fetch(
-      supabaseUrl + '/rest/v1/photos?location_id=in.(' + locationIds.join(',') + ')&sort_order=eq.1&select=location_id,url',
+      supabaseUrl + '/rest/v1/photos?location_id=in.(' + locationIds.join(',') + ')&sort_order=eq.1&select=location_id,path',
       { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }
     );
     const rows = await res.json();
     const map = {};
-    if (Array.isArray(rows)) rows.forEach(r => { map[r.location_id] = r.url; });
+    if (Array.isArray(rows)) {
+      rows.forEach(r => {
+        if (r.location_id && r.path) {
+          // Assemble full URL via Cloudflare CDN
+          map[r.location_id] = PHOTOS_BASE_URL + '/' + r.path;
+        }
+      });
+    }
     return map;
   } catch(e) { return {}; }
 }
@@ -1553,12 +1564,61 @@ function renderRecentLocations() {
     '</div>';
 }
 
-// ─── Step 5: Subject line helpers ────────────────────────────────────────────
+// ─── Degree symbol helper ─────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => {
+function appendDegree(fieldId) {
+  const el = document.getElementById(fieldId);
+  if (!el) return;
+  el.value = el.value.replace(/°C?$/, '') + '°';
+  el.focus();
+}
+
+// ─── UTM auto-append ──────────────────────────────────────────────────────────
+// Appends ?utm_source=newsletter&utm_medium=email&utm_campaign=weekly
+// to any URL pasted or typed into a designated URL field.
+
+const UTM_SUFFIX = '?utm_source=newsletter&utm_medium=email&utm_campaign=weekly';
+const UTM_PARAMS = 'utm_source=newsletter&utm_medium=email&utm_campaign=weekly';
+
+function appendUtm(url) {
+  if (!url || !url.startsWith('http')) return url;
+  // Don't double-add
+  if (url.includes('utm_source=newsletter')) return url;
+  const separator = url.includes('?') ? '&' : '?';
+  return url + separator + UTM_PARAMS;
+}
+
+function applyUtmToField(el) {
+  if (!el) return;
+  const val = el.value.trim();
+  if (val) {
+    const withUtm = appendUtm(val);
+    if (withUtm !== val) el.value = withUtm;
+  }
+}
+
+// Wire UTM auto-append to all URL input fields on blur
+document.addEventListener('DOMContentLoaded', function() {
+  const urlFieldIds = [
+    'rec-page-url', 'rec-manual-url', 'rec-manual-photo',
+    'recent-single-url', 'announcement-link-url',
+    'evt-featured-url', 'evt-page-url',
+    'welcome-cta-url',
+  ];
+  urlFieldIds.forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('blur', function() { applyUtmToField(this); });
+      el.addEventListener('paste', function() {
+        setTimeout(function() { applyUtmToField(el); }, 50);
+      });
+    }
+  });
+
+  // Subject line character counter
   const subjectInput = document.getElementById('email-subject');
   if (subjectInput) {
-    subjectInput.addEventListener('input', () => {
+    subjectInput.addEventListener('input', function() {
       document.getElementById('subject-count').textContent = subjectInput.value.length + ' characters';
     });
   }
@@ -1705,7 +1765,7 @@ function buildEmailHtml(opts) {
         '</td></tr>';
     }
 
-    // 2. Forecast for this weekend — intro text then Sat/Sun tiles (labels already "Saturday"/"Sunday")
+    // 2. Weekend forecast — tiles first, then intro text below (matching screenshot)
     if (weatherIntro || satTemp || sunTemp) {
       const showTiles = satTemp || sunTemp;
       const satTile = satTemp ?
@@ -1730,8 +1790,10 @@ function buildEmailHtml(opts) {
         '<tr><td style="padding:25px 14px 0;">' +
           '<p style="' + sectionEyebrow + '">🌤 Weekend forecast</p>' +
           '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 14px;">' +
-            (weatherIntro ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + amberText + ';margin:0' + (showTiles ? ' 0 12px' : '') + ';line-height:1.7;">' + weatherIntro + '</p>' : '') +
+            // Tiles first
             (showTiles ? '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>' + satTile + sunTile + '</tr></table>' : '') +
+            // Intro text below tiles
+            (weatherIntro ? '<p style="font-family:' + fontBody + ';font-size:14px;color:' + amberText + ';margin:' + (showTiles ? '12px' : '0') + ' 0 0;line-height:1.7;">' + weatherIntro + '</p>' : '') +
           '</div>' +
         '</td></tr>';
     }
