@@ -631,7 +631,9 @@
           <div style="margin-top:12px;">
             <div class="field">
               <label>Location page URL <span style="color:#A09A94;font-weight:400;">(location name links here)</span></label>
-              <input type="text" id="recent-single-url" placeholder="https://gobebop.app/kids-activities/amsterdam/..." />
+              <input type="text" id="recent-single-url" placeholder="https://gobebop.app/kids-activities/amsterdam/..."
+                oninput="updateRecentSingleUrl(this.value)"
+                onblur="applyUtmToField(this)" onpaste="setTimeout(function(){applyUtmToField(document.getElementById('recent-single-url'));},50)" />
             </div>
           </div>
         </div>
@@ -1749,7 +1751,7 @@ function buildEmailHtml(opts) {
       const cardBody     = recMode === 'manual' ? recBody    : recBody;
       const cardLocation = recMode === 'manual' ? ''         : recName;
       bodyRows +=
-        '<tr><td style="padding:25px 14px 0;">' +
+        '<tr><td style="padding:32px 14px 0;">' +
           '<p style="' + sectionEyebrow + '">⭐ GoBebop Recommends</p>' +
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
             (recPhotoUrl ?
@@ -1787,7 +1789,7 @@ function buildEmailHtml(opts) {
           '</div>' +
         '</td>' : '';
       bodyRows +=
-        '<tr><td style="padding:25px 14px 0;">' +
+        '<tr><td style="padding:32px 14px 0;">' +
           '<p style="' + sectionEyebrow + '">🌤 Weekend forecast</p>' +
           '<div style="background:' + amberBg + ';border:1px solid ' + amberBorder + ';border-radius:12px;padding:14px 14px;">' +
             // Tiles first
@@ -1822,7 +1824,7 @@ function buildEmailHtml(opts) {
         '</div>';
       }).join('');
       bodyRows +=
-        '<tr><td style="padding:25px 14px 0;">' +
+        '<tr><td style="padding:32px 14px 0;">' +
           '<p style="' + sectionEyebrow + '">📅 Events this weekend</p>' +
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
             evRows +
@@ -1841,7 +1843,7 @@ function buildEmailHtml(opts) {
         ? (recentSpot.description.length > 130 ? recentSpot.description.slice(0, 130) + '…' : recentSpot.description)
         : null;
       bodyRows +=
-        '<tr><td style="padding:25px 14px 0;">' +
+        '<tr><td style="padding:32px 14px 0;">' +
           '<p style="' + sectionEyebrow + '">💡 Just discovered</p>' +
           '<div style="background:' + cardBg + ';border:1px solid ' + borderStrong + ';border-radius:14px;overflow:hidden;">' +
             (recentSpot.thumbUrl ?
@@ -1863,7 +1865,7 @@ function buildEmailHtml(opts) {
     // 5. Updates (optional) — eyebrow outside grey box, matching other section headers
     if (announcementText) {
       bodyRows +=
-        '<tr><td style="padding:25px 14px 0;">' +
+        '<tr><td style="padding:32px 14px 0;">' +
           '<p style="' + sectionEyebrow + '">📣 Updates</p>' +
           '<div style="background:' + pageBg + ';border-radius:12px;padding:14px 16px;">' +
             '<p style="font-family:' + fontBody + ';font-size:14px;color:' + inkSoft + ';margin:0' + (announcementLinkText && announcementLinkUrl ? ' 0 10px' : '') + ';line-height:1.65;">' + announcementText + '</p>' +
@@ -1960,8 +1962,15 @@ function getEmailOpts() {
     sunEmoji,
     sunTemp,
     sunDesc,
-    weeklyEvents:        weeklyEvents,
-    recentSpot:          recentSinglePick || null,
+    weeklyEvents:        weeklyEvents.map(ev => ({
+      ...ev,
+      _url:  document.getElementById('wevt-url-'  + ev.id)?.value?.trim() || ev._url  || '',
+      _desc: document.getElementById('wevt-desc-' + ev.id)?.value?.trim() || ev._desc || '',
+    })),
+    recentSpot:          recentSinglePick ? {
+      ...recentSinglePick,
+      _url: document.getElementById('recent-single-url')?.value?.trim() || recentSinglePick._url || '',
+    } : null,
     announcementText:    document.getElementById('announcement-text')?.value?.trim() || '',
     announcementLinkText:document.getElementById('announcement-link-text')?.value?.trim() || '',
     announcementLinkUrl: document.getElementById('announcement-link-url')?.value?.trim() || '',
