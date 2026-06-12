@@ -1456,29 +1456,166 @@ function renderWeeklyEvtSelected() {
   if (!weeklyEvents.length) { el.innerHTML = ''; return; }
   const { supabaseUrl } = getConfig();
   const iconBase = supabaseUrl ? supabaseUrl + '/storage/v1/object/public/icons/' : '';
-  el.innerHTML = weeklyEvents.map(ev => {
-    const loc = ev.locations || {};
-    const iconFile = ev.icon || null;
-    const iconHtml = (iconFile && iconBase)
+
+  var headerHtml = weeklyEvents.length > 1
+    ? '<div style="display:flex;justify-content:flex-end;margin-bottom:8px;">' +
+        '<button onclick="generateAllEvtDescs()" id="gen-all-descs-btn" ' +
+          'style="background-color:#4daabb !important;color:#ffffff !important;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-family:\'DM Sans\',sans-serif;font-weight:500;cursor:pointer;">✦ Generate all descriptions</button>' +
+      '</div>'
+    : '';
+
+  var cardsHtml = weeklyEvents.map(function(ev) {
+    var loc = ev.locations || {};
+    var iconFile = ev.icon || null;
+    var iconHtml = (iconFile && iconBase)
       ? '<img src="' + iconBase + iconFile + '" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;" />'
       : '<span style="font-size:18px;flex-shrink:0;">📅</span>';
-    return '<div style="background:#FFFFFF;border:1.5px solid #D4CEC6;border-radius:8px;padding:10px 12px;">' +
+    var safeId = ev.id;
+    var safeDesc = (ev._desc || '').replace(/"/g, '&quot;');
+    return '<div style="background:#FFFFFF;border:1.5px solid #D4CEC6;border-radius:8px;padding:10px 12px;margin-bottom:6px;">' +
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">' +
         iconHtml +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:13px;font-weight:600;color:#1A1714;">' + ev.title + '</div>' +
           '<div style="font-size:11px;color:#A09A94;font-family:\'DM Mono\',monospace;">' + formatWeeklyEvtDate(ev.start_date) + (loc.name ? ' · ' + loc.name : '') + '</div>' +
         '</div>' +
-        '<button onclick="removeWeeklyEvent(\'' + ev.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;flex-shrink:0;">✕</button>' +
+        '<button onclick="removeWeeklyEvent(\'' + safeId + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#A09A94;padding:4px;flex-shrink:0;">✕</button>' +
       '</div>' +
-      '<input type="text" id="wevt-desc-' + ev.id + '" value="' + (ev._desc || '').replace(/"/g, '&quot;') + '" placeholder="One-line description (required)" ' +
-        'oninput="updateWeeklyEvtDesc(\'' + ev.id + '\', this.value)" ' +
-        'style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;box-sizing:border-box;margin-bottom:6px;" />' +
-      '<input type="text" id="wevt-url-' + ev.id + '" value="' + (ev._url || '') + '" placeholder="Event page URL (optional)" ' +
-        'oninput="updateWeeklyEvtUrl(\'' + ev.id + '\', this.value)" ' +
+      '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">' +
+        '<input type="text" id="wevt-desc-' + safeId + '" value="' + safeDesc + '" placeholder="One-line description (required)" ' +
+          'oninput="updateWeeklyEvtDesc(\'' + safeId + '\', this.value)" ' +
+          'style="flex:1;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;" />' +
+        '<button id="wevt-gen-' + safeId + '" onclick="generateEvtDesc(\'' + safeId + '\')" title="Generate with AI" ' +
+          'style="background-color:#4daabb !important;color:#ffffff !important;border:none;border-radius:6px;padding:7px 10px;font-size:12px;font-family:\'DM Sans\',sans-serif;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;">✦</button>' +
+      '</div>' +
+      '<input type="text" id="wevt-url-' + safeId + '" value="' + (ev._url || '') + '" placeholder="Event page URL (optional)" ' +
+        'oninput="updateWeeklyEvtUrl(\'' + safeId + '\', this.value)" ' +
         'style="width:100%;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:7px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#1A1714;outline:none;box-sizing:border-box;" />' +
     '</div>';
   }).join('');
+
+  el.innerHTML = headerHtml + cardsHtml;
+}
+
+function generateEvtDesc(id) {
+  var anthropicKey = localStorage.getItem('bebop_anthropic_key') || '';
+  if (!anthropicKey) { alert('Add your Anthropic API key in the admin tool config panel first.'); return; }
+
+  var ev = weeklyEvents.find(function(e) { return e.id === id; });
+  if (!ev) return;
+
+  var btn = document.getElementById('wevt-gen-' + id);
+  var input = document.getElementById('wevt-desc-' + id);
+  if (btn) { btn.textContent = '…'; btn.disabled = true; btn.style.backgroundColor = '#A09A94'; }
+
+  var loc = ev.locations || {};
+  var context = 'Event title: ' + ev.title;
+  if (ev.event_type) context += '\nType: ' + ev.event_type;
+  if (loc.name) context += '\nVenue: ' + loc.name + (loc.city ? ', ' + loc.city : '');
+  if (ev.start_date) context += '\nDate: ' + formatWeeklyEvtDate(ev.start_date);
+  if (ev.description) context += '\nFull description: ' + ev.description;
+  if (ev.price) context += '\nPrice: ' + ev.price;
+
+  var prompt = 'Write a single punchy sentence (max 15 words) to describe this family event for a newsletter. ' +
+    'It should tell parents what the experience is like — not just restate the title. ' +
+    'Plain text only, no emoji, no quotes, no markdown. Return only the sentence.\n\n' + context;
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': anthropicKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 80,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    var text = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text.trim().replace(/^["']|["']$/g, '') : '';
+    if (text) {
+      var evObj = weeklyEvents.find(function(e) { return e.id === id; });
+      if (evObj) evObj._desc = text;
+      if (input) input.value = text;
+    }
+    if (btn) { btn.textContent = '✦'; btn.disabled = false; btn.style.backgroundColor = '#4daabb'; }
+  })
+  .catch(function(err) {
+    alert('Failed to generate description: ' + err.message);
+    if (btn) { btn.textContent = '✦'; btn.disabled = false; btn.style.backgroundColor = '#4daabb'; }
+  });
+}
+
+function generateAllEvtDescs() {
+  var anthropicKey = localStorage.getItem('bebop_anthropic_key') || '';
+  if (!anthropicKey) { alert('Add your Anthropic API key in the admin tool config panel first.'); return; }
+
+  var btn = document.getElementById('gen-all-descs-btn');
+  if (btn) { btn.textContent = '✦ Generating…'; btn.disabled = true; btn.style.backgroundColor = '#A09A94'; }
+
+  // Build a sequential promise chain — one at a time to avoid rate limits
+  var chain = Promise.resolve();
+  weeklyEvents.forEach(function(ev) {
+    chain = chain.then(function() {
+      // Skip if already has a description
+      var existingInput = document.getElementById('wevt-desc-' + ev.id);
+      var existing = (existingInput && existingInput.value.trim()) || ev._desc || '';
+      if (existing) return Promise.resolve();
+
+      var singleBtn = document.getElementById('wevt-gen-' + ev.id);
+      var input = document.getElementById('wevt-desc-' + ev.id);
+      if (singleBtn) { singleBtn.textContent = '…'; singleBtn.disabled = true; singleBtn.style.backgroundColor = '#A09A94'; }
+
+      var loc = ev.locations || {};
+      var context = 'Event title: ' + ev.title;
+      if (ev.event_type) context += '\nType: ' + ev.event_type;
+      if (loc.name) context += '\nVenue: ' + loc.name + (loc.city ? ', ' + loc.city : '');
+      if (ev.start_date) context += '\nDate: ' + formatWeeklyEvtDate(ev.start_date);
+      if (ev.description) context += '\nFull description: ' + ev.description;
+      if (ev.price) context += '\nPrice: ' + ev.price;
+
+      var prompt = 'Write a single punchy sentence (max 15 words) to describe this family event for a newsletter. ' +
+        'It should tell parents what the experience is like — not just restate the title. ' +
+        'Plain text only, no emoji, no quotes, no markdown. Return only the sentence.\n\n' + context;
+
+      return fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': anthropicKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 80,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        var text = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text.trim().replace(/^["']|["']$/g, '') : '';
+        if (text) {
+          ev._desc = text;
+          if (input) input.value = text;
+        }
+        if (singleBtn) { singleBtn.textContent = '✦'; singleBtn.disabled = false; singleBtn.style.backgroundColor = '#4daabb'; }
+        // Small delay between calls
+        return new Promise(function(resolve) { setTimeout(resolve, 300); });
+      })
+      .catch(function() {
+        if (singleBtn) { singleBtn.textContent = '✦'; singleBtn.disabled = false; singleBtn.style.backgroundColor = '#4daabb'; }
+      });
+    });
+  });
+
+  chain.then(function() {
+    if (btn) { btn.textContent = '✦ Generate all descriptions'; btn.disabled = false; btn.style.backgroundColor = '#4daabb'; }
+  });
 }
 
 // ─── Single recently-added spot picker (step 4) ───────────────────────────────
