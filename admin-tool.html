@@ -8,7 +8,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#4daabb" />
-  <title>bebop — add location</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234daabb'/%3E%3Cpath d='M16 6c-4.4 0-8 3.6-8 8 0 5.5 8 13 8 13s8-7.5 8-13c0-4.4-3.6-8-8-8z' fill='white'/%3E%3Ccircle cx='16' cy='14' r='3' fill='%234daabb'/%3E%3C/svg%3E" />
+  <title>bebop — admin tool</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1204,6 +1205,11 @@ header {
         </div>
 
         <div class="field">
+          <label>Image URL <span style="color:#A09A94;font-weight:400;">(optional)</span></label>
+          <input type="text" id="evt-image-url" placeholder="https://..." />
+        </div>
+
+        <div class="field">
           <label>Event type</label>
           <select id="evt-type">
             <option value="">— none —</option>
@@ -1217,7 +1223,7 @@ header {
             <option value="Indoor Activity">Indoor Activity</option>
             <option value="Outdoor Activity">Outdoor Activity</option>
             <option value="Meal / Dining Experience">Meal / Dining Experience</option>
-            <option value="Meetup / Playground">Meetup / Playground</option>
+            <option value="Meetup / Playgroup">Meetup / Playgroup</option>
             <option value="Market">Market</option>
             <option value="Festival / Fair">Festival / Fair</option>
             <option value="Tour / Walk">Tour / Walk</option>
@@ -1233,6 +1239,7 @@ header {
             <option value="nl">Dutch (nl)</option>
             <option value="en">English (en)</option>
             <option value="multi">Multilingual (multi)</option>
+            <option value="other">Other</option>
           </select>
         </div>
 
@@ -1342,18 +1349,265 @@ header {
     <div class="section-title">📡 Google data refresh</div>
   </div>
   <div class="section-body">
-    <p style="font-size:13px;color:#6B6560;margin-bottom:16px;line-height:1.6;">
-      Updates <strong>opening hours</strong>, <strong>opening status</strong>, and <strong>rating + review count</strong> for all locations with a Google Place ID. One API call per location (~$0.017 each).
+    <p style="font-size:13px;color:#6B6560;margin-bottom:20px;line-height:1.6;">
+      Updates <strong>opening hours</strong>, <strong>opening status</strong>, and <strong>rating + review count</strong>. One Places API call per location (~$0.017 each). Use filters to target only the locations you need.
     </p>
-    <!-- Category filter -->
+
+    <!-- Filter panel -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+
+      <!-- Secondary categories include -->
+      <div class="field">
+        <label>Include secondary categories</label>
+        <select id="rf-sec-include" multiple style="height:110px;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:6px;font-size:12px;font-family:'DM Sans',sans-serif;">
+          <option value="__all__" selected>All categories</option>
+          <option value="__closed__">⚠ Closed Temporarily</option>
+          <option value="__no_hours__">⚠ No opening hours listed</option>
+                  <option value="Adventure Park">Adventure Park</option>
+                  <option value="Alpaca Farm">Alpaca Farm</option>
+                  <option value="Amusement Park">Amusement Park</option>
+                  <option value="Aquarium">Aquarium</option>
+                  <option value="Arcade">Arcade</option>
+                  <option value="Art Classes">Art Classes</option>
+                  <option value="Art Museum">Art Museum</option>
+                  <option value="Aviation Museum">Aviation Museum</option>
+                  <option value="Baby Spa">Baby Spa</option>
+                  <option value="Bakery">Bakery</option>
+                  <option value="Barefoot Path">Barefoot Path</option>
+                  <option value="Beach">Beach</option>
+                  <option value="Boat Trip">Boat Trip</option>
+                  <option value="Bookshop">Bookshop</option>
+                  <option value="Botanical Garden">Botanical Garden</option>
+                  <option value="Bowling">Bowling</option>
+                  <option value="Butterfly House">Butterfly House</option>
+                  <option value="Cafe">Cafe</option>
+                  <option value="Children's Farm">Children's Farm</option>
+                  <option value="Children's Museum">Children's Museum</option>
+                  <option value="Cinema">Cinema</option>
+                  <option value="Climbing Centre">Climbing Centre</option>
+                  <option value="Coding Classes">Coding Classes</option>
+                  <option value="Concert Hall">Concert Hall</option>
+                  <option value="Construction Playground">Construction Playground</option>
+                  <option value="Cooking Classes">Cooking Classes</option>
+                  <option value="Culture Museum">Culture Museum</option>
+                  <option value="Cycling Track">Cycling Track</option>
+                  <option value="Dance Classes">Dance Classes</option>
+                  <option value="Drama Classes">Drama Classes</option>
+                  <option value="Ferris Wheel / Observation Tower">Ferris Wheel / Observation Tower</option>
+                  <option value="Film Museum">Film Museum</option>
+                  <option value="Fun Center">Fun Center</option>
+                  <option value="Gnome Trail">Gnome Trail</option>
+                  <option value="Gymnastics Classes">Gymnastics Classes</option>
+                  <option value="Hiking Trail">Hiking Trail</option>
+                  <option value="Historic Site">Historic Site</option>
+                  <option value="History Museum">History Museum</option>
+                  <option value="Holiday Camp">Holiday Camp</option>
+                  <option value="Horse Riding">Horse Riding</option>
+                  <option value="Ice Cream Shop">Ice Cream Shop</option>
+                  <option value="Ice Skating">Ice Skating</option>
+                  <option value="Immersive Experience">Immersive Experience</option>
+                  <option value="Indoor Playground">Indoor Playground</option>
+                  <option value="Interactive Store">Interactive Store</option>
+                  <option value="Kids Cafe">Kids Cafe</option>
+                  <option value="Language Classes">Language Classes</option>
+                  <option value="Library">Library</option>
+                  <option value="Maritime Museum">Maritime Museum</option>
+                  <option value="Martial Arts">Martial Arts</option>
+                  <option value="Minigolf">Minigolf</option>
+                  <option value="Music Lessons">Music Lessons</option>
+                  <option value="Music Museum">Music Museum</option>
+                  <option value="Natural History Museum">Natural History Museum</option>
+                  <option value="Nature Playground">Nature Playground</option>
+                  <option value="Nature Reserve">Nature Reserve</option>
+                  <option value="Open Air Museum">Open Air Museum</option>
+                  <option value="Paddling Pool">Paddling Pool</option>
+                  <option value="Pancake House">Pancake House</option>
+                  <option value="Pick-Your-Own Farm">Pick-Your-Own Farm</option>
+                  <option value="Plane Spotting">Plane Spotting</option>
+                  <option value="Planetarium">Planetarium</option>
+                  <option value="Playground">Playground</option>
+                  <option value="Playgroup">Playgroup</option>
+                  <option value="Pony Rides">Pony Rides</option>
+                  <option value="Railway Museum">Railway Museum</option>
+                  <option value="Restaurant">Restaurant</option>
+                  <option value="Role-Play Village">Role-Play Village</option>
+                  <option value="Science Museum">Science Museum</option>
+                  <option value="Sensory Classes">Sensory Classes</option>
+                  <option value="Sensory Play Space">Sensory Play Space</option>
+                  <option value="Skatepark">Skatepark</option>
+                  <option value="Space Museum">Space Museum</option>
+                  <option value="Splash Pad">Splash Pad</option>
+                  <option value="Sports Coaching">Sports Coaching</option>
+                  <option value="Sports Field">Sports Field</option>
+                  <option value="Swimming Lessons">Swimming Lessons</option>
+                  <option value="Swimming Pool">Swimming Pool</option>
+                  <option value="Theatre">Theatre</option>
+                  <option value="Theme Park">Theme Park</option>
+                  <option value="Train Ride">Train Ride</option>
+                  <option value="Trampoline Park">Trampoline Park</option>
+                  <option value="Water Park">Water Park</option>
+                  <option value="Water Sports">Water Sports</option>
+                  <option value="Wildlife Park">Wildlife Park</option>
+                  <option value="Yoga / Mindfulness">Yoga / Mindfulness</option>
+                  <option value="Zoo">Zoo</option>
+        </select>
+        <p class="text-muted">Hold Ctrl/Cmd to select multiple. Select "All categories" alone to include everything.</p>
+      </div>
+
+      <!-- Secondary categories exclude -->
+      <div class="field">
+        <label>Exclude secondary categories</label>
+        <select id="rf-sec-exclude" multiple style="height:110px;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:6px;font-size:12px;font-family:'DM Sans',sans-serif;">
+                  <option value="Adventure Park">Adventure Park</option>
+                  <option value="Alpaca Farm">Alpaca Farm</option>
+                  <option value="Amusement Park">Amusement Park</option>
+                  <option value="Aquarium">Aquarium</option>
+                  <option value="Arcade">Arcade</option>
+                  <option value="Art Classes">Art Classes</option>
+                  <option value="Art Museum">Art Museum</option>
+                  <option value="Aviation Museum">Aviation Museum</option>
+                  <option value="Baby Spa">Baby Spa</option>
+                  <option value="Bakery">Bakery</option>
+                  <option value="Barefoot Path">Barefoot Path</option>
+                  <option value="Beach">Beach</option>
+                  <option value="Boat Trip">Boat Trip</option>
+                  <option value="Bookshop">Bookshop</option>
+                  <option value="Botanical Garden">Botanical Garden</option>
+                  <option value="Bowling">Bowling</option>
+                  <option value="Butterfly House">Butterfly House</option>
+                  <option value="Cafe">Cafe</option>
+                  <option value="Children's Farm">Children's Farm</option>
+                  <option value="Children's Museum">Children's Museum</option>
+                  <option value="Cinema">Cinema</option>
+                  <option value="Climbing Centre">Climbing Centre</option>
+                  <option value="Coding Classes">Coding Classes</option>
+                  <option value="Concert Hall">Concert Hall</option>
+                  <option value="Construction Playground">Construction Playground</option>
+                  <option value="Cooking Classes">Cooking Classes</option>
+                  <option value="Culture Museum">Culture Museum</option>
+                  <option value="Cycling Track">Cycling Track</option>
+                  <option value="Dance Classes">Dance Classes</option>
+                  <option value="Drama Classes">Drama Classes</option>
+                  <option value="Ferris Wheel / Observation Tower">Ferris Wheel / Observation Tower</option>
+                  <option value="Film Museum">Film Museum</option>
+                  <option value="Fun Center">Fun Center</option>
+                  <option value="Gnome Trail">Gnome Trail</option>
+                  <option value="Gymnastics Classes">Gymnastics Classes</option>
+                  <option value="Hiking Trail">Hiking Trail</option>
+                  <option value="Historic Site">Historic Site</option>
+                  <option value="History Museum">History Museum</option>
+                  <option value="Holiday Camp">Holiday Camp</option>
+                  <option value="Horse Riding">Horse Riding</option>
+                  <option value="Ice Cream Shop">Ice Cream Shop</option>
+                  <option value="Ice Skating">Ice Skating</option>
+                  <option value="Immersive Experience">Immersive Experience</option>
+                  <option value="Indoor Playground">Indoor Playground</option>
+                  <option value="Interactive Store">Interactive Store</option>
+                  <option value="Kids Cafe">Kids Cafe</option>
+                  <option value="Language Classes">Language Classes</option>
+                  <option value="Library">Library</option>
+                  <option value="Maritime Museum">Maritime Museum</option>
+                  <option value="Martial Arts">Martial Arts</option>
+                  <option value="Minigolf">Minigolf</option>
+                  <option value="Music Lessons">Music Lessons</option>
+                  <option value="Music Museum">Music Museum</option>
+                  <option value="Natural History Museum">Natural History Museum</option>
+                  <option value="Nature Playground">Nature Playground</option>
+                  <option value="Nature Reserve">Nature Reserve</option>
+                  <option value="Open Air Museum">Open Air Museum</option>
+                  <option value="Paddling Pool">Paddling Pool</option>
+                  <option value="Pancake House">Pancake House</option>
+                  <option value="Pick-Your-Own Farm">Pick-Your-Own Farm</option>
+                  <option value="Plane Spotting">Plane Spotting</option>
+                  <option value="Planetarium">Planetarium</option>
+                  <option value="Playground">Playground</option>
+                  <option value="Playgroup">Playgroup</option>
+                  <option value="Pony Rides">Pony Rides</option>
+                  <option value="Railway Museum">Railway Museum</option>
+                  <option value="Restaurant">Restaurant</option>
+                  <option value="Role-Play Village">Role-Play Village</option>
+                  <option value="Science Museum">Science Museum</option>
+                  <option value="Sensory Classes">Sensory Classes</option>
+                  <option value="Sensory Play Space">Sensory Play Space</option>
+                  <option value="Skatepark">Skatepark</option>
+                  <option value="Space Museum">Space Museum</option>
+                  <option value="Splash Pad">Splash Pad</option>
+                  <option value="Sports Coaching">Sports Coaching</option>
+                  <option value="Sports Field">Sports Field</option>
+                  <option value="Swimming Lessons">Swimming Lessons</option>
+                  <option value="Swimming Pool">Swimming Pool</option>
+                  <option value="Theatre">Theatre</option>
+                  <option value="Theme Park">Theme Park</option>
+                  <option value="Train Ride">Train Ride</option>
+                  <option value="Trampoline Park">Trampoline Park</option>
+                  <option value="Water Park">Water Park</option>
+                  <option value="Water Sports">Water Sports</option>
+                  <option value="Wildlife Park">Wildlife Park</option>
+                  <option value="Yoga / Mindfulness">Yoga / Mindfulness</option>
+                  <option value="Zoo">Zoo</option>
+        </select>
+        <p class="text-muted">Hold Ctrl/Cmd to select multiple. Leave empty to exclude nothing.</p>
+      </div>
+
+      <!-- Cities -->
+      <div class="field">
+        <label>Cities <span style="color:#A09A94;font-weight:400;">(leave empty = all cities)</span></label>
+        <select id="rf-cities" multiple style="height:90px;background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:8px;padding:6px;font-size:12px;font-family:'DM Sans',sans-serif;">
+        </select>
+        <p class="text-muted" id="rf-cities-hint">Loading cities…</p>
+      </div>
+
+      <!-- Other filters -->
+      <div class="field">
+        <label>Other filters</label>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:400;cursor:pointer;">
+            <input type="checkbox" id="rf-has-hours" /> Only locations with opening hours listed
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:400;cursor:pointer;">
+            <input type="checkbox" id="rf-published-only" checked /> Published locations only
+          </label>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <label style="font-size:13px;font-weight:400;">Tiers:</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:400;cursor:pointer;"><input type="checkbox" id="rf-tier-1" checked /> 1</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:400;cursor:pointer;"><input type="checkbox" id="rf-tier-2" checked /> 2</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:400;cursor:pointer;"><input type="checkbox" id="rf-tier-3" checked /> 3</label>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <label style="font-size:13px;font-weight:400;white-space:nowrap;">Not refreshed in last</label>
+            <select id="rf-days-ago" style="background:#F0EBE3;border:1.5px solid #DDD7CF;border-radius:6px;padding:5px 10px;font-size:12px;">
+              <option value="">Any time</option>
+              <option value="7">7 days</option>
+              <option value="14">14 days</option>
+              <option value="30" selected>30 days</option>
+              <option value="60">60 days</option>
+              <option value="90">90 days</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /filter grid -->
+
+    <!-- Preview + Run buttons -->
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
-      <select id="refresh-sec-cat" style="font-size:13px;padding:8px 12px;border:1.5px solid #D4CEC6;border-radius:8px;background:white;max-width:260px;">
-        <option value="">All locations</option>
-        <option value="__closed__">⚠ Closed Temporarily only</option>
-      </select>
-      <button class="btn btn-enrich" onclick="startGoogleRefresh(document.getElementById('refresh-sec-cat').value || null)" id="google-refresh-btn">📡 Refresh from Google</button>
+      <button class="btn btn-secondary" onclick="previewRefresh()" id="rf-preview-btn">🔍 Preview</button>
+      <button class="btn btn-enrich" onclick="runRefresh()" id="google-refresh-btn" disabled>📡 Refresh from Google</button>
       <span id="google-refresh-status" style="font-size:12px;color:#A09A94;font-family:'DM Mono',monospace;"></span>
     </div>
+
+    <!-- Preview result -->
+    <div id="rf-preview-result" style="display:none;background:#F7F3ED;border:1.5px solid #D4CEC6;border-radius:8px;padding:12px 16px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div>
+          <span id="rf-preview-count" style="font-size:15px;font-weight:600;color:#1A1714;"></span>
+          <span id="rf-preview-cost" style="font-size:13px;color:#6B6560;margin-left:8px;"></span>
+        </div>
+        <div id="rf-preview-tags" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+      </div>
+      <div id="rf-preview-list" style="margin-top:10px;max-height:180px;overflow-y:auto;font-size:12px;font-family:'DM Mono',monospace;color:#6B6560;line-height:1.8;"></div>
+    </div>
+
     <div id="google-refresh-progress" style="display:none;margin-top:8px;">
       <div style="height:6px;background:#E4DDD3;border-radius:3px;overflow:hidden;margin-bottom:8px;">
         <div id="google-refresh-bar" style="height:100%;background:#4daabb;width:0%;transition:width 0.3s;border-radius:3px;"></div>
@@ -2508,7 +2762,7 @@ ${website ? `- Website: ${website}` : ''}
 Return ONLY a valid JSON object with these exact keys:
 {
   "categories": [],         // array, pick 1-2 from: ["Active Play","Animals & Nature","Amusements & Attractions","Classes, Workshops, Camps","Culture & Learning","Restaurants & Cafes"]
-  "secondary_categories": [],  // array, pick 1-3 that apply from: ["Playground", "Indoor Playground", "Trampoline Park", "Skatepark", "Sports Field", "Swimming Pool", "Paddling Pool", "Splash Pad", "Water Sports", "Water Park", "Climbing Centre", "Minigolf", "Bowling", "Ice Skating", "Cycling Track", "Nature Playground", "Adventure Park",  "Sensory Play Space", "Baby Spa", "Zoo", "Children's Farm", "Alpaca Farm", "Pick-Your-Own Farm", "Aquarium", "Butterfly House", "Wildlife Park", "Botanical Garden", "Nature Reserve", "Hiking Trail", "Gnome Trail", "Barefoot Path", "Pony Rides", "Theme Park", "Amusement Park", "Fun Center", "Role-Play Village", "Immersive Experience", "Interactive Store", "Arcade", "Cinema", "Planetarium", "Ferris Wheel / Observation Tower", "Boat Trip", "Train Ride", "Plane Spotting", "Children's Museum", "Natural History Museum", "Science Museum", "Space Museum", "History Museum", "Art Museum", "Culture Museum", "Maritime Museum", "Railway Museum", "Aviation Museum", "Open Air Museum", "Film Museum", "Music Museum", "Library", "Bookshop", "Theatre", "Swimming Lessons", "Gymnastics Classes", "Dance Classes", "Martial Arts", "Music Lessons", "Art Classes", "Drama Classes", "Cooking Classes", "Yoga / Mindfulness", "Coding Classes", "Language Classes", "Sports Coaching", "Sensory Classes",  "Horse Riding", "Playgroup", "Kids Cafe", "Pancake House", "Restaurant", "Cafe", "Ice Cream Shop", "Bakery"]
+  "secondary_categories": [],  // array, pick 1-3 that apply from: ["Playground", "Indoor Playground", "Trampoline Park", "Skatepark", "Sports Field", "Swimming Pool", "Paddling Pool", "Splash Pad", "Water Sports", "Water Park", "Climbing Centre", "Minigolf", "Bowling", "Ice Skating", "Cycling Track", "Nature Playground", "Adventure Park",  "Sensory Play Space", "Baby Spa", "Zoo", "Children's Farm", "Alpaca Farm", "Pick-Your-Own Farm", "Aquarium", "Butterfly House", "Wildlife Park", "Botanical Garden", "Nature Reserve", "Hiking Trail", "Gnome Trail", "Barefoot Path", "Pony Rides", "Beach", "Theme Park", "Amusement Park", "Fun Center", "Role-Play Village", "Immersive Experience", "Interactive Store", "Arcade", "Cinema", "Planetarium", "Ferris Wheel / Observation Tower", "Boat Trip", "Train Ride", "Plane Spotting", "Children's Museum", "Natural History Museum", "Science Museum", "Space Museum", "History Museum", "Art Museum", "Culture Museum", "Maritime Museum", "Railway Museum", "Aviation Museum", "Open Air Museum", "Film Museum", "Music Museum", "Library", "Bookshop", "Theatre", "Swimming Lessons", "Gymnastics Classes", "Dance Classes", "Martial Arts", "Music Lessons", "Art Classes", "Drama Classes", "Cooking Classes", "Yoga / Mindfulness", "Coding Classes", "Language Classes", "Sports Coaching", "Sensory Classes",  "Horse Riding", "Playgroup", "Kids Cafe", "Pancake House", "Restaurant", "Cafe", "Ice Cream Shop", "Bakery"]
   "secondary_category_lead": null, // string, the single most defining secondary — must be one of secondary_categories
   "indoor_outdoor": "",     // "Indoor", "Outdoor", or "Mixed" — null if unsure
   "ideal_age_min": null,    // youngest suitable age in years (integer), null if truly all ages. Age ranges are INCLUSIVE — a place with min age 2 should have age_baby: true.
@@ -3872,7 +4126,7 @@ async function uploadPhotoMode() {
 
 const SECONDARY_TAXONOMY = {
   "Active Play": ["Playground","Indoor Playground","Trampoline Park","Skatepark","Sports Field","Swimming Pool","Paddling Pool","Splash Pad","Water Sports","Water Park","Climbing Centre","Minigolf","Bowling","Ice Skating","Cycling Track","Nature Playground","Adventure Park","Sensory Play Space","Baby Spa","Construction Playground"],
-  "Animals & Nature": ["Zoo","Children's Farm","Alpaca Farm","Pick-Your-Own Farm","Aquarium","Butterfly House","Wildlife Park","Botanical Garden","Nature Reserve","Hiking Trail","Gnome Trail","Barefoot Path","Pony Rides"],
+  "Animals & Nature": ["Zoo","Children's Farm","Alpaca Farm","Pick-Your-Own Farm","Aquarium","Butterfly House","Wildlife Park","Botanical Garden","Nature Reserve","Hiking Trail","Gnome Trail","Barefoot Path","Pony Rides","Beach"],
   "Amusements & Attractions": ["Theme Park","Amusement Park","Fun Center","Role-Play Village","Immersive Experience","Interactive Store","Arcade","Cinema","Planetarium","Ferris Wheel / Observation Tower","Boat Trip","Train Ride","Plane Spotting"],
   "Culture & Learning": ["Children's Museum","Natural History Museum","Science Museum","Space Museum","History Museum","Art Museum","Culture Museum","Maritime Museum","Railway Museum","Aviation Museum","Open Air Museum","Film Museum","Music Museum","Library","Bookshop","Concert Hall","Historic Site","Theatre"],
   "Classes, Workshops, Camps": ["Swimming Lessons","Gymnastics Classes","Dance Classes","Martial Arts","Music Lessons","Art Classes","Drama Classes","Cooking Classes","Yoga / Mindfulness","Coding Classes","Language Classes","Sports Coaching","Sensory Classes","Horse Riding","Playgroup","Holiday Camp"],
@@ -4662,7 +4916,7 @@ function evtResetForm() {
   document.getElementById('evt-loc-search').value = '';
   document.getElementById('evt-loc-results').innerHTML = '';
   ['evt-title','evt-address','evt-description','evt-start','evt-end',
-   'evt-price','evt-booking-url','evt-age-min','evt-age-max'].forEach(id => {
+   'evt-price','evt-booking-url','evt-image-url','evt-age-min','evt-age-max'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -5049,6 +5303,7 @@ async function saveEvent() {
     recurring_until:  document.getElementById('evt-recurring-until').value || null,
     price:            document.getElementById('evt-price').value || null,
     booking_url:      document.getElementById('evt-booking-url').value || null,
+    image_url:        document.getElementById('evt-image-url').value || null,
     age_min:          document.getElementById('evt-age-min').value !== '' ? parseInt(document.getElementById('evt-age-min').value) : null,
     age_max:          document.getElementById('evt-age-max').value !== '' ? parseInt(document.getElementById('evt-age-max').value) : null,
     status:           document.getElementById('evt-status').value,
@@ -5477,22 +5732,197 @@ function resetLocationForm() {
 
 // ─── Google bulk refresh ──────────────────────────────────────────────────────
 
+// ── Refresh filters helpers ───────────────────────────────────────────────────
+
 function populateRefreshSecCatDropdown() {
-  const sel = document.getElementById('refresh-sec-cat');
-  if (!sel || sel.options.length > 1) return; // already populated
-  const allSecs = Object.values(SECONDARY_TAXONOMY).flat().sort();
-  allSecs.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s; opt.textContent = s;
-    sel.appendChild(opt);
-  });
+  // Now handled by static HTML — just load cities
+  loadRefreshCities();
 }
 
-async function startGoogleRefresh(filterSecCat) {
+async function loadRefreshCities() {
+  const { supabaseUrl, supabaseKey, supabaseTable } = getConfig();
+  const sel   = document.getElementById('rf-cities');
+  const hint  = document.getElementById('rf-cities-hint');
+  if (!sel || !supabaseUrl || !supabaseKey) return;
+  try {
+    const res  = await fetch(
+      `${supabaseUrl}/rest/v1/${supabaseTable}?select=city&city=not.is.null&order=city.asc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    );
+    const rows = await res.json();
+    const cities = [...new Set(rows.map(r => r.city).filter(Boolean))].sort();
+    sel.innerHTML = cities.map(c => `<option value="${c}">${c}</option>`).join('');
+    if (hint) hint.textContent = 'Hold Ctrl/Cmd to select multiple. Leave empty = all cities.';
+  } catch(e) {
+    if (hint) hint.textContent = 'Could not load cities.';
+  }
+}
+
+function buildRefreshQuery() {
+  const { supabaseUrl, supabaseTable } = getConfig();
+  // Collect filter values
+  const incSel   = document.getElementById('rf-sec-include');
+  const excSel   = document.getElementById('rf-sec-exclude');
+  const citySel  = document.getElementById('rf-cities');
+  const hasHours = document.getElementById('rf-has-hours').checked;
+  const pubOnly  = document.getElementById('rf-published-only').checked;
+  const tier1    = document.getElementById('rf-tier-1').checked;
+  const tier2    = document.getElementById('rf-tier-2').checked;
+  const tier3    = document.getElementById('rf-tier-3').checked;
+  const daysAgo  = document.getElementById('rf-days-ago').value;
+
+  const incVals  = Array.from(incSel.selectedOptions).map(o => o.value);
+  const excVals  = Array.from(excSel.selectedOptions).map(o => o.value);
+  const cityVals = Array.from(citySel.selectedOptions).map(o => o.value);
+  const tiers    = [tier1?1:null, tier2?2:null, tier3?3:null].filter(Boolean);
+
+  let url = `${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,city,tier,google_place_id,opening_status,opening_hours,updated_at&order=name.asc`;
+
+  // Include filters
+  if (!incVals.includes('__all__')) {
+    if (incVals.includes('__closed__')) {
+      url += '&opening_status=eq.CLOSED_TEMPORARILY';
+    } else if (incVals.includes('__no_hours__')) {
+      url += '&opening_hours=is.null';
+    } else if (incVals.length) {
+      // Any of the selected categories
+      const catList = incVals.map(v => encodeURIComponent(v)).join(',');
+      url += `&secondary_categories=ov.{${catList}}`;
+    }
+  }
+
+  // Exclude categories (applied client-side after fetch — Supabase can't negate overlap easily)
+  // Status / published
+  if (pubOnly) url += '&status=eq.published';
+
+  // Has hours
+  if (hasHours) url += '&opening_hours=not.is.null';
+
+  // Tier
+  if (tiers.length && tiers.length < 3) {
+    url += '&tier=in.(' + tiers.join(',') + ')';
+  }
+
+  // City
+  if (cityVals.length) {
+    url += '&city=in.(' + cityVals.map(c => encodeURIComponent(c)).join(',') + ')';
+  }
+
+  // Last updated — filter client-side (updated_at is already selected)
+  return { url, excVals, daysAgo: daysAgo ? parseInt(daysAgo) : null };
+}
+
+function applyClientFilters(locations, excVals, daysAgo) {
+  let filtered = locations;
+
+  // Exclude categories
+  if (excVals.length) {
+    filtered = filtered.filter(loc => {
+      const cats = loc.secondary_categories || [];
+      return !excVals.some(ex => cats.includes(ex));
+    });
+  }
+
+  // Days ago filter
+  if (daysAgo) {
+    const cutoff = new Date(Date.now() - daysAgo * 864e5);
+    filtered = filtered.filter(loc => {
+      if (!loc.updated_at) return true; // never updated — include
+      return new Date(loc.updated_at) < cutoff;
+    });
+  }
+
+  return filtered;
+}
+
+function buildFilterTags(incVals, excVals, cityVals, daysAgo, pubOnly, tiers) {
+  const tags = [];
+  if (!incVals.includes('__all__')) {
+    if (incVals.includes('__closed__')) tags.push({ label: 'Closed Temporarily', color: '#E8541A' });
+    else if (incVals.includes('__no_hours__')) tags.push({ label: 'No hours', color: '#E8541A' });
+    else incVals.forEach(v => tags.push({ label: v, color: '#4daabb' }));
+  }
+  excVals.forEach(v => tags.push({ label: '✗ ' + v, color: '#991B1B' }));
+  cityVals.forEach(c => tags.push({ label: '📍 ' + c, color: '#2D6A4F' }));
+  if (daysAgo) tags.push({ label: 'Not refreshed in ' + daysAgo + 'd', color: '#6B6560' });
+  if (pubOnly) tags.push({ label: 'Published only', color: '#6B6560' });
+  if (tiers.length < 3) tags.push({ label: 'Tier ' + tiers.join('+'), color: '#6B6560' });
+  return tags;
+}
+
+var _refreshLocations = []; // cached after preview
+
+async function previewRefresh() {
+  const { supabaseUrl, supabaseKey } = getConfig();
+  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
+
+  const btn      = document.getElementById('rf-preview-btn');
+  const statusEl = document.getElementById('google-refresh-status');
+  const runBtn   = document.getElementById('google-refresh-btn');
+  btn.disabled = true;
+  btn.textContent = 'Loading…';
+  statusEl.textContent = '';
+  runBtn.disabled = true;
+
+  try {
+    const { url, excVals, daysAgo } = buildRefreshQuery();
+    const res = await fetch(url, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
+    const raw = await res.json();
+
+    // Apply client-side filters
+    _refreshLocations = applyClientFilters(raw, excVals, daysAgo);
+
+    const count = _refreshLocations.length;
+    const costEur = (count * 0.017 * 0.92).toFixed(2); // ~$0.017 → EUR
+
+    // Build tag summary
+    const incVals  = Array.from(document.getElementById('rf-sec-include').selectedOptions).map(o => o.value);
+    const cityVals = Array.from(document.getElementById('rf-cities').selectedOptions).map(o => o.value);
+    const tiers    = [1,2,3].filter(t => document.getElementById('rf-tier-'+t).checked);
+    const pubOnly  = document.getElementById('rf-published-only').checked;
+    const tags     = buildFilterTags(incVals, excVals, cityVals, daysAgo, pubOnly, tiers);
+
+    // Render preview
+    const resultEl  = document.getElementById('rf-preview-result');
+    const countEl   = document.getElementById('rf-preview-count');
+    const costEl    = document.getElementById('rf-preview-cost');
+    const tagsEl    = document.getElementById('rf-preview-tags');
+    const listEl    = document.getElementById('rf-preview-list');
+
+    countEl.textContent = count + ' location' + (count !== 1 ? 's' : '') + ' will be refreshed';
+    costEl.textContent  = '≈ €' + costEur;
+    costEl.style.color  = parseFloat(costEur) > 5 ? '#E8541A' : '#2D6A4F';
+
+    tagsEl.innerHTML = tags.map(t =>
+      `<span style="background:#F0EBE3;border:1px solid #D4CEC6;border-radius:20px;padding:2px 9px;font-size:11px;color:${t.color};font-family:'DM Mono',monospace;">${t.label}</span>`
+    ).join('');
+
+    listEl.innerHTML = _refreshLocations.slice(0, 50).map(l =>
+      `${l.name} <span style="color:#A09A94;">${l.city || ''} · Tier ${l.tier || '?'}</span>`
+    ).join('<br>') + (_refreshLocations.length > 50 ? `<br><span style="color:#A09A94;">…and ${_refreshLocations.length - 50} more</span>` : '');
+
+    resultEl.style.display = '';
+    runBtn.disabled = count === 0;
+    if (count === 0) statusEl.textContent = 'No locations match these filters.';
+
+  } catch(e) {
+    statusEl.textContent = 'Preview failed: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 Preview';
+  }
+}
+
+
+async function runRefresh() {
+  if (!_refreshLocations.length) return alert('Run Preview first to see what will be refreshed.');
   const { supabaseUrl, supabaseKey, serviceKey, supabaseTable, googleKey } = getConfig();
   const writeKey = serviceKey || supabaseKey;
-  if (!supabaseUrl || !supabaseKey) return alert('Configure Supabase first.');
   if (!googleKey) return alert('Configure your Google Places API key first.');
+
+  const locations = _refreshLocations;
+  const costEur = (locations.length * 0.017 * 0.92).toFixed(2);
+  if (!confirm(`Refresh ${locations.length} locations from Google Places API? Estimated cost: €${costEur}.`)) return;
 
   const btn      = document.getElementById('google-refresh-btn');
   const statusEl = document.getElementById('google-refresh-status');
@@ -5501,28 +5931,15 @@ async function startGoogleRefresh(filterSecCat) {
   const logEl    = document.getElementById('google-refresh-log');
   const changesEl = document.getElementById('google-refresh-changes');
 
-  if (!confirm(`This will call the Google Places API once per location${filterSecCat ? ' in the selected category' : ''} to refresh opening hours, status, and ratings (~$0.017/location). Continue?`)) return;
-
   btn.disabled = true;
   progressEl.style.display = 'block';
   logEl.innerHTML = '';
   if (changesEl) changesEl.innerHTML = '';
 
   try {
-    let url = `${supabaseUrl}/rest/v1/${supabaseTable}?google_place_id=not.is.null&select=id,name,google_place_id,opening_status,opening_hours&order=name.asc`;
-    if (filterSecCat === '__closed__') {
-      url += `&opening_status=eq.CLOSED_TEMPORARILY`;
-    } else if (filterSecCat) {
-      url += `&secondary_categories=cs.{${encodeURIComponent(filterSecCat)}}`;
-    }
-
-    const res = await fetch(url, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } });
-    const locations = await res.json();
-    if (!locations.length) { statusEl.textContent = 'No locations found for this filter.'; btn.disabled = false; return; }
-
     statusEl.textContent = `Refreshing ${locations.length} locations…`;
     let done = 0, errors = 0, updated = 0;
-    const changes = []; // track meaningful changes
+    const changes = [];
 
     for (const loc of locations) {
       barEl.style.width = `${((done + 1) / locations.length) * 100}%`;
@@ -5542,12 +5959,10 @@ async function startGoogleRefresh(filterSecCat) {
           opening_status:      data.businessStatus ?? null,
         };
 
-        // Detect status change
         if (data.businessStatus && data.businessStatus !== loc.opening_status) {
           changes.push({ name: loc.name, type: 'status', from: loc.opening_status || 'unknown', to: data.businessStatus });
         }
 
-        // Parse + detect opening hours change
         let newHours = null;
         if (data.regularOpeningHours?.weekdayDescriptions?.length) {
           const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
@@ -5556,8 +5971,6 @@ async function startGoogleRefresh(filterSecCat) {
             hours: data.regularOpeningHours.weekdayDescriptions[i]?.replace(/^[^:]+:\s*/, '') || 'Closed'
           }));
           patch.opening_hours = newHours;
-
-          // Compare with stored hours (simple string comparison)
           const oldStr = JSON.stringify(loc.opening_hours || []);
           const newStr = JSON.stringify(newHours);
           if (oldStr !== newStr) {
@@ -5591,8 +6004,8 @@ async function startGoogleRefresh(filterSecCat) {
 
     statusEl.textContent = `✓ Done — ${updated} updated, ${errors} errors, ${changes.length} change${changes.length !== 1 ? 's' : ''} detected.`;
     barEl.style.width = '100%';
+    _refreshLocations = []; // clear cache — require new preview before next run
 
-    // Show changes summary
     if (changesEl && changes.length) {
       changesEl.innerHTML = `
         <div style="margin-top:16px;">
@@ -5615,6 +6028,7 @@ async function startGoogleRefresh(filterSecCat) {
     btn.disabled = false;
   }
 }
+
 
 // ─── Event Import (iCal / WordPress API / OBA) ───────────────────────────────
 
